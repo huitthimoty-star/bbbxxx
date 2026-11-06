@@ -36,6 +36,7 @@
       display: flex;
       flex-direction: column;
       padding: 1.5rem;
+      position: relative;
     }
 
     header {
@@ -45,6 +46,7 @@
       margin-bottom: 1.5rem;
       border-bottom: 1px solid var(--card-border);
       padding-bottom: 1rem;
+      position: relative;
     }
 
     .brand {
@@ -69,6 +71,13 @@
       text-transform: uppercase;
     }
 
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      position: relative;
+    }
+
     .btn-audience {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -84,11 +93,78 @@
       background: var(--card-border);
     }
 
+    .btn-menu-dots {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--tea-milk);
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      font-size: 1.25rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+    .btn-menu-dots:hover {
+      background: var(--card-border);
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      top: 48px;
+      right: 0;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      width: 190px;
+      padding: 0.5rem;
+      display: none;
+      flex-direction: column;
+      gap: 0.35rem;
+      z-index: 100;
+    }
+    .dropdown-menu.show { display: flex; }
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.6rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--tea-milk);
+      cursor: pointer;
+      border: none;
+      background: none;
+      text-align: left;
+      transition: background 0.15s;
+    }
+    .dropdown-item:hover {
+      background: #25201B;
+    }
+    .dropdown-item.active {
+      background: #2E221D;
+      color: var(--boba-gold);
+    }
+
+    .view-section {
+      display: none;
+      width: 100%;
+    }
+    .view-section.active {
+      display: block;
+    }
+
+    /* Live Studio Section Layout */
     .dashboard-layout {
       display: grid;
       grid-template-columns: 2.2fr 1fr;
       gap: 1.5rem;
-      flex: 1;
     }
 
     @media (max-width: 1024px) {
@@ -224,6 +300,7 @@
       transform: scale(0.98);
     }
 
+    /* Host Mod Chat */
     .chat-panel {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -379,6 +456,67 @@
       border-radius: 8px;
       cursor: pointer;
     }
+
+    /* Replays Management View */
+    .replays-admin-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .replays-admin-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .replay-list-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .admin-replay-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #14110F;
+      border: 1px solid #251F1A;
+      padding: 0.85rem 1rem;
+      border-radius: 12px;
+    }
+
+    .admin-replay-info h4 {
+      font-family: var(--font-heading);
+      font-size: 1rem;
+      color: var(--boba-gold);
+      margin-bottom: 0.2rem;
+    }
+
+    .admin-replay-info p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .btn-delete-replay {
+      background: rgba(230, 57, 70, 0.15);
+      border: 1px solid var(--danger);
+      color: var(--danger);
+      padding: 0.35rem 0.65rem;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-delete-replay:hover {
+      background: var(--danger);
+      color: #fff;
+    }
   </style>
 </head>
 <body>
@@ -386,88 +524,150 @@
   <header>
     <div class="brand">
       <span style="font-size: 1.5rem;">🧋</span>
-      <h1>BobaStream</h1>
-      <span class="badge-studio">Studio</span>
+      <h1 id="topStudioTitle">BobaStream Studio</h1>
+      <span class="badge-studio" id="studioModeBadge">Live Mode</span>
     </div>
-    <a href="/" target="_blank" class="btn-audience">Open Audience View ↗</a>
+
+    <div class="header-actions">
+      <a href="/" target="_blank" class="btn-audience">Open Audience View ↗</a>
+
+      <!-- 3-Dots Menu Trigger -->
+      <button class="btn-menu-dots" id="btnMenuDots" title="Menu">⋮</button>
+
+      <!-- 3-Dots Dropdown Options -->
+      <div class="dropdown-menu" id="navDropdown">
+        <button class="dropdown-item active" id="menuLive">
+          <span>🔴</span> Live Section
+        </button>
+        <button class="dropdown-item" id="menuReplays">
+          <span>🎬</span> Live Replays
+        </button>
+      </div>
+    </div>
   </header>
 
-  <div class="dashboard-layout">
-    <div class="monitor-panel">
+  <!-- ================= SUB-SECTION 1: LIVE STUDIO ================= -->
+  <section class="view-section active" id="sectionLiveStudio">
+    <div class="dashboard-layout">
+      <div class="monitor-panel">
+        
+        <!-- Video Monitor -->
+        <div class="video-monitor-card">
+          <div class="card-header">
+            <span>Live Confirmation Monitor</span>
+            <span id="feedStatusText" style="color: #4EBA6F;">Ready</span>
+          </div>
+          <div class="monitor-viewport">
+            <iframe id="studioMonitorIframe" src="" allow="autoplay; fullscreen; encrypted-media; picture-in-picture"></iframe>
+          </div>
+        </div>
+
+        <!-- Quick Metrics -->
+        <div class="stats-row">
+          <div class="stat-box">
+            <div class="stat-label">Active Viewers</div>
+            <div class="stat-val" id="valViewers">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Feed Status</div>
+            <div class="stat-val" style="font-size: 1.2rem; color: #4EBA6F;" id="valStatus">Active</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Global Taps</div>
+            <div class="stat-val" id="valTaps">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Mode</div>
+            <div class="stat-val" style="font-size: 1.2rem; color: var(--tea-milk);">Direct Link</div>
+          </div>
+        </div>
+
+        <!-- Ingest Controller -->
+        <div class="controls-card">
+          <h3 style="font-family: var(--font-heading); font-size: 1.15rem; color: var(--boba-gold);">🔗 Live Stream Ingest & Details</h3>
+          
+          <div class="form-group">
+            <label>Live Player / Embed Link (Twitch embed, VDO.Ninja view, or HLS .m3u8):</label>
+            <input type="text" id="streamUrlInput" class="form-input" placeholder="e.g. https://player.twitch.tv/?channel=... or https://vdo.ninja/?view=...">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label>Stream Room Title:</label>
+              <input type="text" id="roomTitleInput" class="form-input" value="Tapioca Pearl Room 🧋">
+            </div>
+            <div class="form-group">
+              <label>Host Status / Description:</label>
+              <input type="text" id="roomDescInput" class="form-input" value="Welcome to BobaStream! Hang out and sip tea!">
+            </div>
+          </div>
+
+          <button id="btnBroadcast" class="btn-broadcast">🚀 Broadcast Live to All Viewers</button>
+        </div>
+      </div>
+
+      <!-- Host Mod Chat -->
+      <div class="chat-panel">
+        <div class="chat-header">
+          <div>
+            <h3>Host Mod Chat</h3>
+            <span style="font-size: 0.72rem; color: var(--text-muted);">5-min auto window</span>
+          </div>
+          <button id="btnClearAllChat" class="btn-clear-chat">🗑️ Clear Chat</button>
+        </div>
+
+        <div class="chat-messages" id="studioChatBody"></div>
+
+        <div class="chat-input-area">
+          <input type="text" id="hostChatInput" placeholder="Send official host message...">
+          <button id="btnHostSend">Send</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SUB-SECTION 2: REPLAYS MANAGER ================= -->
+  <section class="view-section" id="sectionReplaysStudio">
+    <div class="replays-admin-layout">
       
-      <!-- Video Monitor -->
-      <div class="video-monitor-card">
-        <div class="card-header">
-          <span>Live Confirmation Monitor</span>
-          <span id="feedStatusText" style="color: #4EBA6F;">Ready</span>
-        </div>
-        <div class="monitor-viewport">
-          <iframe id="studioMonitorIframe" src="" allow="autoplay; fullscreen; encrypted-media; picture-in-picture"></iframe>
-        </div>
-      </div>
-
-      <!-- Quick Metrics -->
-      <div class="stats-row">
-        <div class="stat-box">
-          <div class="stat-label">Active Viewers</div>
-          <div class="stat-val" id="valViewers">0</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">Feed Status</div>
-          <div class="stat-val" style="font-size: 1.2rem; color: #4EBA6F;" id="valStatus">Active</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">Global Taps</div>
-          <div class="stat-val" id="valTaps">0</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">Mode</div>
-          <div class="stat-val" style="font-size: 1.2rem; color: var(--tea-milk);">Direct Link</div>
-        </div>
-      </div>
-
-      <!-- Ingest Controller -->
+      <!-- Add New Replay Form -->
       <div class="controls-card">
-        <h3 style="font-family: var(--font-heading); font-size: 1.15rem; color: var(--boba-gold);">🔗 Live Stream Ingest & Details</h3>
+        <h3 style="font-family: var(--font-heading); font-size: 1.2rem; color: var(--boba-gold);">➕ Add New Live Replay</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Publish recorded VODs or past streams directly to the audience Replays shelf.</p>
         
         <div class="form-group">
-          <label>Live Player / Embed Link (Twitch embed, VDO.Ninja view, or HLS .m3u8):</label>
-          <input type="text" id="streamUrlInput" class="form-input" placeholder="e.g. https://player.twitch.tv/?channel=... or https://vdo.ninja/?view=...">
+          <label>Replay Title:</label>
+          <input type="text" id="newReplayTitle" class="form-input" placeholder="e.g. Quad Camera Chill Hangout Ep. 1">
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-          <div class="form-group">
-            <label>Stream Room Title:</label>
-            <input type="text" id="roomTitleInput" class="form-input" value="Tapioca Pearl Room 🧋">
-          </div>
-          <div class="form-group">
-            <label>Host Status / Description:</label>
-            <input type="text" id="roomDescInput" class="form-input" value="Welcome to BobaStream! Hang out and sip tea!">
-          </div>
+        <div class="form-group">
+          <label>Video Embed URL (YouTube embed, MP4 direct, or HLS .m3u8):</label>
+          <input type="text" id="newReplayUrl" class="form-input" placeholder="e.g. https://www.youtube.com/embed/VIDEO_ID">
         </div>
 
-        <button id="btnBroadcast" class="btn-broadcast">🚀 Broadcast Live to All Viewers</button>
+        <div class="form-group">
+          <label>Duration & Date (optional text):</label>
+          <input type="text" id="newReplayMeta" class="form-input" placeholder="e.g. 1:12:45 • Streamed yesterday">
+        </div>
+
+        <div class="form-group">
+          <label>Replay Description:</label>
+          <textarea id="newReplayDesc" class="form-input" style="height: 80px; resize: none;" placeholder="Brief summary of what happened..."></textarea>
+        </div>
+
+        <button id="btnAddReplay" class="btn-broadcast">✨ Publish to Replays Shelf</button>
       </div>
+
+      <!-- Current Replays Shelf List -->
+      <div class="replay-list-card">
+        <h3 style="font-family: var(--font-heading); font-size: 1.2rem;">🎬 Published Replays</h3>
+        <div id="adminReplaysList" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Loading replay archive...</p>
+        </div>
+      </div>
+
     </div>
-
-    <!-- Host Mod Chat -->
-    <div class="chat-panel">
-      <div class="chat-header">
-        <div>
-          <h3>Host Mod Chat</h3>
-          <span style="font-size: 0.72rem; color: var(--text-muted);">5-min auto window</span>
-        </div>
-        <button id="btnClearAllChat" class="btn-clear-chat">🗑️ Clear Chat</button>
-      </div>
-
-      <div class="chat-messages" id="studioChatBody"></div>
-
-      <div class="chat-input-area">
-        <input type="text" id="hostChatInput" placeholder="Send official host message...">
-        <button id="btnHostSend">Send</button>
-      </div>
-    </div>
-  </div>
+  </section>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -489,6 +689,52 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    // --- Navigation & 3-Dots Dropdown Setup ---
+    const btnMenuDots = document.getElementById("btnMenuDots");
+    const navDropdown = document.getElementById("navDropdown");
+    const menuLive = document.getElementById("menuLive");
+    const menuReplays = document.getElementById("menuReplays");
+    const sectionLiveStudio = document.getElementById("sectionLiveStudio");
+    const sectionReplaysStudio = document.getElementById("sectionReplaysStudio");
+    const studioModeBadge = document.getElementById("studioModeBadge");
+
+    btnMenuDots.addEventListener("click", (e) => {
+      e.stopPropagation();
+      navDropdown.classList.toggle("show");
+    });
+
+    document.addEventListener("click", () => {
+      navDropdown.classList.remove("show");
+    });
+
+    menuLive.addEventListener("click", () => {
+      switchStudioView("live");
+    });
+
+    menuReplays.addEventListener("click", () => {
+      switchStudioView("replays");
+    });
+
+    function switchStudioView(view) {
+      if (view === "live") {
+        sectionLiveStudio.classList.add("active");
+        sectionReplaysStudio.classList.remove("active");
+        menuLive.classList.add("active");
+        menuReplays.classList.remove("active");
+        studioModeBadge.innerText = "Live Mode";
+        studioModeBadge.style.background = "var(--accent)";
+      } else {
+        sectionLiveStudio.classList.remove("active");
+        sectionReplaysStudio.classList.add("active");
+        menuLive.classList.remove("active");
+        menuReplays.classList.add("active");
+        studioModeBadge.innerText = "Replays Manager";
+        studioModeBadge.style.background = "var(--boba-gold)";
+      }
+      navDropdown.classList.remove("show");
+    }
+
+    // --- Live Studio Elements ---
     const monitorIframe = document.getElementById("studioMonitorIframe");
     const streamUrlInput = document.getElementById("streamUrlInput");
     const roomTitleInput = document.getElementById("roomTitleInput");
@@ -607,10 +853,13 @@
         <button class="btn-del-msg" title="Delete single message">🗑️</button>
       `;
 
-      // 1-Click single message delete
       div.querySelector(".btn-del-msg").addEventListener("click", async () => {
         if (confirm("Delete this specific message?")) {
-          await deleteDoc(doc(db, "chat_messages", id));
+          try {
+            await deleteDoc(doc(db, "chat_messages", id));
+          } catch (err) {
+            alert("Error deleting message: " + err.message);
+          }
         }
       });
 
@@ -658,6 +907,98 @@
         btnClearAllChat.innerText = "🗑️ Clear Chat";
         btnClearAllChat.disabled = false;
       }
+    });
+
+    // --- 7. Replays Manager Controller ---
+    const newReplayTitle = document.getElementById("newReplayTitle");
+    const newReplayUrl = document.getElementById("newReplayUrl");
+    const newReplayMeta = document.getElementById("newReplayMeta");
+    const newReplayDesc = document.getElementById("newReplayDesc");
+    const btnAddReplay = document.getElementById("btnAddReplay");
+    const adminReplaysList = document.getElementById("adminReplaysList");
+
+    btnAddReplay.addEventListener("click", async () => {
+      const title = newReplayTitle.value.trim();
+      const url = newReplayUrl.value.trim();
+      const meta = newReplayMeta.value.trim();
+      const desc = newReplayDesc.value.trim();
+
+      if (!title || !url) {
+        alert("Please enter both a Replay Title and Video URL!");
+        return;
+      }
+
+      btnAddReplay.innerText = "Adding...";
+      btnAddReplay.disabled = true;
+
+      try {
+        await addDoc(collection(db, "live_replays"), {
+          title: title,
+          videoUrl: url,
+          meta: meta || "Streamed recently",
+          desc: desc || "Recorded live replay on BobaStream.",
+          createdAt: serverTimestamp()
+        });
+
+        newReplayTitle.value = "";
+        newReplayUrl.value = "";
+        newReplayMeta.value = "";
+        newReplayDesc.value = "";
+        alert("🎉 Replay added to public shelf!");
+      } catch (err) {
+        alert("Failed to add replay: " + err.message);
+      } finally {
+        btnAddReplay.innerText = "✨ Publish to Replays Shelf";
+        btnAddReplay.disabled = false;
+      }
+    });
+
+    // --- 8. Replays Live Sync & Robust Deletion ---
+    onSnapshot(collection(db, "live_replays"), (snapshot) => {
+      if (snapshot.empty) {
+        adminReplaysList.innerHTML = `<p style="font-size: 0.85rem; color: var(--text-muted);">No replays published yet.</p>`;
+        return;
+      }
+
+      adminReplaysList.innerHTML = "";
+      snapshot.forEach((docItem) => {
+        const item = docItem.data();
+        const replayDocId = docItem.id;
+
+        const row = document.createElement("div");
+        row.className = "admin-replay-item";
+        row.id = `admin-replay-${replayDocId}`;
+        row.innerHTML = `
+          <div class="admin-replay-info">
+            <h4>${escapeHtml(item.title)}</h4>
+            <p>${escapeHtml(item.meta || '')} • ${escapeHtml(item.desc || '')}</p>
+          </div>
+          <button class="btn-delete-replay" data-id="${replayDocId}">Delete</button>
+        `;
+
+        const deleteBtn = row.querySelector(".btn-delete-replay");
+        deleteBtn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          const targetId = deleteBtn.getAttribute("data-id");
+
+          if (!confirm(`Are you sure you want to permanently delete "${item.title}"?`)) return;
+
+          deleteBtn.innerText = "Deleting...";
+          deleteBtn.disabled = true;
+
+          try {
+            await deleteDoc(doc(db, "live_replays", targetId));
+            row.remove();
+          } catch (err) {
+            console.error("Failed to delete replay:", err);
+            alert("Delete failed: " + err.message);
+            deleteBtn.innerText = "Delete";
+            deleteBtn.disabled = false;
+          }
+        });
+
+        adminReplaysList.appendChild(row);
+      });
     });
 
     function escapeHtml(str) {
