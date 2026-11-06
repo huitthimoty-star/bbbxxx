@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
     :root {
       --bg-dash: #161210;
@@ -56,9 +57,22 @@
       position: relative;
       overflow: hidden;
       border: 1px solid var(--border-dash);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    #localVideo { width: 100%; height: 100%; object-fit: cover; }
+    #dashIframe, #dashVideo { width: 100%; height: 100%; border: none; display: none; }
+
+    .monitor-placeholder {
+      color: #7E7068;
+      font-family: var(--font-heading);
+      font-size: 1.1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
 
     .telemetry-row {
       display: grid;
@@ -101,7 +115,7 @@
 
     .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
     .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--milk-tea); }
-    .form-group input, .form-group select {
+    .form-group input {
       background: #181310;
       border: 1px solid var(--border-dash);
       border-radius: 12px;
@@ -126,11 +140,6 @@
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
-    }
-
-    .btn-secondary {
-      background: #382C25;
-      color: var(--milk-tea);
     }
 
     .chat-mod-panel {
@@ -192,7 +201,7 @@
     </a>
     <div style="display: flex; gap: 0.75rem; align-items: center;">
       <a href="index.html" target="_blank" style="color: var(--milk-tea); font-size: 0.85rem; text-decoration: none; border: 1px solid var(--border-dash); padding: 0.4rem 0.8rem; border-radius: 999px;">
-        👁️ Audience Lounge ↗
+        👁️ Open Audience View ↗
       </a>
     </div>
   </header>
@@ -200,9 +209,14 @@
   <main class="dash-grid">
     <section class="monitor-column">
       <div class="stream-preview-box">
-        <video id="localVideo" autoplay playsinline muted></video>
+        <div class="monitor-placeholder" id="monitorPlaceholder">
+          <span style="font-size:2rem;">📺</span>
+          <span>Paste a link below to activate monitor</span>
+        </div>
+        <iframe id="dashIframe" allow="autoplay; camera; microphone; fullscreen; display-capture; picture-in-picture"></iframe>
+        <video id="dashVideo" autoplay playsinline muted controls></video>
         <div style="position: absolute; top: 1rem; left: 1rem; background: rgba(0,0,0,0.7); padding: 0.3rem 0.7rem; border-radius: 999px; font-size: 0.75rem; font-weight:700; color: var(--accent);" id="broadcastStatusBadge">
-          ⚪ CAMERA OFFLINE
+          LIVE CONFIRMATION MONITOR
         </div>
       </div>
 
@@ -212,49 +226,45 @@
           <strong id="dashActiveViewers" style="color: var(--accent-matcha);">0</strong>
         </div>
         <div class="tele-card">
-          <span>Camera Feed</span>
-          <strong id="teleCamStatus" style="color: #A89B93;">Inactive</strong>
+          <span>Feed Link Status</span>
+          <strong id="teleFeedStatus" style="color: #A89B93;">Pending</strong>
         </div>
         <div class="tele-card">
           <span>Global Taps</span>
           <strong id="dashTotalTaps">0</strong>
         </div>
         <div class="tele-card">
-          <span>Ingest Type</span>
-          <strong>Direct Cam</strong>
+          <span>Mode</span>
+          <strong>Direct Link</strong>
         </div>
       </div>
 
       <div class="customizer-card">
-        <h3>🎨 Stream Title & Camera Settings</h3>
+        <h3>🔗 Live Stream Ingest & Details</h3>
         
+        <div class="form-group">
+          <label>Live Player / Embed Link (VDO.Ninja view link, HLS .m3u8, etc.):</label>
+          <input type="text" id="streamUrlInput" placeholder="e.g. https://vdo.ninja/?view=bobastreamtim&autoplay=1" />
+        </div>
+
         <div class="form-grid">
           <div class="form-group">
             <label>Stream Title:</label>
-            <input type="text" id="streamTitleInput" value="Tapioca Chill Room 🧋" placeholder="e.g. Midnight Boba & Chill Coding" />
+            <input type="text" id="streamTitleInput" value="Tapioca pearl Room 🧋" />
           </div>
           <div class="form-group">
             <label>Host Display Name:</label>
-            <input type="text" id="hostNameInput" value="Tim" placeholder="Your name / handle" />
+            <input type="text" id="hostNameInput" value="Tim" />
           </div>
         </div>
 
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Sub-header Description:</label>
-            <input type="text" id="streamSubtitleInput" value="Direct stream from OBS Virtual Camera" placeholder="Subtitle" />
-          </div>
-          <div class="form-group">
-            <label>Select Camera / OBS Virtual Camera:</label>
-            <select id="cameraDeviceSelect">
-              <option value="">Detecting cameras...</option>
-            </select>
-          </div>
+        <div class="form-group">
+          <label>Sub-header Description:</label>
+          <input type="text" id="streamSubtitleInput" value="Hi guys welcome to the website feel free to navigate kaya niyo na yan malaki na kayo" />
         </div>
 
         <div class="btn-row">
-          <button class="btn-action" id="startCamBtn">📹 1. Start Camera Feed</button>
-          <button class="btn-action btn-secondary" id="saveMetaBtn">💾 2. Update Stream Details</button>
+          <button class="btn-action" id="broadcastBtn">🚀 Broadcast Live to All Viewers</button>
         </div>
       </div>
     </section>
@@ -272,12 +282,10 @@
     </aside>
   </main>
 
-  <canvas id="captureCanvas" style="display:none;" width="640" height="360"></canvas>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { 
-      getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, serverTimestamp, doc, setDoc, updateDoc 
+      getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, serverTimestamp, doc, setDoc 
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -293,110 +301,84 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // --- Active Viewers Counter ---
+    // Active Viewers Counter
     onSnapshot(collection(db, "active_viewers"), (snap) => {
       document.getElementById('dashActiveViewers').textContent = snap.size || 0;
     });
 
-    // --- Device Enumeration ---
-    const camSelect = document.getElementById('cameraDeviceSelect');
-    async function loadDevices() {
-      try {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const videoDevices = devices.filter(d => d.kind === 'videoinput');
-        camSelect.innerHTML = '';
-        if (videoDevices.length === 0) {
-          camSelect.innerHTML = '<option value="">No cameras detected</option>';
-          return;
+    // Monitor Player
+    const dashIframe = document.getElementById('dashIframe');
+    const dashVideo = document.getElementById('dashVideo');
+    const placeholder = document.getElementById('monitorPlaceholder');
+    let dashHls = null;
+
+    function renderPreview(url) {
+      if (!url) return;
+      placeholder.style.display = 'none';
+      if (url.includes('.m3u8')) {
+        dashIframe.style.display = 'none';
+        dashVideo.style.display = 'block';
+        if (Hls.isSupported()) {
+          if (dashHls) dashHls.destroy();
+          dashHls = new Hls();
+          dashHls.loadSource(url);
+          dashHls.attachMedia(dashVideo);
+          dashHls.on(Hls.Events.MANIFEST_PARSED, () => dashVideo.play().catch(() => {}));
+        } else if (dashVideo.canPlayType('application/vnd.apple.mpegurl')) {
+          dashVideo.src = url;
+          dashVideo.play().catch(() => {});
         }
-        videoDevices.forEach((dev, idx) => {
-          const opt = document.createElement('option');
-          opt.value = dev.deviceId;
-          opt.textContent = dev.label || `Camera ${idx + 1}`;
-          camSelect.appendChild(opt);
-        });
-      } catch (e) {
-        console.warn("Device enumeration error:", e);
+      } else {
+        dashVideo.style.display = 'none';
+        dashIframe.style.display = 'block';
+        dashIframe.src = url;
       }
     }
-    loadDevices();
 
-    // --- Camera Handling ---
-    const localVideo = document.getElementById('localVideo');
-    const startCamBtn = document.getElementById('startCamBtn');
-    const teleCamStatus = document.getElementById('teleCamStatus');
-    const statusBadge = document.getElementById('broadcastStatusBadge');
-    let currentStream = null;
-    let broadcastInterval = null;
-
-    startCamBtn.addEventListener('click', async () => {
-      const deviceId = camSelect.value;
-      const constraints = {
-        video: deviceId ? { deviceId: { exact: deviceId } } : true,
-        audio: false
-      };
-
-      try {
-        if (currentStream) currentStream.getTracks().forEach(t => t.stop());
-        currentStream = await navigator.mediaDevices.getUserMedia(constraints);
-        localVideo.srcObject = currentStream;
-        await loadDevices();
-
-        teleCamStatus.textContent = "Live";
-        teleCamStatus.style.color = "var(--accent-matcha)";
-        statusBadge.textContent = "🔴 BROADCASTING LIVE";
-        statusBadge.style.color = "#FFF";
-        statusBadge.style.background = "var(--accent)";
-
-        startBroadcastingFrames();
-      } catch (err) {
-        alert("Camera error: " + err.message);
+    // Load saved stream config if exists
+    onSnapshot(doc(db, "stream_stats", "config"), (snap) => {
+      if (snap.exists() && snap.data().streamUrl) {
+        document.getElementById('streamUrlInput').value = snap.data().streamUrl;
+        document.getElementById('teleFeedStatus').textContent = "Active";
+        document.getElementById('teleFeedStatus').style.color = "var(--accent-matcha)";
+        renderPreview(snap.data().streamUrl);
       }
     });
 
-    const canvas = document.getElementById('captureCanvas');
-    const ctx = canvas.getContext('2d');
-    function startBroadcastingFrames() {
-      if (broadcastInterval) clearInterval(broadcastInterval);
-      broadcastInterval = setInterval(async () => {
-        if (!currentStream || localVideo.readyState < 2) return;
-        ctx.drawImage(localVideo, 0, 0, canvas.width, canvas.height);
-        const frameData = canvas.toDataURL('image/jpeg', 0.5);
-
-        try {
-          await setDoc(doc(db, "stream_stats", "live_frame"), {
-            frame: frameData,
-            timestamp: Date.now()
-          });
-        } catch (e) {}
-      }, 500);
-    }
-
-    // --- Metadata Update ---
+    // Broadcast Button handler
+    const broadcastBtn = document.getElementById('broadcastBtn');
+    const streamUrlInput = document.getElementById('streamUrlInput');
     const streamTitleInput = document.getElementById('streamTitleInput');
     const hostNameInput = document.getElementById('hostNameInput');
     const streamSubtitleInput = document.getElementById('streamSubtitleInput');
-    const saveMetaBtn = document.getElementById('saveMetaBtn');
 
-    saveMetaBtn.addEventListener('click', async () => {
-      const title = streamTitleInput.value.trim() || "Tapioca Chill Room 🧋";
+    broadcastBtn.addEventListener('click', async () => {
+      const url = streamUrlInput.value.trim();
+      const title = streamTitleInput.value.trim() || "Tapioca pearl Room 🧋";
       const host = hostNameInput.value.trim() || "Tim";
       const sub = streamSubtitleInput.value.trim() || "";
 
+      if (!url) return alert("Please paste a live stream link (e.g. VDO.Ninja view link or .m3u8)");
+
       try {
+        await setDoc(doc(db, "stream_stats", "config"), { streamUrl: url });
         await setDoc(doc(db, "stream_stats", "metadata"), {
           title: title,
           host: host,
           subtitle: sub,
           updatedAt: serverTimestamp()
         });
-        alert("Stream details updated! Viewers see the changes immediately.");
+
+        renderPreview(url);
+        document.getElementById('teleFeedStatus').textContent = "Active";
+        document.getElementById('teleFeedStatus').style.color = "var(--accent-matcha)";
+        alert("Broadcast live! All viewers on index.html are now watching this feed with audio.");
       } catch (err) {
-        alert("Failed to save details: " + err.message);
+        alert("Error saving: " + err.message);
       }
     });
 
-    // --- Chat & Telemetry ---
+    // Chat Sync
     const chatCol = collection(db, "chat_messages");
     const chatQuery = query(chatCol, orderBy("timestamp", "asc"), limit(50));
     const dashChatBody = document.getElementById('dashChatBody');
