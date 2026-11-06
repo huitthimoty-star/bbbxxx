@@ -35,15 +35,18 @@
       overflow-x: hidden;
     }
 
+    /* Header & 3-Dots Dropdown */
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1rem;
+      margin-bottom: 1.25rem;
+      position: relative;
     }
 
     .brand { display: flex; align-items: center; gap: 0.6rem; }
     .brand h1 { font-family: var(--font-heading); font-size: 1.6rem; color: var(--boba-tea); }
+    
     .badge-live {
       background: var(--accent);
       color: #fff;
@@ -55,11 +58,75 @@
     }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
 
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      position: relative;
+    }
+
+    .btn-menu-dots {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--boba-tea);
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      font-size: 1.25rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .btn-menu-dots:hover { background: #F5ECE0; }
+    .btn-menu-dots:active { transform: scale(0.92); }
+
+    .dropdown-menu {
+      position: absolute;
+      top: 46px;
+      right: 0;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      box-shadow: 0 10px 25px rgba(92, 75, 64, 0.12);
+      width: 180px;
+      padding: 0.5rem;
+      display: none;
+      flex-direction: column;
+      gap: 0.35rem;
+      z-index: 100;
+    }
+    .dropdown-menu.show { display: flex; }
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.55rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--boba-tea);
+      cursor: pointer;
+      border: none;
+      background: none;
+      text-align: left;
+      transition: background 0.15s;
+    }
+    .dropdown-item:hover { background: var(--bg-cream); }
+    .dropdown-item.active { background: #FDE8E1; color: var(--accent); }
+
+    /* Section Views */
+    .view-section { display: none; width: 100%; }
+    .view-section.active { display: block; }
+
+    /* Live View Layout */
     .main-grid {
       display: grid;
       grid-template-columns: 2.3fr 1fr;
       gap: 1.5rem;
-      flex: 1;
     }
     @media (max-width: 992px) { .main-grid { grid-template-columns: 1fr; } }
 
@@ -135,10 +202,7 @@
       font-size: 0.95rem;
       transition: transform 0.08s, background 0.1s;
     }
-    .btn-tap:active {
-      transform: scale(0.92);
-      background: #EFE4D6;
-    }
+    .btn-tap:active { transform: scale(0.92); background: #EFE4D6; }
 
     .floating-reaction {
       position: absolute;
@@ -152,6 +216,7 @@
       100% { transform: translateY(-110px) scale(1.4) rotate(20deg); opacity: 0; }
     }
 
+    /* Live Chat */
     .chat-col {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -162,7 +227,6 @@
       overflow: hidden;
       box-shadow: 0 10px 30px rgba(92, 75, 64, 0.05);
     }
-
     .chat-head {
       padding: 0.9rem 1.25rem;
       border-bottom: 1px solid var(--card-border);
@@ -199,7 +263,6 @@
       flex-direction: column;
       gap: 0.8rem;
     }
-
     .chat-item {
       display: flex;
       align-items: flex-start;
@@ -209,11 +272,7 @@
       border-radius: 14px;
       border: 1px solid var(--card-border);
     }
-    .chat-item.is-host {
-      background: #FFF5F2;
-      border-color: #F8D1C7;
-    }
-
+    .chat-item.is-host { background: #FFF5F2; border-color: #F8D1C7; }
     .user-avatar { font-size: 1.35rem; line-height: 1; }
     .user-tag {
       font-size: 0.82rem;
@@ -231,12 +290,7 @@
       border-radius: 999px;
     }
     .badge-label.host { background: var(--accent); }
-    .msg-body {
-      font-size: 0.9rem;
-      color: #4A3E37;
-      margin-top: 0.15rem;
-      word-break: break-word;
-    }
+    .msg-body { font-size: 0.9rem; color: #4A3E37; margin-top: 0.15rem; word-break: break-word; }
 
     .chat-input-box {
       padding: 0.85rem;
@@ -255,6 +309,7 @@
       font-size: 0.9rem;
       color: var(--boba-tea);
     }
+    .chat-input-box input:focus { outline: none; border-color: var(--boba-gold); }
     .chat-input-box button {
       background: var(--accent);
       color: #fff;
@@ -265,7 +320,71 @@
       cursor: pointer;
     }
 
-    /* Modal for Name & Avatar Customization */
+    /* Replays View Layout */
+    .replays-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .replay-player-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      box-shadow: 0 10px 30px rgba(92, 75, 64, 0.05);
+    }
+
+    .replay-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .replay-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .replay-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(92, 75, 64, 0.08);
+    }
+
+    .replay-thumb {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #2E2620;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      color: #fff;
+    }
+    .replay-duration {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background: rgba(0,0,0,0.75);
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.15rem 0.45rem;
+      border-radius: 6px;
+    }
+
+    .replay-details { padding: 0.9rem; display: flex; flex-direction: column; gap: 0.3rem; }
+    .replay-title { font-family: var(--font-heading); font-size: 1.05rem; color: var(--boba-tea); }
+    .replay-meta { font-size: 0.78rem; color: var(--text-muted); }
+
+    /* Modal for Name & Avatar */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -299,70 +418,109 @@
       border-radius: 10px;
       border: 2px solid transparent;
     }
-    .avatar-opt.selected {
-      border-color: var(--accent);
-      background: #FFF5F2;
-    }
+    .avatar-opt.selected { border-color: var(--accent); background: #FFF5F2; }
   </style>
 </head>
 <body>
 
+  <!-- Header with Brand & 3-Dots Navigation -->
   <header>
     <div class="brand">
       <span style="font-size: 1.6rem;">🧋</span>
-      <h1>BobaStream</h1>
-      <span class="badge-live">LIVE</span>
+      <h1 id="brandTitle">BobaStream</h1>
+      <span class="badge-live" id="liveBadge">LIVE</span>
     </div>
-    <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700;">
-      Enjoy the tea! ✨
-    </div>
-  </header>
 
-  <div class="main-grid">
-    <div class="player-col">
-      <div class="video-wrapper">
-        <div class="stream-overlay-pill">
-          <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#4EBA6F;"></span>
-          <span id="viewerCountDisplay">1 Viewer</span>
-        </div>
-
-        <iframe id="liveIframePlayer" src="" style="display:none;" allow="autoplay; fullscreen; encrypted-media; picture-in-picture"></iframe>
-        <video id="liveHlsVideo" controls autoplay playsinline style="display:none;"></video>
+    <div class="header-actions">
+      <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700;">
+        Enjoy the tea! ✨
       </div>
 
-      <div class="info-card">
-        <h2 class="info-title" id="roomTitleDisplay">Tapioca Pearl Room 🧋</h2>
-        <p class="info-desc" id="roomDescDisplay">Connecting to live feed...</p>
-      </div>
+      <!-- 3-Dots Menu Trigger -->
+      <button class="btn-menu-dots" id="btnMenuDots" title="Menu">⋮</button>
 
-      <div class="reactions-bar" id="reactionsContainer">
-        <span style="font-size: 0.9rem; font-weight: 700; color: var(--text-muted);">Spam tap reactions! 🧋✨</span>
-        <button id="btnTapSip" class="btn-tap">
-          <span>🧋</span> <span id="tapCountDisplay">0</span> Chill Sips
+      <!-- 3-Dots Dropdown Options -->
+      <div class="dropdown-menu" id="navDropdown">
+        <button class="dropdown-item active" id="tabLive">
+          <span>🔴</span> Live Section
+        </button>
+        <button class="dropdown-item" id="tabReplays">
+          <span>🎬</span> Live Replays
         </button>
       </div>
     </div>
+  </header>
 
-    <!-- Live Lounge Chat -->
-    <div class="chat-col">
-      <div class="chat-head">
-        <h3>Boba Lounge Chat</h3>
-        <span style="font-size: 0.75rem; background: #E8F5E9; color: #2E7D32; padding: 0.2rem 0.5rem; border-radius: 999px; font-weight: 700;">Active</span>
+  <!-- ================= SUB-WEB 1: LIVE SECTION ================= -->
+  <section class="view-section active" id="sectionLive">
+    <div class="main-grid">
+      <div class="player-col">
+        <div class="video-wrapper">
+          <div class="stream-overlay-pill">
+            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#4EBA6F;"></span>
+            <span id="viewerCountDisplay">1 Viewer</span>
+          </div>
+
+          <iframe id="liveIframePlayer" src="" style="display:none;" allow="autoplay; fullscreen; encrypted-media; picture-in-picture"></iframe>
+          <video id="liveHlsVideo" controls autoplay playsinline style="display:none;"></video>
+        </div>
+
+        <div class="info-card">
+          <h2 class="info-title" id="roomTitleDisplay">Tapioca Pearl Room 🧋</h2>
+          <p class="info-desc" id="roomDescDisplay">Connecting to live feed...</p>
+        </div>
+
+        <div class="reactions-bar" id="reactionsContainer">
+          <span style="font-size: 0.9rem; font-weight: 700; color: var(--text-muted);">Spam tap reactions! 🧋✨</span>
+          <button id="btnTapSip" class="btn-tap">
+            <span>🧋</span> <span id="tapCountDisplay">0</span> Chill Sips
+          </button>
+        </div>
       </div>
 
-      <div class="user-profile-bar">
-        <div>Chatting as: <strong id="lblProfilePreview">🧋 ChillSipper</strong></div>
-        <button class="btn-edit-profile" id="btnOpenModal">Change Name/Icon</button>
-      </div>
+      <!-- Live Lounge Chat -->
+      <div class="chat-col">
+        <div class="chat-head">
+          <h3>Boba Lounge Chat</h3>
+          <span style="font-size: 0.75rem; background: #E8F5E9; color: #2E7D32; padding: 0.2rem 0.5rem; border-radius: 999px; font-weight: 700;">Active</span>
+        </div>
 
-      <div class="chat-body" id="audienceChatBody"></div>
+        <div class="user-profile-bar">
+          <div>Chatting as: <strong id="lblProfilePreview">🧋 ChillSipper</strong></div>
+          <button class="btn-edit-profile" id="btnOpenModal">Change Name/Icon</button>
+        </div>
 
-      <div class="chat-input-box">
-        <input type="text" id="audienceChatInput" placeholder="Send a message to the lounge..." maxlength="180">
-        <button id="btnAudienceSend">Send</button>
+        <div class="chat-body" id="audienceChatBody"></div>
+
+        <div class="chat-input-box">
+          <input type="text" id="audienceChatInput" placeholder="Send a message to the lounge..." maxlength="180">
+          <button id="btnAudienceSend">Send</button>
+        </div>
       </div>
     </div>
-  </div>
+  </section>
+
+  <!-- ================= SUB-WEB 2: LIVE REPLAYS ================= -->
+  <section class="view-section" id="sectionReplays">
+    <div class="replays-container">
+      
+      <!-- Replay Video Player -->
+      <div class="replay-player-card">
+        <h2 style="font-family: var(--font-heading); font-size: 1.35rem;" id="activeReplayTitle">🎬 Stream Replay Archive</h2>
+        <div class="video-wrapper">
+          <iframe id="replayIframePlayer" src="" allow="autoplay; fullscreen; encrypted-media" style="background:#000;"></iframe>
+        </div>
+        <p style="font-size: 0.9rem; color: var(--text-muted);" id="activeReplayDesc">Select any past broadcast below to rewatch the session.</p>
+      </div>
+
+      <!-- Dynamic Replays Archive Shelf (Direct from Firestore) -->
+      <h3 style="font-family: var(--font-heading); font-size: 1.2rem;">Past Broadcasts</h3>
+      <div class="replay-grid" id="replayGridList">
+        <p style="font-size: 0.85rem; color: var(--text-muted);" id="noReplaysMsg">Loading replays...</p>
+      </div>
+
+    </div>
+  </section>
 
   <!-- Profile Edit Modal -->
   <div class="modal-overlay" id="profileModal">
@@ -416,6 +574,103 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    // --- Navigation & 3-Dots Dropdown Setup ---
+    const btnMenuDots = document.getElementById("btnMenuDots");
+    const navDropdown = document.getElementById("navDropdown");
+    const tabLive = document.getElementById("tabLive");
+    const tabReplays = document.getElementById("tabReplays");
+    const sectionLive = document.getElementById("sectionLive");
+    const sectionReplays = document.getElementById("sectionReplays");
+    const liveBadge = document.getElementById("liveBadge");
+
+    btnMenuDots.addEventListener("click", (e) => {
+      e.stopPropagation();
+      navDropdown.classList.toggle("show");
+    });
+
+    document.addEventListener("click", () => {
+      navDropdown.classList.remove("show");
+    });
+
+    tabLive.addEventListener("click", () => {
+      switchSubView("live");
+    });
+
+    tabReplays.addEventListener("click", () => {
+      switchSubView("replays");
+    });
+
+    function switchSubView(view) {
+      if (view === "live") {
+        sectionLive.classList.add("active");
+        sectionReplays.classList.remove("active");
+        tabLive.classList.add("active");
+        tabReplays.classList.remove("active");
+        liveBadge.innerText = "LIVE";
+        liveBadge.style.background = "var(--accent)";
+      } else {
+        sectionLive.classList.remove("active");
+        sectionReplays.classList.add("active");
+        tabLive.classList.remove("active");
+        tabReplays.classList.add("active");
+        liveBadge.innerText = "REPLAYS";
+        liveBadge.style.background = "var(--boba-tea)";
+      }
+      navDropdown.classList.remove("show");
+    }
+
+    // --- Dynamic Replays Shelf Listener ---
+    const replayGridList = document.getElementById("replayGridList");
+    const replayIframe = document.getElementById("replayIframePlayer");
+    const activeReplayTitle = document.getElementById("activeReplayTitle");
+    const activeReplayDesc = document.getElementById("activeReplayDesc");
+
+    // Real-time listener for Firestore "live_replays" collection
+    onSnapshot(collection(db, "live_replays"), (snapshot) => {
+      if (snapshot.empty) {
+        replayGridList.innerHTML = `<p style="font-size: 0.9rem; color: var(--text-muted); grid-column: 1/-1; padding: 1.5rem 0;">No replay recordings published yet. Stay tuned for past broadcasts!</p>`;
+        return;
+      }
+
+      replayGridList.innerHTML = "";
+      let first = true;
+
+      snapshot.forEach((docItem) => {
+        const item = docItem.data();
+        const card = document.createElement("div");
+        card.className = "replay-card";
+        
+        card.innerHTML = `
+          <div class="replay-thumb">
+            <span>🧋</span>
+            <span class="replay-duration">${escapeHtml(item.meta || 'VOD')}</span>
+          </div>
+          <div class="replay-details">
+            <h4 class="replay-title">${escapeHtml(item.title)}</h4>
+            <span class="replay-meta">${escapeHtml(item.desc || '')}</span>
+          </div>
+        `;
+
+        card.addEventListener("click", () => {
+          replayIframe.src = item.videoUrl;
+          activeReplayTitle.innerText = item.title;
+          activeReplayDesc.innerText = item.desc || item.meta || "Recorded broadcast on BobaStream.";
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+
+        // Set the first replay video as active player source if player is currently empty
+        if (first && !replayIframe.src) {
+          replayIframe.src = item.videoUrl;
+          activeReplayTitle.innerText = item.title;
+          activeReplayDesc.innerText = item.desc || item.meta || "Recorded broadcast on BobaStream.";
+          first = false;
+        }
+
+        replayGridList.appendChild(card);
+      });
+    });
+
+    // --- Live Stream Elements ---
     const liveIframePlayer = document.getElementById("liveIframePlayer");
     const liveHlsVideo = document.getElementById("liveHlsVideo");
     const roomTitleDisplay = document.getElementById("roomTitleDisplay");
@@ -601,8 +856,7 @@
 
     // --- 4. Interactive Floating Tap Emojis ---
     const tapEmojis = ["🧋", "✨", "💖", "🍡", "🌸", "⭐", "🎉"];
-    btnTapSip.addEventListener("click", async (e) => {
-      // Spawn floating emoji animation
+    btnTapSip.addEventListener("click", async () => {
       const span = document.createElement("span");
       span.className = "floating-reaction";
       span.innerText = tapEmojis[Math.floor(Math.random() * tapEmojis.length)];
@@ -615,7 +869,6 @@
       reactionsContainer.appendChild(span);
       setTimeout(() => span.remove(), 1200);
 
-      // Increment Firestore tap counter
       try {
         await setDoc(doc(db, "stream_stats", "main"), {
           taps: increment(1)
