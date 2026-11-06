@@ -3,481 +3,526 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BobaStream 🧋 | Live Stream</title>
+  <title>BobaStream 🧋 Live Lounge</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
     :root {
-      --bg-cream: #FDF9F3;
+      --bg-cream: #FAF6EE;
       --card-bg: #FFFFFF;
-      --milk-tea: #E6CEB5;
-      --tea-dark: #8F5E36;
-      --pearl-black: #2A1E17;
-      --taro-purple: #C8B6E2;
-      --matcha-green: #97A97C;
-      --accent-coral: #E07A5F;
-      --border-soft: rgba(143, 94, 54, 0.15);
-      --font-heading: 'Fredoka', cursive;
-      --font-body: 'Plus Jakarta Sans', sans-serif;
+      --card-border: #EFE4D6;
+      --accent: #E07A5F;
+      --accent-hover: #D0694E;
+      --boba-gold: #E29578;
+      --boba-tea: #5C4B40;
+      --text-muted: #8F8278;
+      --font-heading: 'Fredoka', cursive, sans-serif;
+      --font-body: 'Nunito', sans-serif;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    body { background-color: var(--bg-cream); color: var(--pearl-black); font-family: var(--font-body); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg-cream);
+      color: var(--boba-tea);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem 1.5rem;
+    }
 
     header {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(12px);
-      border-bottom: 2px solid var(--border-soft);
-      padding: 0.75rem 1.5rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 50;
+      margin-bottom: 1rem;
     }
 
     .brand {
       display: flex;
       align-items: center;
       gap: 0.6rem;
-      font-family: var(--font-heading);
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--tea-dark);
-      text-decoration: none;
     }
 
-    .brand span {
-      background: var(--accent-coral);
-      color: white;
+    .brand h1 {
+      font-family: var(--font-heading);
+      font-size: 1.6rem;
+      color: var(--boba-tea);
+    }
+
+    .badge-live {
+      background: var(--accent);
+      color: #fff;
       font-size: 0.75rem;
-      padding: 0.2rem 0.5rem;
+      font-weight: 800;
+      padding: 0.2rem 0.65rem;
       border-radius: 999px;
-      font-family: var(--font-body);
-      font-weight: 700;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.7; }
+      100% { opacity: 1; }
     }
 
     .main-grid {
       display: grid;
-      grid-template-columns: 1fr 380px;
-      gap: 1.25rem;
-      padding: 1.25rem;
-      max-width: 1600px;
-      margin: 0 auto;
-      width: 100%;
+      grid-template-columns: 2.3fr 1fr;
+      gap: 1.5rem;
       flex: 1;
     }
 
-    @media (max-width: 992px) { .main-grid { grid-template-columns: 1fr; } }
-
-    .stage-container { display: flex; flex-direction: column; gap: 1rem; }
-
-    .video-viewport {
-      position: relative;
-      background: #15110E;
-      border-radius: 24px;
-      overflow: hidden;
-      aspect-ratio: 16 / 9;
-      box-shadow: 0 16px 36px rgba(42, 30, 23, 0.08);
-      border: 3px solid white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    @media (max-width: 992px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
-    #streamIframe, #streamVideo {
+    .player-col {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(92, 75, 64, 0.08);
+    }
+
+    .video-wrapper iframe, .video-wrapper video {
       width: 100%;
       height: 100%;
       border: none;
-      display: none;
+      object-fit: cover;
     }
 
-    .standby-screen {
+    .stream-overlay-pill {
       position: absolute;
-      inset: 0;
+      top: 1rem;
+      left: 1rem;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.4rem 0.8rem;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 10;
+    }
+
+    .info-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 1.25rem;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #2A1E17, #15110E);
-      color: var(--milk-tea);
-      gap: 0.8rem;
+      gap: 0.5rem;
+    }
+
+    .info-title {
       font-family: var(--font-heading);
-      z-index: 5;
+      font-size: 1.35rem;
+      color: var(--boba-tea);
     }
 
-    .standby-screen .boba-icon { font-size: 3.5rem; animation: gentleBounce 2s infinite ease-in-out; }
-    @keyframes gentleBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-
-    .reaction-particle-layer { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 20; }
-    .floating-emoji {
-      position: absolute; user-select: none; font-size: 2.2rem;
-      animation: floatUp 2.6s cubic-bezier(0.21, 0.82, 0.42, 1) forwards;
-    }
-    @keyframes floatUp {
-      0% { transform: translateY(0) scale(0.6) rotate(0deg); opacity: 0; }
-      15% { opacity: 1; transform: translateY(-30px) scale(1.2) rotate(-10deg); }
-      80% { opacity: 0.9; }
-      100% { transform: translateY(-460px) scale(1.4) rotate(25deg); opacity: 0; }
+    .info-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
     }
 
-    .video-badges { position: absolute; top: 1rem; left: 1rem; display: flex; gap: 0.5rem; z-index: 25; }
-    .badge {
-      background: rgba(0, 0, 0, 0.65); color: white; padding: 0.35rem 0.75rem; border-radius: 999px;
-      font-size: 0.75rem; font-weight: 600; backdrop-filter: blur(8px); display: flex; align-items: center; gap: 0.4rem;
-    }
-    .badge-live { background: var(--accent-coral); }
-    .badge-live::before { content: ''; width: 8px; height: 8px; background: white; border-radius: 50%; animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-
-    .stream-meta-card {
-      background: var(--card-bg); border: 1px solid var(--border-soft); padding: 1rem 1.25rem;
-      border-radius: 20px; display: flex; justify-content: space-between; align-items: center;
-    }
-    .stream-meta-card h2 { font-family: var(--font-heading); font-size: 1.3rem; color: var(--pearl-black); }
-    .stream-meta-card p { font-size: 0.85rem; color: #6D5D53; margin-top: 0.2rem; }
-
-    .reaction-action-dock {
-      background: var(--card-bg); border: 1px solid var(--border-soft); border-radius: 24px; padding: 1.2rem;
-      display: flex; flex-direction: column; gap: 0.8rem;
-    }
-    .combo-banner {
-      display: flex; justify-content: space-between; align-items: center;
-      font-family: var(--font-heading); font-size: 1rem; color: var(--tea-dark);
-      background: var(--bg-cream); padding: 0.45rem 1rem; border-radius: 14px;
-    }
-    .reaction-buttons-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.5rem; }
-    .react-btn {
-      background: var(--bg-cream); border: 2px solid transparent; border-radius: 18px; padding: 0.65rem 0.2rem;
-      display: flex; flex-direction: column; align-items: center; gap: 0.3rem; cursor: pointer; font-family: var(--font-heading);
-      transition: all 0.12s ease;
-    }
-    .react-btn:hover { background: #F4EADF; transform: translateY(-3px); }
-    .react-btn:active { transform: scale(0.85); border-color: var(--tea-dark); }
-    .react-btn .emoji { font-size: 1.8rem; }
-    .react-btn .counter {
-      font-size: 0.75rem; font-weight: 700; color: var(--pearl-black); background: white;
-      padding: 0.15rem 0.5rem; border-radius: 999px; min-width: 28px; text-align: center;
+    .reactions-bar {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
-    .chat-panel {
-      background: var(--card-bg); border: 1px solid var(--border-soft); border-radius: 24px;
-      display: flex; flex-direction: column; height: 720px; overflow: hidden;
-      box-shadow: 0 12px 30px rgba(42, 30, 23, 0.05);
+    .btn-tap {
+      background: var(--bg-cream);
+      border: 1px solid var(--card-border);
+      padding: 0.5rem 1rem;
+      border-radius: 12px;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      transition: transform 0.1s, background 0.1s;
     }
-    .chat-header {
-      padding: 1rem; border-bottom: 1px solid var(--border-soft); display: flex;
-      justify-content: space-between; align-items: center; background: #FAF5EE;
+
+    .btn-tap:active {
+      transform: scale(0.92);
+      background: #EFE4D6;
     }
-    .chat-header h3 { font-family: var(--font-heading); font-size: 1.15rem; color: var(--pearl-black); }
-    .chat-body { flex: 1; padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; }
-    .chat-msg { display: flex; gap: 0.6rem; align-items: flex-start; font-size: 0.9rem; }
-    .chat-avatar {
-      width: 32px; height: 32px; border-radius: 50%; background: var(--bg-cream);
-      display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
-      flex-shrink: 0; border: 1px solid var(--border-soft);
+
+    .chat-col {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      height: 720px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(92, 75, 64, 0.05);
     }
-    .chat-content { background: var(--bg-cream); padding: 0.55rem 0.85rem; border-radius: 14px; border-top-left-radius: 4px; max-width: 85%; }
-    .chat-author { font-weight: 700; font-size: 0.8rem; color: var(--tea-dark); display: flex; align-items: center; gap: 0.35rem; }
-    .chat-badge { font-size: 0.65rem; padding: 0.1rem 0.4rem; border-radius: 999px; background: var(--pearl-black); color: white; }
-    .badge-host { background: var(--accent-coral); color: white; }
-    .chat-text { color: var(--pearl-black); word-break: break-word; line-height: 1.35; }
-    .chat-footer { padding: 0.85rem; border-top: 1px solid var(--border-soft); display: flex; flex-direction: column; gap: 0.5rem; background: white; }
-    .identity-row { display: flex; gap: 0.5rem; }
-    .identity-row input { font-size: 0.8rem; padding: 0.35rem 0.6rem; border: 1px solid var(--border-soft); border-radius: 10px; flex: 1; background: var(--bg-cream); outline: none; }
-    .chat-input-row { display: flex; gap: 0.5rem; }
-    .chat-input-row input { flex: 1; font-size: 0.9rem; padding: 0.65rem 0.9rem; border: 1px solid var(--border-soft); border-radius: 999px; outline: none; background: var(--bg-cream); }
-    .btn-send { background: var(--pearl-black); color: white; border: none; font-family: var(--font-heading); padding: 0 1.2rem; border-radius: 999px; cursor: pointer; }
+
+    .chat-head {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .chat-head h3 {
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+    }
+
+    .chat-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .chat-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      background: #FDFBF7;
+      padding: 0.65rem 0.85rem;
+      border-radius: 14px;
+      border: 1px solid var(--card-border);
+    }
+
+    .chat-item.is-host {
+      background: #FFF5F2;
+      border-color: #F8D1C7;
+    }
+
+    .user-tag {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--boba-tea);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .badge-label {
+      background: var(--boba-tea);
+      color: #fff;
+      font-size: 0.65rem;
+      padding: 0.1rem 0.45rem;
+      border-radius: 999px;
+    }
+
+    .badge-label.host {
+      background: var(--accent);
+    }
+
+    .msg-body {
+      font-size: 0.9rem;
+      color: #4A3E37;
+      margin-top: 0.15rem;
+      word-break: break-word;
+    }
+
+    .chat-input-box {
+      padding: 0.85rem;
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      gap: 0.5rem;
+      background: var(--card-bg);
+    }
+
+    .chat-input-box input {
+      flex: 1;
+      background: var(--bg-cream);
+      border: 1px solid var(--card-border);
+      padding: 0.65rem 0.9rem;
+      border-radius: 10px;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      color: var(--boba-tea);
+    }
+
+    .chat-input-box input:focus {
+      outline: none;
+      border-color: var(--boba-gold);
+    }
+
+    .chat-input-box button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 0 1.1rem;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
 
   <header>
-    <a href="index.html" class="brand">
-      🧋 BobaStream <span>LIVE</span>
-    </a>
-    <div style="font-size: 0.85rem; font-weight: 600; color: var(--tea-dark);">
-      Enjoy guys hehe ✨
+    <div class="brand">
+      <span style="font-size: 1.6rem;">🧋</span>
+      <h1>BobaStream</h1>
+      <span class="badge-live">LIVE</span>
+    </div>
+    <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700;">
+      Enjoy the tea! ✨
     </div>
   </header>
 
-  <main class="main-grid">
-    <section class="stage-container">
-      <div class="video-viewport">
-        <div class="standby-screen" id="standbyScreen">
-          <div class="boba-icon">🧋</div>
-          <div>Waiting for Host to broadcast link...</div>
+  <div class="main-grid">
+    <div class="player-col">
+      <div class="video-wrapper">
+        <div class="stream-overlay-pill">
+          <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#4EBA6F;"></span>
+          <span id="viewerCountDisplay">1 Viewer</span>
         </div>
-        <iframe id="streamIframe" allow="autoplay; camera; microphone; fullscreen; display-capture; picture-in-picture"></iframe>
-        <video id="streamVideo" autoplay playsinline controls></video>
 
-        <div class="reaction-particle-layer" id="particleLayer"></div>
-
-        <div class="video-badges">
-          <div class="badge badge-live">DIRECT LIVE</div>
-          <div class="badge" id="viewerCounterBadge">👥 1 Viewer</div>
-        </div>
+        <!-- Video elements -->
+        <iframe id="liveIframePlayer" src="" style="display:none;" allow="autoplay; fullscreen; encrypted-media; picture-in-picture"></iframe>
+        <video id="liveHlsVideo" controls autoplay playsinline style="display:none;"></video>
       </div>
 
-      <div class="stream-meta-card">
-        <div>
-          <h2 id="liveTitle">Tapioca pearl Room 🧋</h2>
-          <p id="liveSubtitle">Hi guys welcome to the website feel free to navigate kaya niyo na yan malaki na kayo</p>
-        </div>
-        <div style="font-size: 0.85rem; font-weight: 700; color: var(--tea-dark);" id="hostViewerBadge">
-          👤 Host: Tim
-        </div>
+      <div class="info-card">
+        <h2 class="info-title" id="roomTitleDisplay">Tapioca Pearl Room 🧋</h2>
+        <p class="info-desc" id="roomDescDisplay">Connecting to live feed...</p>
       </div>
 
-      <div class="reaction-action-dock">
-        <div class="combo-banner">
-          <span>Spam tap reactions! 🚀</span>
-          <span id="comboIndicator">x1 Chill Sip</span>
-        </div>
-        <div class="reaction-buttons-grid">
-          <button class="react-btn" data-type="heart"><span class="emoji">❤️</span><span class="counter" data-reaction-badge="heart">0</span></button>
-          <button class="react-btn" data-type="boba"><span class="emoji">🧋</span><span class="counter" data-reaction-badge="boba">0</span></button>
-          <button class="react-btn" data-type="laugh"><span class="emoji">😂</span><span class="counter" data-reaction-badge="laugh">0</span></button>
-          <button class="react-btn" data-type="fire"><span class="emoji">🔥</span><span class="counter" data-reaction-badge="fire">0</span></button>
-          <button class="react-btn" data-type="sparkles"><span class="emoji">✨</span><span class="counter" data-reaction-badge="sparkles">0</span></button>
-          <button class="react-btn" data-type="angry"><span class="emoji">😡</span><span class="counter" data-reaction-badge="angry">0</span></button>
-        </div>
+      <div class="reactions-bar">
+        <span style="font-size: 0.9rem; font-weight: 700; color: var(--text-muted);">Spam tap reactions! 🧋✨</span>
+        <button id="btnTapSip" class="btn-tap">
+          <span>🧋</span> <span id="tapCountDisplay">0</span> Chill Sips
+        </button>
       </div>
-    </section>
+    </div>
 
-    <aside class="chat-panel">
-      <div class="chat-header">
-        <h3>💬 Boba Lounge Chat</h3>
-        <span style="font-size: 0.75rem; background: var(--matcha-green); color: white; padding: 0.2rem 0.5rem; border-radius: 999px;">Live</span>
+    <!-- Live Lounge Chat -->
+    <div class="chat-col">
+      <div class="chat-head">
+        <h3>Boba Lounge Chat</h3>
+        <span style="font-size: 0.75rem; background: #E8F5E9; color: #2E7D32; padding: 0.2rem 0.5rem; border-radius: 999px; font-weight: 700;">Active</span>
       </div>
-      <div class="chat-body" id="chatBody"></div>
-      <div class="chat-footer">
-        <div class="identity-row">
-          <input type="text" id="userNameInput" placeholder="Your Nickname" value="ChillSipper" maxlength="15" />
-          <select id="userAvatarSelect" style="border: 1px solid var(--border-soft); border-radius: 10px; padding: 0.35rem; background: var(--bg-cream);">
-            <option value="🧋">🧋 Milk Tea</option>
-            <option value="🍵">🍵 Matcha</option>
-            <option value="🍓">🍓 Strawberry</option>
-            <option value="🐻">🐻 Bear</option>
-          </select>
-        </div>
-        <form id="chatForm" class="chat-input-row">
-          <input type="text" id="chatMsgInput" placeholder="Send a message to stream..." maxlength="200" autocomplete="off" />
-          <button type="submit" class="btn-send">Send</button>
-        </form>
+
+      <div class="chat-body" id="audienceChatBody"></div>
+
+      <div class="chat-input-box">
+        <input type="text" id="audienceChatInput" placeholder="Send a message to the lounge..." maxlength="180">
+        <button id="btnAudienceSend">Send</button>
       </div>
-    </aside>
-  </main>
+    </div>
+  </div>
 
-  <script>
-    // Reaction Particles
-    const particleLayer = document.getElementById('particleLayer');
-    const emojisMap = { heart: '❤️', boba: '🧋', laugh: '😂', fire: '🔥', sparkles: '✨', angry: '😡' };
-
-    function spawnFloatingEmoji(type) {
-      const el = document.createElement('div');
-      el.className = 'floating-emoji';
-      el.textContent = emojisMap[type] || '🧋';
-      el.style.left = (15 + Math.random() * 70) + '%';
-      el.style.bottom = '20px';
-      particleLayer.appendChild(el);
-      setTimeout(() => el.remove(), 2600);
-    }
-
-    let combo = 0, comboTimer = null;
-    const comboIndicator = document.getElementById('comboIndicator');
-
-    document.querySelectorAll('.react-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const type = btn.getAttribute('data-type');
-        spawnFloatingEmoji(type);
-        const badge = btn.querySelector('.counter');
-        badge.textContent = parseInt(badge.textContent || '0') + 1;
-
-        combo++;
-        clearTimeout(comboTimer);
-        comboIndicator.textContent = `x${combo} ${combo > 20 ? '🔥 BOBA TSUNAMI' : combo > 10 ? '⚡ TAPIOCA RUSH' : 'Sip'}`;
-        comboTimer = setTimeout(() => { combo = 0; comboIndicator.textContent = 'x1 Chill Sip'; }, 2200);
-
-        if (window.incrementReaction) window.incrementReaction(type);
-      });
-    });
-
-    // Chat DOM
-    const chatBody = document.getElementById('chatBody');
-    window.renderChatMessage = function(name, text, badge, avatar) {
-      const msgDiv = document.createElement('div');
-      msgDiv.className = 'chat-msg';
-      const isHost = badge === 'HOST';
-      msgDiv.innerHTML = `
-        <div class="chat-avatar">${avatar || '🧋'}</div>
-        <div class="chat-content" style="${isHost ? 'background: #FFE8D6; border: 1px solid var(--accent-coral);' : ''}">
-          <div class="chat-author">
-            ${escapeHTML(name || 'Anonymous')}
-            <span class="chat-badge ${isHost ? 'badge-host' : ''}">${escapeHTML(badge || 'Viewer')}</span>
-          </div>
-          <div class="chat-text">${escapeHTML(text)}</div>
-        </div>
-      `;
-      chatBody.appendChild(msgDiv);
-      chatBody.scrollTop = chatBody.scrollHeight;
-    };
-
-    function escapeHTML(str) {
-      return String(str).replace(/[&<>'"]/g, t => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[t] || t));
-    }
-
-    const chatForm = document.getElementById('chatForm');
-    const chatMsgInput = document.getElementById('chatMsgInput');
-    const userNameInput = document.getElementById('userNameInput');
-    const userAvatarSelect = document.getElementById('userAvatarSelect');
-
-    chatForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const text = chatMsgInput.value.trim();
-      if (!text) return;
-      chatMsgInput.value = '';
-      if (window.sendGlobalChat) {
-        window.sendGlobalChat(userNameInput.value.trim() || 'Viewer', text, 'Viewer', userAvatarSelect.value);
-      }
-    });
-
-    // Stream Link Loader
-    const iframe = document.getElementById('streamIframe');
-    const video = document.getElementById('streamVideo');
-    const standbyScreen = document.getElementById('standbyScreen');
-    let hlsInstance = null;
-
-    window.applyStreamLink = function(url) {
-      if (!url) return;
-      standbyScreen.style.display = 'none';
-
-      if (url.includes('.m3u8')) {
-        iframe.style.display = 'none';
-        video.style.display = 'block';
-        if (Hls.isSupported()) {
-          if (hlsInstance) hlsInstance.destroy();
-          hlsInstance = new Hls({ lowLatencyMode: true });
-          hlsInstance.loadSource(url);
-          hlsInstance.attachMedia(video);
-          hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(() => {}));
-        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-          video.src = url;
-          video.play().catch(() => {});
-        }
-      } else {
-        video.style.display = 'none';
-        iframe.style.display = 'block';
-        iframe.src = url;
-      }
-    };
-  </script>
-
-  <!-- Firebase Live Sync -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { 
-      getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, serverTimestamp, doc, updateDoc, increment, setDoc, deleteDoc 
+      getFirestore, collection, addDoc, onSnapshot, query, where, orderBy, limit, 
+      serverTimestamp, doc, setDoc, deleteDoc, Timestamp, increment 
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+    // --- Firebase Configuration ---
     const firebaseConfig = {
-      apiKey: "AIzaSyCDJz10JB1d7h7ul6tq_TfwEFkZi7M4ovy",
+      apiKey: "AIzaSyB-SAMPLE-REPLACE_WITH_YOUR_KEY",
       authDomain: "bobastream-65561.firebaseapp.com",
       projectId: "bobastream-65561",
       storageBucket: "bobastream-65561.firebasestorage.app",
-      messagingSenderId: "797280854987",
-      appId: "1:797280854987:web:12d0c736b8deac49aab54e",
-      measurementId: "G-N7E1XTMMTW"
+      messagingSenderId: "84729104829",
+      appId: "1:84729104829:web:93a4cd2b948cf20"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // 1. Live Stream Link Sync (Updates immediately without refresh)
-    onSnapshot(doc(db, "stream_stats", "config"), (snap) => {
-      if (snap.exists() && snap.data().streamUrl) {
-        window.applyStreamLink(snap.data().streamUrl);
-      }
+    const liveIframePlayer = document.getElementById("liveIframePlayer");
+    const liveHlsVideo = document.getElementById("liveHlsVideo");
+    const roomTitleDisplay = document.getElementById("roomTitleDisplay");
+    const roomDescDisplay = document.getElementById("roomDescDisplay");
+    const viewerCountDisplay = document.getElementById("viewerCountDisplay");
+    const tapCountDisplay = document.getElementById("tapCountDisplay");
+    const btnTapSip = document.getElementById("btnTapSip");
+
+    const audienceChatBody = document.getElementById("audienceChatBody");
+    const audienceChatInput = document.getElementById("audienceChatInput");
+    const btnAudienceSend = document.getElementById("btnAudienceSend");
+
+    // Assign visitor a random nickname if none exists
+    let visitorName = localStorage.getItem("boba_nick");
+    if (!visitorName) {
+      const sippers = ["ChillSipper", "TaroFan", "MatchaLover", "OolongFriend", "BobaEnjoyer"];
+      visitorName = sippers[Math.floor(Math.random() * sippers.length)] + Math.floor(Math.random() * 899 + 100);
+      localStorage.setItem("boba_nick", visitorName);
+    }
+
+    // --- 1. Viewer Presence Tracking ---
+    const viewerDocId = "viewer_" + Math.random().toString(36).substring(2, 9);
+    const viewerRef = doc(db, "active_viewers", viewerDocId);
+
+    async function registerViewer() {
+      await setDoc(viewerRef, { joinedAt: serverTimestamp() });
+    }
+    registerViewer();
+
+    window.addEventListener("beforeunload", () => {
+      deleteDoc(viewerRef);
     });
 
-    // 2. Active Viewers Presence
-    const sessionId = "viewer_" + Math.random().toString(36).substring(2, 9);
-    const presenceRef = doc(db, "active_viewers", sessionId);
-    const viewerBadge = document.getElementById("viewerCounterBadge");
-
-    try {
-      await setDoc(presenceRef, { joinedAt: serverTimestamp() });
-      window.addEventListener("beforeunload", () => {
-        deleteDoc(presenceRef).catch(() => {});
-      });
-    } catch (e) {}
-
-    onSnapshot(collection(db, "active_viewers"), (snapshot) => {
-      const count = snapshot.size || 1;
-      viewerBadge.textContent = `👥 ${count} ${count === 1 ? 'Viewer' : 'Viewers'}`;
+    onSnapshot(collection(db, "active_viewers"), (snap) => {
+      viewerCountDisplay.innerText = `${snap.size} ${snap.size === 1 ? 'Viewer' : 'Viewers'}`;
     });
 
-    // 3. Title & Host Customization Sync
-    const liveTitle = document.getElementById('liveTitle');
-    const liveSubtitle = document.getElementById('liveSubtitle');
-    const hostViewerBadge = document.getElementById('hostViewerBadge');
-
-    onSnapshot(doc(db, "stream_stats", "metadata"), (snap) => {
-      if (snap.exists()) {
-        const d = snap.data();
-        if (d.title) liveTitle.textContent = d.title;
-        if (d.subtitle) liveSubtitle.textContent = d.subtitle;
-        if (d.host) hostViewerBadge.textContent = `👤 Host: ${d.host}`;
-      }
-    });
-
-    // 4. Live Chat
-    const chatCol = collection(db, "chat_messages");
-    const chatQuery = query(chatCol, orderBy("timestamp", "asc"), limit(40));
-    const processedIds = new Set();
-
-    onSnapshot(chatQuery, (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        if (change.type === "added" && !processedIds.has(change.doc.id)) {
-          processedIds.add(change.doc.id);
-          const data = change.doc.data();
-          window.renderChatMessage(data.name, data.text, data.badge, data.avatar);
-        }
-      });
-    });
-
-    window.sendGlobalChat = async function(name, text, badge, avatar) {
-      await addDoc(chatCol, {
-        name: name,
-        text: text,
-        badge: badge,
-        avatar: avatar,
-        timestamp: serverTimestamp()
-      });
-    };
-
-    // 5. Spam Reactions
-    const statsDocRef = doc(db, "stream_stats", "reactions");
-    onSnapshot(statsDocRef, (snap) => {
+    // --- 2. Live Stream Embed & Info Sync ---
+    let currentStreamUrl = "";
+    onSnapshot(doc(db, "stream_stats", "main"), (snap) => {
       if (snap.exists()) {
         const data = snap.data();
-        for (const [key, val] of Object.entries(data)) {
-          const badge = document.querySelector(`[data-reaction-badge="${key}"]`);
-          if (badge) badge.textContent = val;
+        if (data.title) roomTitleDisplay.innerText = data.title;
+        if (data.description) roomDescDisplay.innerText = data.description;
+        if (data.taps !== undefined) tapCountDisplay.innerText = data.taps;
+
+        if (data.activeUrl && data.activeUrl !== currentStreamUrl) {
+          currentStreamUrl = data.activeUrl;
+          loadVideoUrl(currentStreamUrl);
         }
       }
     });
 
-    window.incrementReaction = async function(type) {
-      try {
-        await updateDoc(statsDocRef, { [type]: increment(1), total: increment(1) });
-      } catch (err) {
-        if (err.code === "not-found") await setDoc(statsDocRef, { [type]: 1, total: 1 });
+    function loadVideoUrl(url) {
+      if (url.includes(".m3u8")) {
+        liveIframePlayer.style.display = "none";
+        liveHlsVideo.style.display = "block";
+        if (Hls.isSupported()) {
+          const hls = new Hls();
+          hls.loadSource(url);
+          hls.attachMedia(liveHlsVideo);
+        } else if (liveHlsVideo.canPlayType('application/vnd.apple.mpegurl')) {
+          liveHlsVideo.src = url;
+        }
+      } else {
+        liveHlsVideo.style.display = "none";
+        liveIframePlayer.style.display = "block";
+        liveIframePlayer.src = url;
       }
-    };
+    }
+
+    // --- 3. Chat with 5-Minute Window & Instant Host-Clear Sync ---
+    const fiveMinutesAgo = Timestamp.fromMillis(Date.now() - 5 * 60 * 1000);
+    const chatQuery = query(
+      collection(db, "chat_messages"),
+      where("timestamp", ">=", fiveMinutesAgo),
+      orderBy("timestamp", "asc"),
+      limit(50)
+    );
+
+    const audienceMsgIds = new Set();
+
+    onSnapshot(chatQuery, (snapshot) => {
+      // If collection was cleared by host, wipe all messages
+      if (snapshot.empty) {
+        audienceChatBody.innerHTML = "";
+        audienceMsgIds.clear();
+        return;
+      }
+
+      snapshot.docChanges().forEach((change) => {
+        const id = change.doc.id;
+        if (change.type === "added" && !audienceMsgIds.has(id)) {
+          audienceMsgIds.add(id);
+          const data = change.doc.data();
+          renderAudienceMsg(id, data.name, data.text, data.badge);
+        }
+        if (change.type === "removed") {
+          audienceMsgIds.delete(id);
+          const elem = document.getElementById(`aud-msg-${id}`);
+          if (elem) elem.remove();
+        }
+      });
+      audienceChatBody.scrollTop = audienceChatBody.scrollHeight;
+    });
+
+    function renderAudienceMsg(id, name, text, badge) {
+      const isHost = (badge === "Host" || badge === "HOST");
+      const div = document.createElement("div");
+      div.className = `chat-item ${isHost ? 'is-host' : ''}`;
+      div.id = `aud-msg-${id}`;
+
+      div.innerHTML = `
+        <span style="font-size: 1.1rem;">${isHost ? '🧋' : '🍵'}</span>
+        <div style="flex: 1;">
+          <div class="user-tag">
+            <span>${escapeHtml(name)}</span>
+            <span class="badge-label ${isHost ? 'host' : ''}">${escapeHtml(badge || 'Sipper')}</span>
+          </div>
+          <div class="msg-body">${escapeHtml(text)}</div>
+        </div>
+      `;
+      audienceChatBody.appendChild(div);
+    }
+
+    // Send Message
+    async function sendChatMessage() {
+      const msg = audienceChatInput.value.trim();
+      if (!msg) return;
+
+      audienceChatInput.value = "";
+      await addDoc(collection(db, "chat_messages"), {
+        name: visitorName,
+        text: msg,
+        badge: "Sipper",
+        timestamp: serverTimestamp()
+      });
+    }
+
+    btnAudienceSend.addEventListener("click", sendChatMessage);
+    audienceChatInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") sendChatMessage();
+    });
+
+    // --- 4. Interactive Sip Reactions ---
+    btnTapSip.addEventListener("click", async () => {
+      try {
+        await setDoc(doc(db, "stream_stats", "main"), {
+          taps: increment(1)
+        }, { merge: true });
+      } catch (err) {
+        console.error("Tap increment error", err);
+      }
+    });
+
+    function escapeHtml(str) {
+      return String(str || "").replace(/[&<>"']/g, (m) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[m]);
+    }
   </script>
 </body>
 </html>
