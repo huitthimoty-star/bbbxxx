@@ -3,429 +3,641 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BobaStream Broadcaster Studio 🎙️</title>
+  <title>BobaStream Broadcaster Studio 🧋</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-dash: #161210;
-      --card-dash: #231C18;
+      --bg-dark: #12100E;
+      --card-bg: #1C1815;
+      --card-border: #2E2620;
       --accent: #E07A5F;
-      --accent-matcha: #97A97C;
-      --milk-tea: #E6CEB5;
-      --border-dash: rgba(230, 206, 181, 0.15);
-      --font-heading: 'Fredoka', cursive;
-      --font-body: 'Plus Jakarta Sans', sans-serif;
+      --accent-hover: #D0694E;
+      --boba-gold: #F4A261;
+      --tea-milk: #F4EAD4;
+      --text-muted: #9E9188;
+      --danger: #E63946;
+      --font-heading: 'Fredoka', cursive, sans-serif;
+      --font-body: 'Nunito', sans-serif;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background-color: var(--bg-dash); color: #F5EFEB; font-family: var(--font-body); min-height: 100vh; display: flex; flex-direction: column; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg-dark);
+      color: var(--tea-milk);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem;
+    }
 
     header {
-      background: #1C1613;
-      border-bottom: 1px solid var(--border-dash);
-      padding: 0.85rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand h1 {
+      font-family: var(--font-heading);
+      font-size: 1.5rem;
+      color: var(--tea-milk);
+    }
+
+    .badge-studio {
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+
+    .btn-audience {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--tea-milk);
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      transition: background 0.2s;
+    }
+    .btn-audience:hover {
+      background: var(--card-border);
+    }
+
+    .dashboard-layout {
+      display: grid;
+      grid-template-columns: 2.2fr 1fr;
+      gap: 1.5rem;
+      flex: 1;
+    }
+
+    @media (max-width: 1024px) {
+      .dashboard-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .monitor-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .video-monitor-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-header {
+      padding: 0.85rem 1.25rem;
+      font-size: 0.85rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--card-border);
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    .brand { font-family: var(--font-heading); font-size: 1.4rem; color: var(--milk-tea); text-decoration: none; }
-    .brand span { background: var(--accent); color: white; font-size: 0.75rem; padding: 0.2rem 0.55rem; border-radius: 999px; }
-
-    .dash-grid {
-      display: grid;
-      grid-template-columns: 1fr 380px;
-      gap: 1.25rem;
-      padding: 1.25rem;
-      max-width: 1600px;
-      margin: 0 auto;
+    .monitor-viewport {
       width: 100%;
-      flex: 1;
-    }
-
-    @media (max-width: 992px) { .dash-grid { grid-template-columns: 1fr; } }
-
-    .monitor-column { display: flex; flex-direction: column; gap: 1rem; }
-
-    .stream-preview-box {
-      background: #000;
-      border-radius: 20px;
       aspect-ratio: 16 / 9;
+      background: #000;
       position: relative;
-      overflow: hidden;
-      border: 1px solid var(--border-dash);
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
 
-    #dashIframe, #dashVideo { width: 100%; height: 100%; border: none; display: none; }
-
-    .monitor-placeholder {
-      color: #7E7068;
-      font-family: var(--font-heading);
-      font-size: 1.1rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.5rem;
+    .monitor-viewport iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
     }
 
-    .telemetry-row {
+    .stats-row {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 0.75rem;
+      gap: 1rem;
     }
 
-    .tele-card {
-      background: var(--card-dash);
-      border: 1px solid var(--border-dash);
-      padding: 0.9rem;
-      border-radius: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 0.3rem;
+    .stat-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 1rem;
     }
 
-    .tele-card span { font-size: 0.75rem; color: #A89B93; text-transform: uppercase; font-weight: 700; }
-    .tele-card strong { font-size: 1.2rem; font-family: var(--font-heading); color: var(--milk-tea); }
+    .stat-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
 
-    .customizer-card {
-      background: var(--card-dash);
-      border: 1px solid var(--border-dash);
-      padding: 1.25rem;
-      border-radius: 20px;
+    .stat-val {
+      font-family: var(--font-heading);
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--boba-gold);
+    }
+
+    .controls-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 1.5rem;
       display: flex;
       flex-direction: column;
       gap: 1rem;
     }
 
-    .customizer-card h3 { font-family: var(--font-heading); color: var(--milk-tea); }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.75rem;
-    }
-
-    @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
-
-    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
-    .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--milk-tea); }
-    .form-group input {
-      background: #181310;
-      border: 1px solid var(--border-dash);
-      border-radius: 12px;
-      padding: 0.75rem 1rem;
-      color: white;
-      font-size: 0.9rem;
-      outline: none;
-      font-family: var(--font-body);
-    }
-
-    .btn-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-
-    .btn-action {
-      background: var(--accent);
-      color: white;
-      border: none;
-      font-family: var(--font-heading);
-      font-weight: 600;
-      padding: 0.75rem 1.4rem;
-      border-radius: 12px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .chat-mod-panel {
-      background: var(--card-dash);
-      border: 1px solid var(--border-dash);
-      border-radius: 20px;
+    .form-group {
       display: flex;
       flex-direction: column;
-      height: 750px;
+      gap: 0.5rem;
+    }
+
+    .form-group label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--tea-milk);
+    }
+
+    .form-input {
+      background: #100E0D;
+      border: 1px solid var(--card-border);
+      color: var(--tea-milk);
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--boba-gold);
+    }
+
+    .btn-broadcast {
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
+      font-weight: 700;
+      padding: 0.9rem;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-broadcast:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-broadcast:active {
+      transform: scale(0.98);
+    }
+
+    .chat-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      display: flex;
+      flex-direction: column;
+      height: 720px;
       overflow: hidden;
     }
 
-    .chat-mod-header {
-      padding: 1rem;
-      background: #1A1412;
-      border-bottom: 1px solid var(--border-dash);
+    .chat-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--card-border);
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    .chat-mod-body {
+    .chat-header h3 {
+      font-family: var(--font-heading);
+      font-size: 1.1rem;
+    }
+
+    .btn-clear-chat {
+      background: rgba(230, 57, 70, 0.15);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+      padding: 0.3rem 0.65rem;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-clear-chat:hover {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .chat-messages {
       flex: 1;
-      padding: 1rem;
       overflow-y: auto;
+      padding: 1rem;
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
     }
 
-    .chat-msg { display: flex; gap: 0.6rem; font-size: 0.9rem; }
-    .chat-author { font-size: 0.8rem; font-weight: 700; color: var(--milk-tea); margin-bottom: 0.15rem; }
-    .chat-text { color: #E8DED8; word-break: break-word; }
+    .chat-msg {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      background: #14110F;
+      padding: 0.6rem 0.8rem;
+      border-radius: 12px;
+      border: 1px solid #251F1A;
+      position: relative;
+    }
 
-    .chat-mod-footer {
-      padding: 1rem;
-      background: #1A1412;
-      border-top: 1px solid var(--border-dash);
+    .chat-msg .content {
+      flex: 1;
+    }
+
+    .msg-user {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: var(--boba-gold);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .msg-badge {
+      background: var(--card-border);
+      color: var(--text-muted);
+      font-size: 0.65rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+    }
+
+    .msg-badge.host {
+      background: var(--accent);
+      color: white;
+    }
+
+    .msg-text {
+      font-size: 0.88rem;
+      color: var(--tea-milk);
+      word-break: break-word;
+      margin-top: 0.15rem;
+    }
+
+    .btn-del-msg {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 0.2rem;
+      border-radius: 4px;
+      opacity: 0.4;
+      transition: opacity 0.2s, color 0.2s;
+    }
+
+    .chat-msg:hover .btn-del-msg {
+      opacity: 1;
+    }
+
+    .btn-del-msg:hover {
+      color: var(--danger);
+    }
+
+    .chat-input-area {
+      padding: 0.75rem;
+      border-top: 1px solid var(--card-border);
       display: flex;
       gap: 0.5rem;
     }
 
-    .chat-mod-footer input {
+    .chat-input-area input {
       flex: 1;
-      background: #2B221D;
-      border: 1px solid var(--border-dash);
-      border-radius: 999px;
-      padding: 0.65rem 1rem;
-      color: white;
-      outline: none;
+      background: #100E0D;
+      border: 1px solid var(--card-border);
+      color: var(--tea-milk);
+      padding: 0.6rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+    }
+
+    .chat-input-area button {
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      font-weight: 700;
+      padding: 0 1rem;
+      border-radius: 8px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
   <header>
-    <a href="stream.html" class="brand">
-      🎙️ BobaStream <span>STUDIO</span>
-    </a>
-    <div style="display: flex; gap: 0.75rem; align-items: center;">
-      <a href="index.html" target="_blank" style="color: var(--milk-tea); font-size: 0.85rem; text-decoration: none; border: 1px solid var(--border-dash); padding: 0.4rem 0.8rem; border-radius: 999px;">
-        👁️ Open Audience View ↗
-      </a>
+    <div class="brand">
+      <span style="font-size: 1.5rem;">🧋</span>
+      <h1>BobaStream</h1>
+      <span class="badge-studio">Studio</span>
     </div>
+    <a href="/" target="_blank" class="btn-audience">Open Audience View ↗</a>
   </header>
 
-  <main class="dash-grid">
-    <section class="monitor-column">
-      <div class="stream-preview-box">
-        <div class="monitor-placeholder" id="monitorPlaceholder">
-          <span style="font-size:2rem;">📺</span>
-          <span>Paste a link below to activate monitor</span>
+  <div class="dashboard-layout">
+    <div class="monitor-panel">
+      
+      <!-- Video Monitor -->
+      <div class="video-monitor-card">
+        <div class="card-header">
+          <span>Live Confirmation Monitor</span>
+          <span id="feedStatusText" style="color: #4EBA6F;">Connecting...</span>
         </div>
-        <iframe id="dashIframe" allow="autoplay; camera; microphone; fullscreen; display-capture; picture-in-picture"></iframe>
-        <video id="dashVideo" autoplay playsinline muted controls></video>
-        <div style="position: absolute; top: 1rem; left: 1rem; background: rgba(0,0,0,0.7); padding: 0.3rem 0.7rem; border-radius: 999px; font-size: 0.75rem; font-weight:700; color: var(--accent);" id="broadcastStatusBadge">
-          LIVE CONFIRMATION MONITOR
-        </div>
-      </div>
-
-      <div class="telemetry-row">
-        <div class="tele-card">
-          <span>Active Viewers</span>
-          <strong id="dashActiveViewers" style="color: var(--accent-matcha);">0</strong>
-        </div>
-        <div class="tele-card">
-          <span>Feed Link Status</span>
-          <strong id="teleFeedStatus" style="color: #A89B93;">Pending</strong>
-        </div>
-        <div class="tele-card">
-          <span>Global Taps</span>
-          <strong id="dashTotalTaps">0</strong>
-        </div>
-        <div class="tele-card">
-          <span>Mode</span>
-          <strong>Direct Link</strong>
+        <div class="monitor-viewport">
+          <iframe id="studioMonitorIframe" src="" allow="autoplay; fullscreen; encrypted-media; picture-in-picture"></iframe>
         </div>
       </div>
 
-      <div class="customizer-card">
-        <h3>🔗 Live Stream Ingest & Details</h3>
+      <!-- Quick Metrics -->
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-label">Active Viewers</div>
+          <div class="stat-val" id="valViewers">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Feed Status</div>
+          <div class="stat-val" style="font-size: 1.2rem; color: #4EBA6F;" id="valStatus">Ready</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Global Taps</div>
+          <div class="stat-val" id="valTaps">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Mode</div>
+          <div class="stat-val" style="font-size: 1.2rem; color: var(--tea-milk);">Direct Link</div>
+        </div>
+      </div>
+
+      <!-- Ingest Controller -->
+      <div class="controls-card">
+        <h3 style="font-family: var(--font-heading); font-size: 1.15rem; color: var(--boba-gold);">🔗 Live Stream Ingest & Details</h3>
         
         <div class="form-group">
-          <label>Live Player / Embed Link (VDO.Ninja view link, HLS .m3u8, etc.):</label>
-          <input type="text" id="streamUrlInput" placeholder="e.g. https://vdo.ninja/?view=bobastreamtim&autoplay=1" />
+          <label>Live Player / Embed Link (Twitch embed, VDO.Ninja view, or HLS .m3u8):</label>
+          <input type="text" id="streamUrlInput" class="form-input" placeholder="e.g. https://player.twitch.tv/?channel=... or https://vdo.ninja/?view=...">
         </div>
 
-        <div class="form-grid">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
           <div class="form-group">
-            <label>Stream Title:</label>
-            <input type="text" id="streamTitleInput" value="Tapioca pearl Room 🧋" />
+            <label>Stream Room Title:</label>
+            <input type="text" id="roomTitleInput" class="form-input" value="Tapioca Pearl Room 🧋">
           </div>
           <div class="form-group">
-            <label>Host Display Name:</label>
-            <input type="text" id="hostNameInput" value="Tim" />
+            <label>Host Status / Description:</label>
+            <input type="text" id="roomDescInput" class="form-input" value="Welcome to BobaStream! Hang out and sip tea!">
           </div>
         </div>
 
-        <div class="form-group">
-          <label>Sub-header Description:</label>
-          <input type="text" id="streamSubtitleInput" value="Hi guys welcome to the website feel free to navigate kaya niyo na yan malaki na kayo" />
-        </div>
-
-        <div class="btn-row">
-          <button class="btn-action" id="broadcastBtn">🚀 Broadcast Live to All Viewers</button>
-        </div>
+        <button id="btnBroadcast" class="btn-broadcast">🚀 Broadcast Live to All Viewers</button>
       </div>
-    </section>
+    </div>
 
-    <aside class="chat-mod-panel">
-      <div class="chat-mod-header">
-        <h3 style="font-family: var(--font-heading); font-size: 1.1rem;">Host Mod Chat</h3>
-        <span style="font-size: 0.75rem; background: var(--accent); color: white; padding: 0.15rem 0.5rem; border-radius: 999px;">Host Mode</span>
+    <!-- Host Mod Chat -->
+    <div class="chat-panel">
+      <div class="chat-header">
+        <div>
+          <h3>Host Mod Chat</h3>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">5-min auto window</span>
+        </div>
+        <button id="btnClearAllChat" class="btn-clear-chat">🗑️ Clear Chat</button>
       </div>
-      <div class="chat-mod-body" id="dashChatBody"></div>
-      <form class="chat-mod-footer" id="dashChatForm">
-        <input type="text" id="dashMsgInput" placeholder="Chat as Host..." maxlength="200" autocomplete="off" />
-        <button type="submit" class="btn-action" style="padding: 0.6rem 1.2rem; border-radius: 999px;">Send</button>
-      </form>
-    </aside>
-  </main>
+
+      <div class="chat-messages" id="studioChatBody"></div>
+
+      <div class="chat-input-area">
+        <input type="text" id="hostChatInput" placeholder="Send official host message...">
+        <button id="btnHostSend">Send</button>
+      </div>
+    </div>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { 
-      getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, serverTimestamp, doc, setDoc 
+      getFirestore, collection, addDoc, onSnapshot, query, where, orderBy, limit, 
+      serverTimestamp, doc, setDoc, getDocs, deleteDoc, Timestamp 
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+    // --- Firebase Configuration ---
     const firebaseConfig = {
-      apiKey: "AIzaSyCDJz10JB1d7h7ul6tq_TfwEFkZi7M4ovy",
+      apiKey: "AIzaSyB-SAMPLE-REPLACE_WITH_YOUR_KEY",
       authDomain: "bobastream-65561.firebaseapp.com",
       projectId: "bobastream-65561",
       storageBucket: "bobastream-65561.firebasestorage.app",
-      messagingSenderId: "797280854987",
-      appId: "1:797280854987:web:12d0c736b8deac49aab54e",
-      measurementId: "G-N7E1XTMMTW"
+      messagingSenderId: "84729104829",
+      appId: "1:84729104829:web:93a4cd2b948cf20"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Active Viewers Counter
-    onSnapshot(collection(db, "active_viewers"), (snap) => {
-      document.getElementById('dashActiveViewers').textContent = snap.size || 0;
-    });
+    const monitorIframe = document.getElementById("studioMonitorIframe");
+    const streamUrlInput = document.getElementById("streamUrlInput");
+    const roomTitleInput = document.getElementById("roomTitleInput");
+    const roomDescInput = document.getElementById("roomDescInput");
+    const btnBroadcast = document.getElementById("btnBroadcast");
+    const btnClearAllChat = document.getElementById("btnClearAllChat");
 
-    // Monitor Player
-    const dashIframe = document.getElementById('dashIframe');
-    const dashVideo = document.getElementById('dashVideo');
-    const placeholder = document.getElementById('monitorPlaceholder');
-    let dashHls = null;
+    const valViewers = document.getElementById("valViewers");
+    const valTaps = document.getElementById("valTaps");
+    const studioChatBody = document.getElementById("studioChatBody");
+    const hostChatInput = document.getElementById("hostChatInput");
+    const btnHostSend = document.getElementById("btnHostSend");
 
-    function renderPreview(url) {
-      if (!url) return;
-      placeholder.style.display = 'none';
-      if (url.includes('.m3u8')) {
-        dashIframe.style.display = 'none';
-        dashVideo.style.display = 'block';
-        if (Hls.isSupported()) {
-          if (dashHls) dashHls.destroy();
-          dashHls = new Hls();
-          dashHls.loadSource(url);
-          dashHls.attachMedia(dashVideo);
-          dashHls.on(Hls.Events.MANIFEST_PARSED, () => dashVideo.play().catch(() => {}));
-        } else if (dashVideo.canPlayType('application/vnd.apple.mpegurl')) {
-          dashVideo.src = url;
-          dashVideo.play().catch(() => {});
+    // --- 1. Real-time Stream Metadata ---
+    onSnapshot(doc(db, "stream_stats", "main"), (snap) => {
+      if (snap.exists()) {
+        const data = snap.data();
+        if (data.activeUrl && monitorIframe.src !== data.activeUrl) {
+          monitorIframe.src = data.activeUrl;
+          streamUrlInput.value = data.activeUrl;
         }
-      } else {
-        dashVideo.style.display = 'none';
-        dashIframe.style.display = 'block';
-        dashIframe.src = url;
-      }
-    }
-
-    // Load saved stream config if exists
-    onSnapshot(doc(db, "stream_stats", "config"), (snap) => {
-      if (snap.exists() && snap.data().streamUrl) {
-        document.getElementById('streamUrlInput').value = snap.data().streamUrl;
-        document.getElementById('teleFeedStatus').textContent = "Active";
-        document.getElementById('teleFeedStatus').style.color = "var(--accent-matcha)";
-        renderPreview(snap.data().streamUrl);
+        if (data.title) roomTitleInput.value = data.title;
+        if (data.description) roomDescInput.value = data.description;
+        if (data.taps !== undefined) valTaps.innerText = data.taps;
       }
     });
 
-    // Broadcast Button handler
-    const broadcastBtn = document.getElementById('broadcastBtn');
-    const streamUrlInput = document.getElementById('streamUrlInput');
-    const streamTitleInput = document.getElementById('streamTitleInput');
-    const hostNameInput = document.getElementById('hostNameInput');
-    const streamSubtitleInput = document.getElementById('streamSubtitleInput');
+    // --- 2. Active Viewers Count ---
+    onSnapshot(collection(db, "active_viewers"), (snap) => {
+      valViewers.innerText = snap.size;
+    });
 
-    broadcastBtn.addEventListener('click', async () => {
+    // --- 3. Save / Broadcast Feed ---
+    btnBroadcast.addEventListener("click", async () => {
       const url = streamUrlInput.value.trim();
-      const title = streamTitleInput.value.trim() || "Tapioca pearl Room 🧋";
-      const host = hostNameInput.value.trim() || "Tim";
-      const sub = streamSubtitleInput.value.trim() || "";
+      const title = roomTitleInput.value.trim();
+      const desc = roomDescInput.value.trim();
 
-      if (!url) return alert("Please paste a live stream link (e.g. VDO.Ninja view link or .m3u8)");
+      if (!url) {
+        alert("Please enter a valid Stream or Embed link!");
+        return;
+      }
+
+      btnBroadcast.innerText = "Broadcasting...";
+      btnBroadcast.disabled = true;
 
       try {
-        await setDoc(doc(db, "stream_stats", "config"), { streamUrl: url });
-        await setDoc(doc(db, "stream_stats", "metadata"), {
+        await setDoc(doc(db, "stream_stats", "main"), {
+          activeUrl: url,
           title: title,
-          host: host,
-          subtitle: sub,
+          description: desc,
           updatedAt: serverTimestamp()
-        });
+        }, { merge: true });
 
-        renderPreview(url);
-        document.getElementById('teleFeedStatus').textContent = "Active";
-        document.getElementById('teleFeedStatus').style.color = "var(--accent-matcha)";
-        alert("Broadcast live! All viewers on index.html are now watching this feed with audio.");
+        monitorIframe.src = url;
+        alert("🎉 Broadcast URL published successfully to all viewers!");
       } catch (err) {
-        alert("Error saving: " + err.message);
+        alert("Error publishing stream: " + err.message);
+      } finally {
+        btnBroadcast.innerText = "🚀 Broadcast Live to All Viewers";
+        btnBroadcast.disabled = false;
       }
     });
 
-    // Chat Sync
-    const chatCol = collection(db, "chat_messages");
-    const chatQuery = query(chatCol, orderBy("timestamp", "asc"), limit(50));
-    const dashChatBody = document.getElementById('dashChatBody');
-    const seen = new Set();
+    // --- 4. Chat System with 5-Minute Auto Window ---
+    const fiveMinutesAgo = Timestamp.fromMillis(Date.now() - 5 * 60 * 1000);
+    const chatQuery = query(
+      collection(db, "chat_messages"),
+      where("timestamp", ">=", fiveMinutesAgo),
+      orderBy("timestamp", "asc"),
+      limit(50)
+    );
 
-    onSnapshot(chatQuery, (snap) => {
-      snap.docChanges().forEach((c) => {
-        if (c.type === "added" && !seen.has(c.doc.id)) {
-          seen.add(c.doc.id);
-          const d = c.doc.data();
-          const row = document.createElement('div');
-          row.className = 'chat-msg';
-          row.innerHTML = `
-            <div style="font-size: 1.2rem;">${d.avatar || '🧋'}</div>
-            <div>
-              <div class="chat-author">${d.name} <span style="font-size: 0.65rem; background: ${d.badge === 'HOST' ? '#E07A5F' : '#3E3129'}; padding: 0.1rem 0.4rem; border-radius: 999px;">${d.badge}</span></div>
-              <div class="chat-text">${d.text}</div>
-            </div>
-          `;
-          dashChatBody.appendChild(row);
-          dashChatBody.scrollTop = dashChatBody.scrollHeight;
+    const renderedDocIds = new Set();
+
+    onSnapshot(chatQuery, (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        const id = change.doc.id;
+        if (change.type === "added" && !renderedDocIds.has(id)) {
+          renderedDocIds.add(id);
+          const data = change.doc.data();
+          renderStudioMsg(id, data.name, data.text, data.badge);
+        }
+        if (change.type === "removed") {
+          renderedDocIds.delete(id);
+          const elem = document.getElementById(`msg-${id}`);
+          if (elem) elem.remove();
         }
       });
+      studioChatBody.scrollTop = studioChatBody.scrollHeight;
     });
 
-    const form = document.getElementById('dashChatForm');
-    const input = document.getElementById('dashMsgInput');
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const txt = input.value.trim();
-      if (!txt) return;
-      input.value = '';
-      const currentHost = hostNameInput.value.trim() || "Tim";
-      await addDoc(chatCol, {
-        name: currentHost,
-        text: txt,
+    function renderStudioMsg(id, name, text, badge) {
+      const div = document.createElement("div");
+      div.className = "chat-msg";
+      div.id = `msg-${id}`;
+
+      const isHost = (badge === "Host" || badge === "HOST");
+      div.innerHTML = `
+        <div class="content">
+          <div class="msg-user">
+            ${isHost ? '🧋' : '🍵'} <span>${escapeHtml(name)}</span>
+            <span class="msg-badge ${isHost ? 'host' : ''}">${escapeHtml(badge || 'Viewer')}</span>
+          </div>
+          <div class="msg-text">${escapeHtml(text)}</div>
+        </div>
+        <button class="btn-del-msg" title="Delete single message">🗑️</button>
+      `;
+
+      div.querySelector(".btn-del-msg").addEventListener("click", async () => {
+        if (confirm("Delete this specific message?")) {
+          await deleteDoc(doc(db, "chat_messages", id));
+        }
+      });
+
+      studioChatBody.appendChild(div);
+    }
+
+    // --- 5. Host Send Message ---
+    async function sendHostMessage() {
+      const text = hostChatInput.value.trim();
+      if (!text) return;
+
+      hostChatInput.value = "";
+      await addDoc(collection(db, "chat_messages"), {
+        name: "Host (Tim)",
+        text: text,
         badge: "HOST",
-        avatar: "🎙️",
         timestamp: serverTimestamp()
       });
+    }
+
+    btnHostSend.addEventListener("click", sendHostMessage);
+    hostChatInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") sendHostMessage();
     });
 
-    onSnapshot(doc(db, "stream_stats", "reactions"), (snap) => {
-      if (snap.exists()) {
-        document.getElementById('dashTotalTaps').textContent = (snap.data().total || 0).toLocaleString();
+    // --- 6. Host Wipe / Clear All Chat Button ---
+    btnClearAllChat.addEventListener("click", async () => {
+      if (!confirm("Are you sure you want to clear and delete all chat messages for EVERYONE?")) return;
+
+      try {
+        btnClearAllChat.innerText = "Clearing...";
+        btnClearAllChat.disabled = true;
+
+        const snapshot = await getDocs(collection(db, "chat_messages"));
+        const batchDeletes = snapshot.docs.map(docItem => deleteDoc(docItem.ref));
+        await Promise.all(batchDeletes);
+
+        studioChatBody.innerHTML = "";
+        renderedDocIds.clear();
+        alert("✨ All chat messages wiped clean!");
+      } catch (err) {
+        alert("Failed to clear chat: " + err.message);
+      } finally {
+        btnClearAllChat.innerText = "🗑️ Clear Chat";
+        btnClearAllChat.disabled = false;
       }
     });
+
+    function escapeHtml(str) {
+      return String(str || "").replace(/[&<>"']/g, (m) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[m]);
+    }
   </script>
 </body>
 </html>
