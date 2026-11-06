@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <!-- Ably Realtime Client (Zero Quota Limits) -->
-  <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
+  <script src="https://cdn.ably.com/lib/ably.min.js"></script>
   <style>
     :root {
       --bg-cream: #FAF6EE;
@@ -562,7 +562,7 @@
       getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, serverTimestamp, increment 
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // --- Firebase Configuration (Preserved for Streams & Replays) ---
+    // --- Firebase Configuration (Preserved for Streams, Taps, & Replays) ---
     const firebaseConfig = {
       apiKey: "AIzaSyB-SAMPLE-REPLACE_WITH_YOUR_KEY",
       authDomain: "bobastream-65561.firebaseapp.com",
@@ -780,16 +780,17 @@
       }
     }
 
-    // --- 3. Ably Realtime Chat Setup (Zero Firestore Reads) ---
+    // --- 3. Ably Realtime Chat Setup (Zero Firestore Quota Used) ---
     const ABLY_KEY = "zdFIEA.lFwawQ:3hO05NbdXIUZJ-K3BkyCIWT2RaeKz4fPg40qakSsc40";
-    const ably = new Ably.Realtime({ key: ABLY_KEY, clientId: myName });
-    const chatChannel = ably.channels.get("bobastream_lounge");
+    const AblyLib = window.Ably || Ably;
+    const ablyClient = new AblyLib.Realtime({ key: ABLY_KEY, echoMessages: true });
+    const chatChannel = ablyClient.channels.get("bobastream_lounge");
 
     const audienceMsgIds = new Set();
 
     // Listen for live messages
     chatChannel.subscribe("chat_message", (msg) => {
-      const id = msg.id || ("msg_" + Math.random().toString(36).substr(2, 9));
+      const id = msg.id || ("msg_" + Math.random().toString(36).substring(2, 9));
       if (!audienceMsgIds.has(id)) {
         audienceMsgIds.add(id);
         const data = msg.data;
@@ -834,27 +835,31 @@
       audienceChatBody.appendChild(div);
     }
 
-    function sendChatMessage() {
+    async function sendChatMessage() {
       const msg = audienceChatInput.value.trim();
       if (!msg) return;
 
       audienceChatInput.value = "";
-      chatChannel.publish("chat_message", {
-        name: myName,
-        text: msg,
-        badge: "Sipper",
-        avatar: myAvatar,
-        timestamp: Date.now()
-      });
+      try {
+        await chatChannel.publish("chat_message", {
+          name: myName,
+          text: msg,
+          badge: "Sipper",
+          avatar: myAvatar,
+          timestamp: Date.now()
+        });
+      } catch (err) {
+        console.error("Message send failed:", err);
+      }
     }
 
-    btnAudienceSend.addEventListener("click", sendChatMessage);
-    audienceChatInput.addEventListener("keydown", (e) => {
+    btnAudienceSend.onclick = sendChatMessage;
+    audienceChatInput.onkeydown = (e) => {
       if (e.key === "Enter") {
         e.preventDefault();
         sendChatMessage();
       }
-    });
+    };
 
     // --- 4. Interactive Floating Tap Emojis ---
     const tapEmojis = ["🧋", "✨", "💖", "🍡", "🌸", "⭐", "🎉"];
