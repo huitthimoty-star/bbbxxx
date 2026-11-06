@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BobaStream Studio 🧋</title>
+  <title>BobaStream Broadcaster Studio 🧋</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Ably Realtime Client Library -->
+  <!-- Ably Realtime Client (No Quota Limits) -->
   <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
 
   <style>
@@ -19,10 +19,12 @@
       --accent-tea-hover: #AF7630;
       --accent-boba: #3E2723;
       --accent-soft: #FBF4E9;
+      --accent-green: #2E7D32;
       --text-main: #2C2623;
       --text-muted: #8D7B68;
       --border-color: #EFE6DD;
       --shadow-sm: 0 2px 8px rgba(62, 39, 35, 0.04);
+      --shadow-md: 0 8px 24px rgba(62, 39, 35, 0.08);
       --font-heading: 'Fredoka', cursive, sans-serif;
       --font-body: 'Plus Jakarta Sans', sans-serif;
     }
@@ -69,6 +71,62 @@
       border-radius: 999px;
     }
 
+    /* 3-Dot Navigation Menu */
+    .menu-container {
+      position: relative;
+    }
+
+    .menu-btn {
+      background: var(--accent-soft);
+      border: 1px solid var(--border-color);
+      border-radius: 50%;
+      width: 38px;
+      height: 38px;
+      font-size: 1.25rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+    }
+    .menu-btn:hover { background: #EFE6DD; }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 48px;
+      background: var(--card-bg);
+      border: 1.5px solid var(--border-color);
+      border-radius: 14px;
+      box-shadow: var(--shadow-md);
+      width: 210px;
+      z-index: 100;
+      padding: 0.4rem;
+      flex-direction: column;
+    }
+    .dropdown-menu.show { display: flex; }
+
+    .dropdown-item {
+      padding: 0.65rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      background: transparent;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    .dropdown-item:hover {
+      background: var(--accent-soft);
+      color: var(--accent-tea);
+    }
+
     .main-grid {
       display: grid;
       grid-template-columns: 1fr 380px;
@@ -84,6 +142,12 @@
       .main-grid { grid-template-columns: 1fr; }
     }
 
+    .studio-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
     .card {
       background: var(--card-bg);
       border: 1.5px solid var(--border-color);
@@ -92,7 +156,37 @@
       box-shadow: var(--shadow-sm);
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 0.85rem;
+    }
+
+    .card h2 {
+      font-family: var(--font-heading);
+      font-size: 1.2rem;
+      color: var(--accent-boba);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .form-group label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .form-group input, .form-group textarea {
+      border: 1.5px solid var(--border-color);
+      border-radius: 10px;
+      padding: 0.6rem 0.75rem;
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+    }
+    .form-group input:focus, .form-group textarea:focus {
+      border-color: var(--accent-tea);
     }
 
     .btn {
@@ -120,7 +214,26 @@
     }
     .btn-danger:hover { background: #BF2600; }
 
-    /* Studio Chat */
+    /* Live Preview Box */
+    .video-preview {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%;
+      background: #000;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1.5px solid var(--border-color);
+    }
+    .video-preview iframe, .video-preview video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* Studio Chat Feed */
     .studio-chat-box {
       background: var(--card-bg);
       border: 1.5px solid var(--border-color);
@@ -166,6 +279,16 @@
       outline: none;
       font-family: inherit;
     }
+
+    .replay-list-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.65rem 0.85rem;
+      background: var(--accent-soft);
+      border-radius: 10px;
+      font-size: 0.85rem;
+    }
   </style>
 </head>
 <body>
@@ -175,39 +298,100 @@
       <a href="#" class="brand"><span>🧋</span> BobaStream</a>
       <span class="studio-badge">Host Studio</span>
     </div>
-    <div>
+
+    <div style="display: flex; align-items: center; gap: 1rem;">
       <a href="index.html" target="_blank" style="text-decoration: none; font-size: 0.85rem; font-weight: 700; color: var(--accent-tea);">Open Audience View ↗</a>
+
+      <!-- 3-Dot Navigation Menu -->
+      <div class="menu-container">
+        <button class="menu-btn" id="btnMenuDots" title="Menu">⋮</button>
+        <div class="dropdown-menu" id="dropdownMenu">
+          <button class="dropdown-item" id="navItemStream">🔴 Live Stream Setup</button>
+          <button class="dropdown-item" id="navItemReplays">🎬 Live Replays Archive</button>
+          <a class="dropdown-item" href="index.html" target="_blank">📺 Open Live Lounge</a>
+        </div>
+      </div>
     </div>
   </header>
 
   <main class="main-grid">
 
-    <!-- Controls Column -->
-    <div style="display: flex; flex-direction: column; gap: 1.25rem;">
-      <div class="card">
-        <h2 style="font-family: var(--font-heading); font-size: 1.25rem;">Host Moderation Tools</h2>
-        <p style="font-size: 0.9rem; color: var(--text-muted);">Moderate your room live. Actions instantly push to all connected viewers over WebSockets.</p>
-        <div>
-          <button class="btn-danger" id="btnClearAllChat">🧹 Clear All Chat Messages</button>
+    <!-- LEFT PANEL: CONFIGURATION & CONTROLS -->
+    <div class="studio-panel">
+
+      <!-- SECTION A: STREAM SETUP -->
+      <div class="card" id="cardStreamSetup">
+        <h2>🎥 Live Stream Connection</h2>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Paste the embed URL or video stream link for your audience player.</p>
+        
+        <div class="form-group">
+          <label>Stream / Video Embed URL</label>
+          <input type="text" id="inputStreamUrl" placeholder="https://player.twitch.tv/?channel=yourchannel&parent=..." value="https://player.twitch.tv/?channel=obobatea&parent=bblxxx.rea65048.workers.dev&parent=localhost&muted=false">
+        </div>
+
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn" id="btnUpdateStream">Update Stream Feed</button>
+        </div>
+
+        <div style="margin-top: 0.5rem;">
+          <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">Monitor Preview</label>
+          <div class="video-preview" style="margin-top: 0.35rem;">
+            <iframe id="studioPreviewIframe" src="https://player.twitch.tv/?channel=obobatea&parent=bblxxx.rea65048.workers.dev&parent=localhost&muted=false" allowfullscreen></iframe>
+          </div>
         </div>
       </div>
 
-      <div class="card">
-        <h2 style="font-family: var(--font-heading); font-size: 1.25rem;">WebSocket Status</h2>
-        <p style="font-size: 0.9rem; color: var(--text-muted);">
-          Connection: <strong id="ablyStatus" style="color: #2E7D32;">Connecting...</strong>
-        </p>
-        <p style="font-size: 0.85rem; color: var(--text-muted);">
-          Room: <code>bobastream_lounge</code> | Limit: <strong>6,000,000 free msgs / mo</strong>
-        </p>
+      <!-- SECTION B: ADD NEW LIVE REPLAY -->
+      <div class="card" id="cardReplaysSetup">
+        <h2>🎬 Add New Live Replay</h2>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Publish recorded sessions. Dropbox links will auto-convert to direct streaming.</p>
+
+        <div class="form-group">
+          <label>Replay Title</label>
+          <input type="text" id="replayTitle" placeholder="e.g. PBB Live Nov 6 Part 1 🧋" value="Pbb Live Nov 6 Part 1 🧋">
+        </div>
+
+        <div class="form-group">
+          <label>Video Stream / Dropbox Embed URL</label>
+          <input type="text" id="replayUrl" placeholder="https://www.dropbox.com/scl/fi/.../video.mp4?rlkey=...&raw=1" value="https://www.dropbox.com/scl/fi/w7z2x69tvz9vehzeilzx3/Pbb-live-Nov-6-Part-1.mp4?rlkey=2w793wvd9lwjfn4076bh1eddd&st=t5yoeuvq&raw=1">
+        </div>
+
+        <div class="form-group">
+          <label>Duration & Tag</label>
+          <input type="text" id="replayMeta" placeholder="e.g. Nov 6 • Part 1" value="Nov 6 • Part 1">
+        </div>
+
+        <div class="form-group">
+          <label>Replay Description</label>
+          <textarea id="replayDesc" rows="2" placeholder="Summary of the broadcast session...">Pinoy Big Brother Live session recording.</textarea>
+        </div>
+
+        <div>
+          <button class="btn" id="btnPublishReplay">✨ Publish Live Replay</button>
+        </div>
+
+        <div style="margin-top: 0.5rem;">
+          <h3 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.5rem;">Published Replays</h3>
+          <div id="publishedReplaysList" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
+        </div>
       </div>
+
+      <!-- SECTION C: MODERATION -->
+      <div class="card">
+        <h2>🧹 Room Moderation</h2>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Instantly clear chat messages across all connected audience tabs via Ably.</p>
+        <div>
+          <button class="btn-danger" id="btnClearAllChat">Clear All Lounge Chat</button>
+        </div>
+      </div>
+
     </div>
 
-    <!-- Live Stream Chat Column -->
+    <!-- RIGHT PANEL: STUDIO LIVE CHAT (ABLY WEBSOCKET) -->
     <div class="studio-chat-box">
       <div class="chat-head">
         <h3 style="font-family: var(--font-heading);">Studio Chat Feed</h3>
-        <span style="font-size: 0.75rem; background: #E8F5E9; color: #2E7D32; padding: 0.2rem 0.5rem; border-radius: 999px; font-weight: 800;">Realtime</span>
+        <span style="font-size: 0.75rem; background: #E8F5E9; color: #2E7D32; padding: 0.2rem 0.5rem; border-radius: 999px; font-weight: 800;">Ably Realtime</span>
       </div>
 
       <div class="chat-body" id="studioChatBody"></div>
@@ -228,39 +412,142 @@
       })[m]);
     }
 
-    // --- Ably Studio Realtime Connection ---
+    // --- 1. 3-Dot Navigation Menu ---
+    const btnMenuDots = document.getElementById("btnMenuDots");
+    const dropdownMenu = document.getElementById("dropdownMenu");
+    const cardStreamSetup = document.getElementById("cardStreamSetup");
+    const cardReplaysSetup = document.getElementById("cardReplaysSetup");
+    const navItemStream = document.getElementById("navItemStream");
+    const navItemReplays = document.getElementById("navItemReplays");
+
+    btnMenuDots.addEventListener("click", (e) => {
+      e.stopPropagation();
+      dropdownMenu.classList.toggle("show");
+    });
+
+    document.addEventListener("click", () => {
+      dropdownMenu.classList.remove("show");
+    });
+
+    navItemStream.addEventListener("click", () => {
+      cardStreamSetup.scrollIntoView({ behavior: "smooth" });
+    });
+
+    navItemReplays.addEventListener("click", () => {
+      cardReplaysSetup.scrollIntoView({ behavior: "smooth" });
+    });
+
+    // --- 2. Live Stream Update ---
+    const inputStreamUrl = document.getElementById("inputStreamUrl");
+    const btnUpdateStream = document.getElementById("btnUpdateStream");
+    const studioPreviewIframe = document.getElementById("studioPreviewIframe");
+
+    btnUpdateStream.addEventListener("click", () => {
+      const url = inputStreamUrl.value.trim();
+      if (!url) return;
+      studioPreviewIframe.src = url;
+      localStorage.setItem("bobastream_feed_url", url);
+      alert("Stream preview updated!");
+    });
+
+    // --- 3. Live Replay Manager ---
+    const replayTitle = document.getElementById("replayTitle");
+    const replayUrl = document.getElementById("replayUrl");
+    const replayMeta = document.getElementById("replayMeta");
+    const replayDesc = document.getElementById("replayDesc");
+    const btnPublishReplay = document.getElementById("btnPublishReplay");
+    const publishedReplaysList = document.getElementById("publishedReplaysList");
+
+    let savedReplays = JSON.parse(localStorage.getItem("bobastream_replays") || "[]");
+
+    // Initialize with default PBB replay if empty
+    if (savedReplays.length === 0) {
+      savedReplays.push({
+        id: "rep_" + Date.now(),
+        title: "PBB Live Nov 6 Part 1 🧋",
+        url: "https://www.dropbox.com/scl/fi/w7z2x69tvz9vehzeilzx3/Pbb-live-Nov-6-Part-1.mp4?rlkey=2w793wvd9lwjfn4076bh1eddd&st=t5yoeuvq&raw=1",
+        meta: "Nov 6 • Part 1",
+        desc: "Pinoy Big Brother Live session recording."
+      });
+      localStorage.setItem("bobastream_replays", JSON.stringify(savedReplays));
+    }
+
+    function renderReplays() {
+      publishedReplaysList.innerHTML = "";
+      savedReplays.forEach((rep, idx) => {
+        const item = document.createElement("div");
+        item.className = "replay-list-item";
+        item.innerHTML = `
+          <div>
+            <strong>${escapeHtml(rep.title)}</strong>
+            <div style="font-size:0.75rem; color:var(--text-muted);">${escapeHtml(rep.meta || '')}</div>
+          </div>
+          <button style="background:none; border:none; color:#DE350B; cursor:pointer; font-weight:700;" onclick="deleteReplay(${idx})">Delete</button>
+        `;
+        publishedReplaysList.appendChild(item);
+      });
+    }
+
+    window.deleteReplay = function(idx) {
+      if (confirm("Remove this replay?")) {
+        savedReplays.splice(idx, 1);
+        localStorage.setItem("bobastream_replays", JSON.stringify(savedReplays));
+        renderReplays();
+      }
+    };
+
+    btnPublishReplay.addEventListener("click", () => {
+      let url = replayUrl.value.trim();
+      const title = replayTitle.value.trim();
+      const meta = replayMeta.value.trim();
+      const desc = replayDesc.value.trim();
+
+      if (!url || !title) {
+        alert("Please provide both a title and a video URL!");
+        return;
+      }
+
+      // Convert standard Dropbox dl=0 links to direct streaming raw=1 links automatically
+      if (url.includes("dropbox.com")) {
+        url = url.replace(/[?&]dl=0/, "").replace(/[?&]raw=1/, "");
+        url += url.includes("?") ? "&raw=1" : "?raw=1";
+      }
+
+      savedReplays.unshift({
+        id: "rep_" + Date.now(),
+        title: title,
+        url: url,
+        meta: meta,
+        desc: desc
+      });
+
+      localStorage.setItem("bobastream_replays", JSON.stringify(savedReplays));
+      renderReplays();
+      alert("Replay published successfully!");
+    });
+
+    renderReplays();
+
+    // --- 4. Ably Realtime Studio Chat ---
     const ABLY_KEY = "zdFIEA.lFwawQ:3hO05NbdXIUZJ-K3BkyCIWT2RaeKz4fPg40qakSsc40";
     const ably = new Ably.Realtime({ key: ABLY_KEY });
     const chatChannel = ably.channels.get("bobastream_lounge");
 
-    const ablyStatus = document.getElementById("ablyStatus");
     const studioChatBody = document.getElementById("studioChatBody");
     const hostChatInput = document.getElementById("hostChatInput");
     const btnHostSend = document.getElementById("btnHostSend");
     const btnClearAllChat = document.getElementById("btnClearAllChat");
 
-    ably.connection.on("connected", () => {
-      ablyStatus.innerText = "Online & Connected 🟢";
-      ablyStatus.style.color = "#2E7D32";
-    });
-
-    ably.connection.on("failed", () => {
-      ablyStatus.innerText = "Connection Failed 🔴";
-      ablyStatus.style.color = "#DE350B";
-    });
-
-    // 1. Receive incoming messages
     chatChannel.subscribe("message", (msg) => {
       const data = msg.data;
       renderStudioMsg(data.name, data.text, data.badge, data.avatar);
       studioChatBody.scrollTop = studioChatBody.scrollHeight;
     });
 
-    // 2. Clear Chat Listener
     chatChannel.subscribe("clear_chat", () => {
       studioChatBody.innerHTML = `
         <div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 0.5rem 0;">
-          🧹 Chat cleared.
+          🧹 Chat room was cleared.
         </div>
       `;
     });
@@ -282,7 +569,6 @@
       studioChatBody.appendChild(div);
     }
 
-    // 3. Host Send Message
     function sendHostMessage() {
       const text = hostChatInput.value.trim();
       if (!text) return;
@@ -302,9 +588,8 @@
       if (e.key === "Enter") sendHostMessage();
     });
 
-    // 4. Host Clear All Chat Button
     btnClearAllChat.addEventListener("click", () => {
-      if (confirm("Clear chat messages for everyone in the lounge?")) {
+      if (confirm("Clear chat for everyone in the lounge?")) {
         chatChannel.publish("clear_chat", { timestamp: Date.now() });
       }
     });
