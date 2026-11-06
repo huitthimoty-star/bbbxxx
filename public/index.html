@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
     :root {
       --bg-cream: #FDF9F3;
@@ -87,11 +88,11 @@
       justify-content: center;
     }
 
-    #streamFrameDisplay {
+    #streamIframe, #streamVideo {
       width: 100%;
       height: 100%;
-      object-fit: cover;
-      display: block;
+      border: none;
+      display: none;
     }
 
     .standby-screen {
@@ -105,12 +106,13 @@
       color: var(--milk-tea);
       gap: 0.8rem;
       font-family: var(--font-heading);
+      z-index: 5;
     }
 
     .standby-screen .boba-icon { font-size: 3.5rem; animation: gentleBounce 2s infinite ease-in-out; }
     @keyframes gentleBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 
-    .reaction-particle-layer { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 10; }
+    .reaction-particle-layer { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 20; }
     .floating-emoji {
       position: absolute; user-select: none; font-size: 2.2rem;
       animation: floatUp 2.6s cubic-bezier(0.21, 0.82, 0.42, 1) forwards;
@@ -122,7 +124,7 @@
       100% { transform: translateY(-460px) scale(1.4) rotate(25deg); opacity: 0; }
     }
 
-    .video-badges { position: absolute; top: 1rem; left: 1rem; display: flex; gap: 0.5rem; z-index: 12; }
+    .video-badges { position: absolute; top: 1rem; left: 1rem; display: flex; gap: 0.5rem; z-index: 25; }
     .badge {
       background: rgba(0, 0, 0, 0.65); color: white; padding: 0.35rem 0.75rem; border-radius: 999px;
       font-size: 0.75rem; font-weight: 600; backdrop-filter: blur(8px); display: flex; align-items: center; gap: 0.4rem;
@@ -207,9 +209,10 @@
       <div class="video-viewport">
         <div class="standby-screen" id="standbyScreen">
           <div class="boba-icon">🧋</div>
-          <div>Waiting for Host to start camera...</div>
+          <div>Waiting for Host to broadcast link...</div>
         </div>
-        <img id="streamFrameDisplay" style="display:none;" alt="Live stream feed" />
+        <iframe id="streamIframe" allow="autoplay; camera; microphone; fullscreen; display-capture; picture-in-picture"></iframe>
+        <video id="streamVideo" autoplay playsinline controls></video>
 
         <div class="reaction-particle-layer" id="particleLayer"></div>
 
@@ -341,6 +344,36 @@
         window.sendGlobalChat(userNameInput.value.trim() || 'Viewer', text, 'Viewer', userAvatarSelect.value);
       }
     });
+
+    // Stream Link Loader
+    const iframe = document.getElementById('streamIframe');
+    const video = document.getElementById('streamVideo');
+    const standbyScreen = document.getElementById('standbyScreen');
+    let hlsInstance = null;
+
+    window.applyStreamLink = function(url) {
+      if (!url) return;
+      standbyScreen.style.display = 'none';
+
+      if (url.includes('.m3u8')) {
+        iframe.style.display = 'none';
+        video.style.display = 'block';
+        if (Hls.isSupported()) {
+          if (hlsInstance) hlsInstance.destroy();
+          hlsInstance = new Hls({ lowLatencyMode: true });
+          hlsInstance.loadSource(url);
+          hlsInstance.attachMedia(video);
+          hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(() => {}));
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+          video.src = url;
+          video.play().catch(() => {});
+        }
+      } else {
+        video.style.display = 'none';
+        iframe.style.display = 'block';
+        iframe.src = url;
+      }
+    };
   </script>
 
   <!-- Firebase Live Sync -->
@@ -363,37 +396,31 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // 1. Live Viewer Presence Tracker (Counts active connected tabs)
+    // 1. Live Stream Link Sync (Updates immediately without refresh)
+    onSnapshot(doc(db, "stream_stats", "config"), (snap) => {
+      if (snap.exists() && snap.data().streamUrl) {
+        window.applyStreamLink(snap.data().streamUrl);
+      }
+    });
+
+    // 2. Active Viewers Presence
     const sessionId = "viewer_" + Math.random().toString(36).substring(2, 9);
     const presenceRef = doc(db, "active_viewers", sessionId);
     const viewerBadge = document.getElementById("viewerCounterBadge");
 
-    // Register this viewer tab
-    await setDoc(presenceRef, { joinedAt: serverTimestamp() });
+    try {
+      await setDoc(presenceRef, { joinedAt: serverTimestamp() });
+      window.addEventListener("beforeunload", () => {
+        deleteDoc(presenceRef).catch(() => {});
+      });
+    } catch (e) {}
 
-    // Clean up on tab close / reload
-    window.addEventListener("beforeunload", () => {
-      deleteDoc(presenceRef).catch(() => {});
-    });
-
-    // Listen to total active viewers collection
     onSnapshot(collection(db, "active_viewers"), (snapshot) => {
       const count = snapshot.size || 1;
       viewerBadge.textContent = `👥 ${count} ${count === 1 ? 'Viewer' : 'Viewers'}`;
     });
 
-    // 2. Live Video Frame Sync
-    const frameImg = document.getElementById('streamFrameDisplay');
-    const standbyScreen = document.getElementById('standbyScreen');
-    onSnapshot(doc(db, "stream_stats", "live_frame"), (snap) => {
-      if (snap.exists() && snap.data().frame) {
-        frameImg.src = snap.data().frame;
-        frameImg.style.display = "block";
-        standbyScreen.style.display = "none";
-      }
-    });
-
-    // 3. Custom Title & Host Sync
+    // 3. Title & Host Customization Sync
     const liveTitle = document.getElementById('liveTitle');
     const liveSubtitle = document.getElementById('liveSubtitle');
     const hostViewerBadge = document.getElementById('hostViewerBadge');
@@ -407,7 +434,7 @@
       }
     });
 
-    // 4. Chat Sync
+    // 4. Live Chat
     const chatCol = collection(db, "chat_messages");
     const chatQuery = query(chatCol, orderBy("timestamp", "asc"), limit(40));
     const processedIds = new Set();
@@ -432,7 +459,7 @@
       });
     };
 
-    // 5. Reactions Sync
+    // 5. Spam Reactions
     const statsDocRef = doc(db, "stream_stats", "reactions");
     onSnapshot(statsDocRef, (snap) => {
       if (snap.exists()) {
