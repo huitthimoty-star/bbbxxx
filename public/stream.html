@@ -251,7 +251,7 @@
       background: rgba(230, 57, 70, 0.15);
       color: var(--danger);
       border: 1px solid var(--danger);
-      padding: 0.3rem 0.65rem;
+      padding: 0.35rem 0.75rem;
       border-radius: 8px;
       font-size: 0.75rem;
       font-weight: 800;
@@ -276,12 +276,23 @@
     .chat-msg {
       display: flex;
       align-items: flex-start;
-      gap: 0.6rem;
+      gap: 0.65rem;
       background: #14110F;
-      padding: 0.6rem 0.8rem;
+      padding: 0.65rem 0.85rem;
       border-radius: 12px;
       border: 1px solid #251F1A;
       position: relative;
+    }
+
+    .chat-msg.is-host {
+      background: #201714;
+      border-color: #3D261D;
+    }
+
+    .chat-msg .avatar-box {
+      font-size: 1.35rem;
+      line-height: 1;
+      user-select: none;
     }
 
     .chat-msg .content {
@@ -314,7 +325,7 @@
       font-size: 0.88rem;
       color: var(--tea-milk);
       word-break: break-word;
-      margin-top: 0.15rem;
+      margin-top: 0.2rem;
     }
 
     .btn-del-msg {
@@ -323,7 +334,7 @@
       color: var(--text-muted);
       cursor: pointer;
       font-size: 0.85rem;
-      padding: 0.2rem;
+      padding: 0.2rem 0.4rem;
       border-radius: 4px;
       opacity: 0.4;
       transition: opacity 0.2s, color 0.2s;
@@ -352,6 +363,11 @@
       padding: 0.6rem 0.8rem;
       border-radius: 8px;
       font-size: 0.85rem;
+    }
+
+    .chat-input-area input:focus {
+      outline: none;
+      border-color: var(--boba-gold);
     }
 
     .chat-input-area button {
@@ -383,7 +399,7 @@
       <div class="video-monitor-card">
         <div class="card-header">
           <span>Live Confirmation Monitor</span>
-          <span id="feedStatusText" style="color: #4EBA6F;">Connecting...</span>
+          <span id="feedStatusText" style="color: #4EBA6F;">Ready</span>
         </div>
         <div class="monitor-viewport">
           <iframe id="studioMonitorIframe" src="" allow="autoplay; fullscreen; encrypted-media; picture-in-picture"></iframe>
@@ -398,7 +414,7 @@
         </div>
         <div class="stat-box">
           <div class="stat-label">Feed Status</div>
-          <div class="stat-val" style="font-size: 1.2rem; color: #4EBA6F;" id="valStatus">Ready</div>
+          <div class="stat-val" style="font-size: 1.2rem; color: #4EBA6F;" id="valStatus">Active</div>
         </div>
         <div class="stat-box">
           <div class="stat-label">Global Taps</div>
@@ -439,7 +455,7 @@
       <div class="chat-header">
         <div>
           <h3>Host Mod Chat</h3>
-          <span style="font-size: 0.75rem; color: var(--text-muted);">5-min auto window</span>
+          <span style="font-size: 0.72rem; color: var(--text-muted);">5-min auto window</span>
         </div>
         <button id="btnClearAllChat" class="btn-clear-chat">🗑️ Clear Chat</button>
       </div>
@@ -549,12 +565,18 @@
     const renderedDocIds = new Set();
 
     onSnapshot(chatQuery, (snapshot) => {
+      if (snapshot.empty) {
+        studioChatBody.innerHTML = "";
+        renderedDocIds.clear();
+        return;
+      }
+
       snapshot.docChanges().forEach((change) => {
         const id = change.doc.id;
         if (change.type === "added" && !renderedDocIds.has(id)) {
           renderedDocIds.add(id);
           const data = change.doc.data();
-          renderStudioMsg(id, data.name, data.text, data.badge);
+          renderStudioMsg(id, data.name, data.text, data.badge, data.avatar);
         }
         if (change.type === "removed") {
           renderedDocIds.delete(id);
@@ -565,16 +587,19 @@
       studioChatBody.scrollTop = studioChatBody.scrollHeight;
     });
 
-    function renderStudioMsg(id, name, text, badge) {
+    function renderStudioMsg(id, name, text, badge, avatar) {
       const div = document.createElement("div");
-      div.className = "chat-msg";
+      const isHost = (badge === "Host" || badge === "HOST");
+      div.className = `chat-msg ${isHost ? 'is-host' : ''}`;
       div.id = `msg-${id}`;
 
-      const isHost = (badge === "Host" || badge === "HOST");
+      const icon = avatar || (isHost ? '🧋' : '🍵');
+
       div.innerHTML = `
+        <span class="avatar-box">${icon}</span>
         <div class="content">
           <div class="msg-user">
-            ${isHost ? '🧋' : '🍵'} <span>${escapeHtml(name)}</span>
+            <span>${escapeHtml(name)}</span>
             <span class="msg-badge ${isHost ? 'host' : ''}">${escapeHtml(badge || 'Viewer')}</span>
           </div>
           <div class="msg-text">${escapeHtml(text)}</div>
@@ -582,6 +607,7 @@
         <button class="btn-del-msg" title="Delete single message">🗑️</button>
       `;
 
+      // 1-Click single message delete
       div.querySelector(".btn-del-msg").addEventListener("click", async () => {
         if (confirm("Delete this specific message?")) {
           await deleteDoc(doc(db, "chat_messages", id));
@@ -601,6 +627,7 @@
         name: "Host (Tim)",
         text: text,
         badge: "HOST",
+        avatar: "🧋",
         timestamp: serverTimestamp()
       });
     }
@@ -612,7 +639,7 @@
 
     // --- 6. Host Wipe / Clear All Chat Button ---
     btnClearAllChat.addEventListener("click", async () => {
-      if (!confirm("Are you sure you want to clear and delete all chat messages for EVERYONE?")) return;
+      if (!confirm("Are you sure you want to clear and delete ALL chat messages for EVERYONE?")) return;
 
       try {
         btnClearAllChat.innerText = "Clearing...";
