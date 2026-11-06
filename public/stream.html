@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BobaStream Streamer Dashboard 🎙️</title>
+  <title>BobaStream Broadcaster Studio 🎙️</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
     :root {
       --bg-dash: #161210;
@@ -46,9 +45,7 @@
       flex: 1;
     }
 
-    @media (max-width: 992px) {
-      .dash-grid { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 992px) { .dash-grid { grid-template-columns: 1fr; } }
 
     .monitor-column { display: flex; flex-direction: column; gap: 1rem; }
 
@@ -61,7 +58,7 @@
       border: 1px solid var(--border-dash);
     }
 
-    #dashVideo { width: 100%; height: 100%; object-fit: cover; }
+    #localVideo { width: 100%; height: 100%; object-fit: cover; }
 
     .telemetry-row {
       display: grid;
@@ -80,9 +77,9 @@
     }
 
     .tele-card span { font-size: 0.75rem; color: #A89B93; text-transform: uppercase; font-weight: 700; }
-    .tele-card strong { font-size: 1.25rem; font-family: var(--font-heading); color: var(--milk-tea); }
+    .tele-card strong { font-size: 1.2rem; font-family: var(--font-heading); color: var(--milk-tea); }
 
-    .controls-panel {
+    .customizer-card {
       background: var(--card-dash);
       border: 1px solid var(--border-dash);
       padding: 1.25rem;
@@ -92,9 +89,19 @@
       gap: 1rem;
     }
 
+    .customizer-card h3 { font-family: var(--font-heading); color: var(--milk-tea); }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+
     .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
     .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--milk-tea); }
-    .form-group input {
+    .form-group input, .form-group select {
       background: #181310;
       border: 1px solid var(--border-dash);
       border-radius: 12px;
@@ -102,7 +109,10 @@
       color: white;
       font-size: 0.9rem;
       outline: none;
+      font-family: var(--font-body);
     }
+
+    .btn-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
 
     .btn-action {
       background: var(--accent);
@@ -110,16 +120,18 @@
       border: none;
       font-family: var(--font-heading);
       font-weight: 600;
-      padding: 0.75rem 1.2rem;
+      padding: 0.75rem 1.4rem;
       border-radius: 12px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
-      justify-content: center;
     }
 
-    .btn-action:hover { opacity: 0.9; }
+    .btn-secondary {
+      background: #382C25;
+      color: var(--milk-tea);
+    }
 
     .chat-mod-panel {
       background: var(--card-dash);
@@ -176,11 +188,11 @@
 
   <header>
     <a href="stream.html" class="brand">
-      🎙️ BobaStream <span>BROADCASTER HUB</span>
+      🎙️ BobaStream <span>STUDIO</span>
     </a>
-    <div>
+    <div style="display: flex; gap: 0.75rem; align-items: center;">
       <a href="index.html" target="_blank" style="color: var(--milk-tea); font-size: 0.85rem; text-decoration: none; border: 1px solid var(--border-dash); padding: 0.4rem 0.8rem; border-radius: 999px;">
-        👁️ Open Audience View ↗
+        👁️ Audience Lounge ↗
       </a>
     </div>
   </header>
@@ -188,41 +200,62 @@
   <main class="dash-grid">
     <section class="monitor-column">
       <div class="stream-preview-box">
-        <video id="dashVideo" autoplay playsinline muted controls></video>
-        <div style="position: absolute; top: 1rem; left: 1rem; background: rgba(0,0,0,0.7); padding: 0.3rem 0.7rem; border-radius: 999px; font-size: 0.75rem; font-weight:700; color: var(--accent);">
-          LIVE CONFIRMATION MONITOR
+        <video id="localVideo" autoplay playsinline muted></video>
+        <div style="position: absolute; top: 1rem; left: 1rem; background: rgba(0,0,0,0.7); padding: 0.3rem 0.7rem; border-radius: 999px; font-size: 0.75rem; font-weight:700; color: var(--accent);" id="broadcastStatusBadge">
+          ⚪ CAMERA OFFLINE
         </div>
       </div>
 
       <div class="telemetry-row">
         <div class="tele-card">
-          <span>Broadcaster</span>
-          <strong>HOST (You)</strong>
+          <span>Active Viewers</span>
+          <strong id="dashActiveViewers" style="color: var(--accent-matcha);">0</strong>
         </div>
         <div class="tele-card">
-          <span>Encoder Health</span>
-          <strong style="color: var(--accent-matcha);">Optimal</strong>
+          <span>Camera Feed</span>
+          <strong id="teleCamStatus" style="color: #A89B93;">Inactive</strong>
         </div>
         <div class="tele-card">
           <span>Global Taps</span>
           <strong id="dashTotalTaps">0</strong>
         </div>
         <div class="tele-card">
-          <span>Latency Mode</span>
-          <strong>Low Delay</strong>
+          <span>Ingest Type</span>
+          <strong>Direct Cam</strong>
         </div>
       </div>
 
-      <div class="controls-panel">
-        <h3 style="font-family: var(--font-heading); color: var(--milk-tea);">📡 Cloudflare Stream / Live Ingest Setting</h3>
-        <p style="font-size: 0.85rem; color: #A89B93;">
-          Paste your Cloudflare HLS Manifest URL (`.m3u8`) here. When you click <strong>Broadcast to Viewers</strong>, all audience members on `index.html` will automatically load your stream without reloading their page.
-        </p>
-        <div class="form-group">
-          <label>Live HLS Manifest URL (.m3u8):</label>
-          <input type="text" id="hlsInput" placeholder="https://customer-xyz.cloudflarestream.com/.../manifest/video.m3u8" />
+      <div class="customizer-card">
+        <h3>🎨 Stream Title & Camera Settings</h3>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Stream Title:</label>
+            <input type="text" id="streamTitleInput" value="Tapioca Chill Room 🧋" placeholder="e.g. Midnight Boba & Chill Coding" />
+          </div>
+          <div class="form-group">
+            <label>Host Display Name:</label>
+            <input type="text" id="hostNameInput" value="Tim" placeholder="Your name / handle" />
+          </div>
         </div>
-        <button class="btn-action" id="pushHlsBtn">🚀 Broadcast to All Viewers</button>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Sub-header Description:</label>
+            <input type="text" id="streamSubtitleInput" value="Direct stream from OBS Virtual Camera" placeholder="Subtitle" />
+          </div>
+          <div class="form-group">
+            <label>Select Camera / OBS Virtual Camera:</label>
+            <select id="cameraDeviceSelect">
+              <option value="">Detecting cameras...</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-action" id="startCamBtn">📹 1. Start Camera Feed</button>
+          <button class="btn-action btn-secondary" id="saveMetaBtn">💾 2. Update Stream Details</button>
+        </div>
       </div>
     </section>
 
@@ -233,32 +266,18 @@
       </div>
       <div class="chat-mod-body" id="dashChatBody"></div>
       <form class="chat-mod-footer" id="dashChatForm">
-        <input type="text" id="dashMsgInput" placeholder="Chat as Broadcaster/Host..." maxlength="200" autocomplete="off" />
+        <input type="text" id="dashMsgInput" placeholder="Chat as Host..." maxlength="200" autocomplete="off" />
         <button type="submit" class="btn-action" style="padding: 0.6rem 1.2rem; border-radius: 999px;">Send</button>
       </form>
     </aside>
   </main>
 
-  <script>
-    function previewStream(url) {
-      const video = document.getElementById('dashVideo');
-      if (Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource(url);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(() => {}));
-      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = url;
-        video.play().catch(() => {});
-      }
-    }
-  </script>
+  <canvas id="captureCanvas" style="display:none;" width="640" height="360"></canvas>
 
-  <!-- Firebase Broadcaster Control -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { 
-      getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, serverTimestamp, doc, setDoc 
+      getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, serverTimestamp, doc, setDoc, updateDoc 
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -274,23 +293,110 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Push new HLS link to all viewers
-    const hlsInput = document.getElementById('hlsInput');
-    const pushHlsBtn = document.getElementById('pushHlsBtn');
+    // --- Active Viewers Counter ---
+    onSnapshot(collection(db, "active_viewers"), (snap) => {
+      document.getElementById('dashActiveViewers').textContent = snap.size || 0;
+    });
 
-    pushHlsBtn.addEventListener('click', async () => {
-      const url = hlsInput.value.trim();
-      if (!url) return alert('Please enter an HLS link (.m3u8)');
+    // --- Device Enumeration ---
+    const camSelect = document.getElementById('cameraDeviceSelect');
+    async function loadDevices() {
       try {
-        await setDoc(doc(db, "stream_stats", "config"), { hlsUrl: url });
-        previewStream(url);
-        alert('Live stream manifest synced! Audience index.html updated.');
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(d => d.kind === 'videoinput');
+        camSelect.innerHTML = '';
+        if (videoDevices.length === 0) {
+          camSelect.innerHTML = '<option value="">No cameras detected</option>';
+          return;
+        }
+        videoDevices.forEach((dev, idx) => {
+          const opt = document.createElement('option');
+          opt.value = dev.deviceId;
+          opt.textContent = dev.label || `Camera ${idx + 1}`;
+          camSelect.appendChild(opt);
+        });
       } catch (e) {
-        alert('Error updating stream: ' + e.message);
+        console.warn("Device enumeration error:", e);
+      }
+    }
+    loadDevices();
+
+    // --- Camera Handling ---
+    const localVideo = document.getElementById('localVideo');
+    const startCamBtn = document.getElementById('startCamBtn');
+    const teleCamStatus = document.getElementById('teleCamStatus');
+    const statusBadge = document.getElementById('broadcastStatusBadge');
+    let currentStream = null;
+    let broadcastInterval = null;
+
+    startCamBtn.addEventListener('click', async () => {
+      const deviceId = camSelect.value;
+      const constraints = {
+        video: deviceId ? { deviceId: { exact: deviceId } } : true,
+        audio: false
+      };
+
+      try {
+        if (currentStream) currentStream.getTracks().forEach(t => t.stop());
+        currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+        localVideo.srcObject = currentStream;
+        await loadDevices();
+
+        teleCamStatus.textContent = "Live";
+        teleCamStatus.style.color = "var(--accent-matcha)";
+        statusBadge.textContent = "🔴 BROADCASTING LIVE";
+        statusBadge.style.color = "#FFF";
+        statusBadge.style.background = "var(--accent)";
+
+        startBroadcastingFrames();
+      } catch (err) {
+        alert("Camera error: " + err.message);
       }
     });
 
-    // Chat listener
+    const canvas = document.getElementById('captureCanvas');
+    const ctx = canvas.getContext('2d');
+    function startBroadcastingFrames() {
+      if (broadcastInterval) clearInterval(broadcastInterval);
+      broadcastInterval = setInterval(async () => {
+        if (!currentStream || localVideo.readyState < 2) return;
+        ctx.drawImage(localVideo, 0, 0, canvas.width, canvas.height);
+        const frameData = canvas.toDataURL('image/jpeg', 0.5);
+
+        try {
+          await setDoc(doc(db, "stream_stats", "live_frame"), {
+            frame: frameData,
+            timestamp: Date.now()
+          });
+        } catch (e) {}
+      }, 500);
+    }
+
+    // --- Metadata Update ---
+    const streamTitleInput = document.getElementById('streamTitleInput');
+    const hostNameInput = document.getElementById('hostNameInput');
+    const streamSubtitleInput = document.getElementById('streamSubtitleInput');
+    const saveMetaBtn = document.getElementById('saveMetaBtn');
+
+    saveMetaBtn.addEventListener('click', async () => {
+      const title = streamTitleInput.value.trim() || "Tapioca Chill Room 🧋";
+      const host = hostNameInput.value.trim() || "Tim";
+      const sub = streamSubtitleInput.value.trim() || "";
+
+      try {
+        await setDoc(doc(db, "stream_stats", "metadata"), {
+          title: title,
+          host: host,
+          subtitle: sub,
+          updatedAt: serverTimestamp()
+        });
+        alert("Stream details updated! Viewers see the changes immediately.");
+      } catch (err) {
+        alert("Failed to save details: " + err.message);
+      }
+    });
+
+    // --- Chat & Telemetry ---
     const chatCol = collection(db, "chat_messages");
     const chatQuery = query(chatCol, orderBy("timestamp", "asc"), limit(50));
     const dashChatBody = document.getElementById('dashChatBody');
@@ -316,7 +422,6 @@
       });
     });
 
-    // Send host messages
     const form = document.getElementById('dashChatForm');
     const input = document.getElementById('dashMsgInput');
     form.addEventListener('submit', async (e) => {
@@ -324,8 +429,9 @@
       const txt = input.value.trim();
       if (!txt) return;
       input.value = '';
+      const currentHost = hostNameInput.value.trim() || "Tim";
       await addDoc(chatCol, {
-        name: "Host (Tim)",
+        name: currentHost,
         text: txt,
         badge: "HOST",
         avatar: "🎙️",
@@ -333,11 +439,9 @@
       });
     });
 
-    // Reactions telemetry
-    onSnapshot(doc(db, "stream_stats", "reactions"), (docSnap) => {
-      if (docSnap.exists()) {
-        const total = docSnap.data().total || 0;
-        document.getElementById('dashTotalTaps').textContent = total.toLocaleString();
+    onSnapshot(doc(db, "stream_stats", "reactions"), (snap) => {
+      if (snap.exists()) {
+        document.getElementById('dashTotalTaps').textContent = (snap.data().total || 0).toLocaleString();
       }
     });
   </script>

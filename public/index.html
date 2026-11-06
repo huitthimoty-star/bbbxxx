@@ -7,7 +7,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
     :root {
       --bg-cream: #FDF9F3;
@@ -71,9 +70,7 @@
       flex: 1;
     }
 
-    @media (max-width: 992px) {
-      .main-grid { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 992px) { .main-grid { grid-template-columns: 1fr; } }
 
     .stage-container { display: flex; flex-direction: column; gap: 1rem; }
 
@@ -85,32 +82,39 @@
       aspect-ratio: 16 / 9;
       box-shadow: 0 16px 36px rgba(42, 30, 23, 0.08);
       border: 3px solid white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    #streamVideo, #streamCanvas {
+    #streamFrameDisplay {
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
     }
 
-    #streamCanvas { display: none; }
-
-    .reaction-particle-layer {
+    .standby-screen {
       position: absolute;
       inset: 0;
-      pointer-events: none;
-      overflow: hidden;
-      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #2A1E17, #15110E);
+      color: var(--milk-tea);
+      gap: 0.8rem;
+      font-family: var(--font-heading);
     }
 
+    .standby-screen .boba-icon { font-size: 3.5rem; animation: gentleBounce 2s infinite ease-in-out; }
+    @keyframes gentleBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+    .reaction-particle-layer { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 10; }
     .floating-emoji {
-      position: absolute;
-      user-select: none;
-      font-size: 2.2rem;
+      position: absolute; user-select: none; font-size: 2.2rem;
       animation: floatUp 2.6s cubic-bezier(0.21, 0.82, 0.42, 1) forwards;
     }
-
     @keyframes floatUp {
       0% { transform: translateY(0) scale(0.6) rotate(0deg); opacity: 0; }
       15% { opacity: 1; transform: translateY(-30px) scale(1.2) rotate(-10deg); }
@@ -118,225 +122,73 @@
       100% { transform: translateY(-460px) scale(1.4) rotate(25deg); opacity: 0; }
     }
 
-    .video-badges {
-      position: absolute;
-      top: 1rem;
-      left: 1rem;
-      display: flex;
-      gap: 0.5rem;
-      z-index: 12;
-    }
-
+    .video-badges { position: absolute; top: 1rem; left: 1rem; display: flex; gap: 0.5rem; z-index: 12; }
     .badge {
-      background: rgba(0, 0, 0, 0.65);
-      color: white;
-      padding: 0.35rem 0.75rem;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      backdrop-filter: blur(8px);
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
+      background: rgba(0, 0, 0, 0.65); color: white; padding: 0.35rem 0.75rem; border-radius: 999px;
+      font-size: 0.75rem; font-weight: 600; backdrop-filter: blur(8px); display: flex; align-items: center; gap: 0.4rem;
     }
-
     .badge-live { background: var(--accent-coral); }
-    .badge-live::before {
-      content: ''; width: 8px; height: 8px; background: white; border-radius: 50%;
-      animation: pulse 1.5s infinite;
-    }
-
+    .badge-live::before { content: ''; width: 8px; height: 8px; background: white; border-radius: 50%; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
     .stream-meta-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-soft);
-      padding: 1rem 1.25rem;
-      border-radius: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      background: var(--card-bg); border: 1px solid var(--border-soft); padding: 1rem 1.25rem;
+      border-radius: 20px; display: flex; justify-content: space-between; align-items: center;
     }
-
     .stream-meta-card h2 { font-family: var(--font-heading); font-size: 1.3rem; color: var(--pearl-black); }
     .stream-meta-card p { font-size: 0.85rem; color: #6D5D53; margin-top: 0.2rem; }
 
     .reaction-action-dock {
-      background: var(--card-bg);
-      border: 1px solid var(--border-soft);
-      border-radius: 24px;
-      padding: 1.2rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
+      background: var(--card-bg); border: 1px solid var(--border-soft); border-radius: 24px; padding: 1.2rem;
+      display: flex; flex-direction: column; gap: 0.8rem;
     }
-
     .combo-banner {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-family: var(--font-heading);
-      font-size: 1rem;
-      color: var(--tea-dark);
-      background: var(--bg-cream);
-      padding: 0.45rem 1rem;
-      border-radius: 14px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-family: var(--font-heading); font-size: 1rem; color: var(--tea-dark);
+      background: var(--bg-cream); padding: 0.45rem 1rem; border-radius: 14px;
     }
-
-    .reaction-buttons-grid {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 0.5rem;
-    }
-
+    .reaction-buttons-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.5rem; }
     .react-btn {
-      background: var(--bg-cream);
-      border: 2px solid transparent;
-      border-radius: 18px;
-      padding: 0.65rem 0.2rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.3rem;
-      cursor: pointer;
-      font-family: var(--font-heading);
+      background: var(--bg-cream); border: 2px solid transparent; border-radius: 18px; padding: 0.65rem 0.2rem;
+      display: flex; flex-direction: column; align-items: center; gap: 0.3rem; cursor: pointer; font-family: var(--font-heading);
       transition: all 0.12s ease;
     }
-
     .react-btn:hover { background: #F4EADF; transform: translateY(-3px); }
     .react-btn:active { transform: scale(0.85); border-color: var(--tea-dark); }
     .react-btn .emoji { font-size: 1.8rem; }
     .react-btn .counter {
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: var(--pearl-black);
-      background: white;
-      padding: 0.15rem 0.5rem;
-      border-radius: 999px;
-      min-width: 28px;
-      text-align: center;
+      font-size: 0.75rem; font-weight: 700; color: var(--pearl-black); background: white;
+      padding: 0.15rem 0.5rem; border-radius: 999px; min-width: 28px; text-align: center;
     }
 
     .chat-panel {
-      background: var(--card-bg);
-      border: 1px solid var(--border-soft);
-      border-radius: 24px;
-      display: flex;
-      flex-direction: column;
-      height: 720px;
-      overflow: hidden;
+      background: var(--card-bg); border: 1px solid var(--border-soft); border-radius: 24px;
+      display: flex; flex-direction: column; height: 720px; overflow: hidden;
       box-shadow: 0 12px 30px rgba(42, 30, 23, 0.05);
     }
-
     .chat-header {
-      padding: 1rem;
-      border-bottom: 1px solid var(--border-soft);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #FAF5EE;
+      padding: 1rem; border-bottom: 1px solid var(--border-soft); display: flex;
+      justify-content: space-between; align-items: center; background: #FAF5EE;
     }
-
-    .chat-header h3 {
-      font-family: var(--font-heading);
-      font-size: 1.15rem;
-      color: var(--pearl-black);
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .chat-body {
-      flex: 1;
-      padding: 1rem;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      scroll-behavior: smooth;
-    }
-
-    .chat-msg {
-      display: flex;
-      gap: 0.6rem;
-      align-items: flex-start;
-      font-size: 0.9rem;
-      animation: fadeIn 0.2s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
+    .chat-header h3 { font-family: var(--font-heading); font-size: 1.15rem; color: var(--pearl-black); }
+    .chat-body { flex: 1; padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; }
+    .chat-msg { display: flex; gap: 0.6rem; align-items: flex-start; font-size: 0.9rem; }
     .chat-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: var(--bg-cream);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-      flex-shrink: 0;
-      border: 1px solid var(--border-soft);
+      width: 32px; height: 32px; border-radius: 50%; background: var(--bg-cream);
+      display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+      flex-shrink: 0; border: 1px solid var(--border-soft);
     }
-
-    .chat-content {
-      background: var(--bg-cream);
-      padding: 0.55rem 0.85rem;
-      border-radius: 14px;
-      border-top-left-radius: 4px;
-      max-width: 85%;
-    }
-
-    .chat-author {
-      font-weight: 700;
-      font-size: 0.8rem;
-      color: var(--tea-dark);
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-      margin-bottom: 0.15rem;
-    }
-
-    .chat-badge {
-      font-size: 0.65rem;
-      padding: 0.1rem 0.4rem;
-      border-radius: 999px;
-      background: var(--pearl-black);
-      color: white;
-    }
-
+    .chat-content { background: var(--bg-cream); padding: 0.55rem 0.85rem; border-radius: 14px; border-top-left-radius: 4px; max-width: 85%; }
+    .chat-author { font-weight: 700; font-size: 0.8rem; color: var(--tea-dark); display: flex; align-items: center; gap: 0.35rem; }
+    .chat-badge { font-size: 0.65rem; padding: 0.1rem 0.4rem; border-radius: 999px; background: var(--pearl-black); color: white; }
     .badge-host { background: var(--accent-coral); color: white; }
-
     .chat-text { color: var(--pearl-black); word-break: break-word; line-height: 1.35; }
-
-    .chat-footer {
-      padding: 0.85rem;
-      border-top: 1px solid var(--border-soft);
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      background: white;
-    }
-
+    .chat-footer { padding: 0.85rem; border-top: 1px solid var(--border-soft); display: flex; flex-direction: column; gap: 0.5rem; background: white; }
     .identity-row { display: flex; gap: 0.5rem; }
-    .identity-row input {
-      font-size: 0.8rem; padding: 0.35rem 0.6rem; border: 1px solid var(--border-soft);
-      border-radius: 10px; flex: 1; background: var(--bg-cream); outline: none;
-    }
-
+    .identity-row input { font-size: 0.8rem; padding: 0.35rem 0.6rem; border: 1px solid var(--border-soft); border-radius: 10px; flex: 1; background: var(--bg-cream); outline: none; }
     .chat-input-row { display: flex; gap: 0.5rem; }
-    .chat-input-row input {
-      flex: 1; font-size: 0.9rem; padding: 0.65rem 0.9rem; border: 1px solid var(--border-soft);
-      border-radius: 999px; outline: none; font-family: var(--font-body); background: var(--bg-cream);
-    }
-
-    .btn-send {
-      background: var(--pearl-black); color: white; border: none; font-family: var(--font-heading);
-      padding: 0 1.2rem; border-radius: 999px; cursor: pointer; font-size: 0.95rem;
-    }
+    .chat-input-row input { flex: 1; font-size: 0.9rem; padding: 0.65rem 0.9rem; border: 1px solid var(--border-soft); border-radius: 999px; outline: none; background: var(--bg-cream); }
+    .btn-send { background: var(--pearl-black); color: white; border: none; font-family: var(--font-heading); padding: 0 1.2rem; border-radius: 999px; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -346,28 +198,34 @@
       🧋 BobaStream <span>LIVE</span>
     </a>
     <div style="font-size: 0.85rem; font-weight: 600; color: var(--tea-dark);">
-      Enjoy the vibes! ✨
+      Enjoy guys hehe ✨
     </div>
   </header>
 
   <main class="main-grid">
     <section class="stage-container">
       <div class="video-viewport">
-        <video id="streamVideo" autoplay playsinline controls></video>
-        <canvas id="streamCanvas"></canvas>
+        <div class="standby-screen" id="standbyScreen">
+          <div class="boba-icon">🧋</div>
+          <div>Waiting for Host to start camera...</div>
+        </div>
+        <img id="streamFrameDisplay" style="display:none;" alt="Live stream feed" />
 
         <div class="reaction-particle-layer" id="particleLayer"></div>
 
         <div class="video-badges">
           <div class="badge badge-live">DIRECT LIVE</div>
-          <div class="badge">👥 Sipper Lounge</div>
+          <div class="badge" id="viewerCounterBadge">👥 1 Viewer</div>
         </div>
       </div>
 
       <div class="stream-meta-card">
-        <div class="stream-info">
-          <h2>Tapioca Chill Room 🧋</h2>
-          <p>Direct livestream feed from OBS Studio | Low-Latency</p>
+        <div>
+          <h2 id="liveTitle">Tapioca pearl Room 🧋</h2>
+          <p id="liveSubtitle">Hi guys welcome to the website feel free to navigate kaya niyo na yan malaki na kayo</p>
+        </div>
+        <div style="font-size: 0.85rem; font-weight: 700; color: var(--tea-dark);" id="hostViewerBadge">
+          👤 Host: Tim
         </div>
       </div>
 
@@ -377,30 +235,12 @@
           <span id="comboIndicator">x1 Chill Sip</span>
         </div>
         <div class="reaction-buttons-grid">
-          <button class="react-btn" data-type="heart">
-            <span class="emoji">❤️</span>
-            <span class="counter" data-reaction-badge="heart">0</span>
-          </button>
-          <button class="react-btn" data-type="boba">
-            <span class="emoji">🧋</span>
-            <span class="counter" data-reaction-badge="boba">0</span>
-          </button>
-          <button class="react-btn" data-type="laugh">
-            <span class="emoji">😂</span>
-            <span class="counter" data-reaction-badge="laugh">0</span>
-          </button>
-          <button class="react-btn" data-type="fire">
-            <span class="emoji">🔥</span>
-            <span class="counter" data-reaction-badge="fire">0</span>
-          </button>
-          <button class="react-btn" data-type="sparkles">
-            <span class="emoji">✨</span>
-            <span class="counter" data-reaction-badge="sparkles">0</span>
-          </button>
-          <button class="react-btn" data-type="angry">
-            <span class="emoji">😡</span>
-            <span class="counter" data-reaction-badge="angry">0</span>
-          </button>
+          <button class="react-btn" data-type="heart"><span class="emoji">❤️</span><span class="counter" data-reaction-badge="heart">0</span></button>
+          <button class="react-btn" data-type="boba"><span class="emoji">🧋</span><span class="counter" data-reaction-badge="boba">0</span></button>
+          <button class="react-btn" data-type="laugh"><span class="emoji">😂</span><span class="counter" data-reaction-badge="laugh">0</span></button>
+          <button class="react-btn" data-type="fire"><span class="emoji">🔥</span><span class="counter" data-reaction-badge="fire">0</span></button>
+          <button class="react-btn" data-type="sparkles"><span class="emoji">✨</span><span class="counter" data-reaction-badge="sparkles">0</span></button>
+          <button class="react-btn" data-type="angry"><span class="emoji">😡</span><span class="counter" data-reaction-badge="angry">0</span></button>
         </div>
       </div>
     </section>
@@ -430,28 +270,7 @@
   </main>
 
   <script>
-    // Audio synthesis pop
-    let audioCtx = null;
-    function playBubblePop() {
-      try {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        const startFreq = 300 + Math.random() * 200;
-        osc.frequency.setValueAtTime(startFreq, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(startFreq + 400, audioCtx.currentTime + 0.08);
-        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.09);
-      } catch (e) {}
-    }
-
-    // Reaction particles
+    // Reaction Particles
     const particleLayer = document.getElementById('particleLayer');
     const emojisMap = { heart: '❤️', boba: '🧋', laugh: '😂', fire: '🔥', sparkles: '✨', angry: '😡' };
 
@@ -462,35 +281,29 @@
       el.style.left = (15 + Math.random() * 70) + '%';
       el.style.bottom = '20px';
       particleLayer.appendChild(el);
-      playBubblePop();
       setTimeout(() => el.remove(), 2600);
     }
 
-    let combo = 0;
-    let comboTimer = null;
+    let combo = 0, comboTimer = null;
     const comboIndicator = document.getElementById('comboIndicator');
 
     document.querySelectorAll('.react-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const type = btn.getAttribute('data-type');
         spawnFloatingEmoji(type);
-
         const badge = btn.querySelector('.counter');
         badge.textContent = parseInt(badge.textContent || '0') + 1;
 
         combo++;
         clearTimeout(comboTimer);
         comboIndicator.textContent = `x${combo} ${combo > 20 ? '🔥 BOBA TSUNAMI' : combo > 10 ? '⚡ TAPIOCA RUSH' : 'Sip'}`;
-        comboTimer = setTimeout(() => {
-          combo = 0;
-          comboIndicator.textContent = 'x1 Chill Sip';
-        }, 2200);
+        comboTimer = setTimeout(() => { combo = 0; comboIndicator.textContent = 'x1 Chill Sip'; }, 2200);
 
         if (window.incrementReaction) window.incrementReaction(type);
       });
     });
 
-    // Chat rendering
+    // Chat DOM
     const chatBody = document.getElementById('chatBody');
     window.renderChatMessage = function(name, text, badge, avatar) {
       const msgDiv = document.createElement('div');
@@ -501,7 +314,7 @@
         <div class="chat-content" style="${isHost ? 'background: #FFE8D6; border: 1px solid var(--accent-coral);' : ''}">
           <div class="chat-author">
             ${escapeHTML(name || 'Anonymous')}
-            <span class="chat-badge ${isHost ? 'badge-host' : ''}">${escapeHTML(badge || 'Sipper')}</span>
+            <span class="chat-badge ${isHost ? 'badge-host' : ''}">${escapeHTML(badge || 'Viewer')}</span>
           </div>
           <div class="chat-text">${escapeHTML(text)}</div>
         </div>
@@ -522,39 +335,19 @@
     chatForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const text = chatMsgInput.value.trim();
-      const name = userNameInput.value.trim() || 'ChillSipper';
-      const avatar = userAvatarSelect.value;
       if (!text) return;
       chatMsgInput.value = '';
-
       if (window.sendGlobalChat) {
-        window.sendGlobalChat(name, text, 'Sipper', avatar);
-      } else {
-        window.renderChatMessage(name, text, 'Sipper', avatar);
+        window.sendGlobalChat(userNameInput.value.trim() || 'Viewer', text, 'Viewer', userAvatarSelect.value);
       }
     });
-
-    // Video Player Ingest Loader
-    function loadHlsStream(streamUrl) {
-      const video = document.getElementById('streamVideo');
-      if (Hls.isSupported()) {
-        const hls = new Hls({ enableWorker: true, lowLatencyMode: true });
-        hls.loadSource(streamUrl);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(() => {}));
-      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = streamUrl;
-        video.addEventListener('loadedmetadata', () => video.play().catch(() => {}));
-      }
-    }
-    window.loadHlsStream = loadHlsStream;
   </script>
 
-  <!-- Firebase Sync Script -->
+  <!-- Firebase Live Sync -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { 
-      getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, serverTimestamp, doc, setDoc, updateDoc, increment 
+      getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, serverTimestamp, doc, updateDoc, increment, setDoc, deleteDoc 
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -567,69 +360,97 @@
       measurementId: "G-N7E1XTMMTW"
     };
 
-    try {
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-      // 1. Fetch Stream Config (Broadcaster can update this live from stream.html)
-      const configDoc = doc(db, "stream_stats", "config");
-      onSnapshot(configDoc, (snap) => {
-        if (snap.exists() && snap.data().hlsUrl) {
-          window.loadHlsStream(snap.data().hlsUrl);
+    // 1. Live Viewer Presence Tracker (Counts active connected tabs)
+    const sessionId = "viewer_" + Math.random().toString(36).substring(2, 9);
+    const presenceRef = doc(db, "active_viewers", sessionId);
+    const viewerBadge = document.getElementById("viewerCounterBadge");
+
+    // Register this viewer tab
+    await setDoc(presenceRef, { joinedAt: serverTimestamp() });
+
+    // Clean up on tab close / reload
+    window.addEventListener("beforeunload", () => {
+      deleteDoc(presenceRef).catch(() => {});
+    });
+
+    // Listen to total active viewers collection
+    onSnapshot(collection(db, "active_viewers"), (snapshot) => {
+      const count = snapshot.size || 1;
+      viewerBadge.textContent = `👥 ${count} ${count === 1 ? 'Viewer' : 'Viewers'}`;
+    });
+
+    // 2. Live Video Frame Sync
+    const frameImg = document.getElementById('streamFrameDisplay');
+    const standbyScreen = document.getElementById('standbyScreen');
+    onSnapshot(doc(db, "stream_stats", "live_frame"), (snap) => {
+      if (snap.exists() && snap.data().frame) {
+        frameImg.src = snap.data().frame;
+        frameImg.style.display = "block";
+        standbyScreen.style.display = "none";
+      }
+    });
+
+    // 3. Custom Title & Host Sync
+    const liveTitle = document.getElementById('liveTitle');
+    const liveSubtitle = document.getElementById('liveSubtitle');
+    const hostViewerBadge = document.getElementById('hostViewerBadge');
+
+    onSnapshot(doc(db, "stream_stats", "metadata"), (snap) => {
+      if (snap.exists()) {
+        const d = snap.data();
+        if (d.title) liveTitle.textContent = d.title;
+        if (d.subtitle) liveSubtitle.textContent = d.subtitle;
+        if (d.host) hostViewerBadge.textContent = `👤 Host: ${d.host}`;
+      }
+    });
+
+    // 4. Chat Sync
+    const chatCol = collection(db, "chat_messages");
+    const chatQuery = query(chatCol, orderBy("timestamp", "asc"), limit(40));
+    const processedIds = new Set();
+
+    onSnapshot(chatQuery, (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === "added" && !processedIds.has(change.doc.id)) {
+          processedIds.add(change.doc.id);
+          const data = change.doc.data();
+          window.renderChatMessage(data.name, data.text, data.badge, data.avatar);
         }
       });
+    });
 
-      // 2. Chat Sync
-      const chatCol = collection(db, "chat_messages");
-      const chatQuery = query(chatCol, orderBy("timestamp", "asc"), limit(40));
-      const processedIds = new Set();
-
-      onSnapshot(chatQuery, (snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-          if (change.type === "added") {
-            const id = change.doc.id;
-            if (!processedIds.has(id)) {
-              processedIds.add(id);
-              const data = change.doc.data();
-              window.renderChatMessage(data.name, data.text, data.badge, data.avatar);
-            }
-          }
-        });
+    window.sendGlobalChat = async function(name, text, badge, avatar) {
+      await addDoc(chatCol, {
+        name: name,
+        text: text,
+        badge: badge,
+        avatar: avatar,
+        timestamp: serverTimestamp()
       });
+    };
 
-      window.sendGlobalChat = async function(name, text, badge, avatar) {
-        if (!text || !text.trim()) return;
-        await addDoc(chatCol, {
-          name: name || "Anonymous",
-          text: text.trim(),
-          badge: badge || "Sipper",
-          avatar: avatar || "🧋",
-          timestamp: serverTimestamp()
-        });
-      };
-
-      // 3. Live Reaction Taps
-      const statsDocRef = doc(db, "stream_stats", "reactions");
-      onSnapshot(statsDocRef, (snap) => {
-        if (snap.exists()) {
-          const data = snap.data();
-          for (const [key, val] of Object.entries(data)) {
-            const badge = document.querySelector(`[data-reaction-badge="${key}"]`);
-            if (badge) badge.textContent = val;
-          }
+    // 5. Reactions Sync
+    const statsDocRef = doc(db, "stream_stats", "reactions");
+    onSnapshot(statsDocRef, (snap) => {
+      if (snap.exists()) {
+        const data = snap.data();
+        for (const [key, val] of Object.entries(data)) {
+          const badge = document.querySelector(`[data-reaction-badge="${key}"]`);
+          if (badge) badge.textContent = val;
         }
-      });
+      }
+    });
 
-      window.incrementReaction = async function(type) {
-        try {
-          await updateDoc(statsDocRef, { [type]: increment(1), total: increment(1) });
-        } catch (err) {
-          if (err.code === "not-found") await setDoc(statsDocRef, { [type]: 1, total: 1 });
-        }
-      };
-    } catch (e) {
-      console.warn("Firebase offline:", e);
-    }
+    window.incrementReaction = async function(type) {
+      try {
+        await updateDoc(statsDocRef, { [type]: increment(1), total: increment(1) });
+      } catch (err) {
+        if (err.code === "not-found") await setDoc(statsDocRef, { [type]: 1, total: 1 });
+      }
+    };
   </script>
 </body>
 </html>
