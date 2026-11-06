@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BobaStream 🧋 | Live Stream & Interactive Hub</title>
+  <title>BobaStream 🧋 | Live Stream</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -23,25 +23,11 @@
       --font-body: 'Plus Jakarta Sans', sans-serif;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      background-color: var(--bg-cream);
-      color: var(--pearl-black);
-      font-family: var(--font-body);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow-x: hidden;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--bg-cream); color: var(--pearl-black); font-family: var(--font-body); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 
     header {
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(12px);
       border-bottom: 2px solid var(--border-soft);
       padding: 0.75rem 1.5rem;
@@ -65,57 +51,13 @@
     }
 
     .brand span {
-      background: var(--pearl-black);
+      background: var(--accent-coral);
       color: white;
       font-size: 0.75rem;
       padding: 0.2rem 0.5rem;
       border-radius: 999px;
       font-family: var(--font-body);
-      font-weight: 600;
-    }
-
-    .header-actions {
-      display: flex;
-      gap: 0.6rem;
-      align-items: center;
-    }
-
-    .btn {
-      font-family: var(--font-heading);
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 999px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.95rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      transition: transform 0.15s ease, background-color 0.2s ease;
-    }
-
-    .btn:hover {
-      transform: translateY(-1px);
-    }
-
-    .btn:active {
-      transform: scale(0.96);
-    }
-
-    .btn-tea {
-      background: var(--milk-tea);
-      color: var(--pearl-black);
-    }
-
-    .btn-dark {
-      background: var(--pearl-black);
-      color: white;
-    }
-
-    .btn-outline {
-      background: transparent;
-      border: 2px solid var(--border-soft);
-      color: var(--tea-dark);
+      font-weight: 700;
     }
 
     .main-grid {
@@ -130,16 +72,10 @@
     }
 
     @media (max-width: 992px) {
-      .main-grid {
-        grid-template-columns: 1fr;
-      }
+      .main-grid { grid-template-columns: 1fr; }
     }
 
-    .stage-container {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
+    .stage-container { display: flex; flex-direction: column; gap: 1rem; }
 
     .video-viewport {
       position: relative;
@@ -151,16 +87,14 @@
       border: 3px solid white;
     }
 
-    #streamCanvas, #streamVideo, #streamIframe {
+    #streamVideo, #streamCanvas {
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
     }
 
-    #streamVideo, #streamIframe {
-      display: none;
-    }
+    #streamCanvas { display: none; }
 
     .reaction-particle-layer {
       position: absolute;
@@ -173,26 +107,15 @@
     .floating-emoji {
       position: absolute;
       user-select: none;
-      font-size: 2rem;
-      animation: floatUp 2.8s cubic-bezier(0.21, 0.82, 0.42, 1) forwards;
+      font-size: 2.2rem;
+      animation: floatUp 2.6s cubic-bezier(0.21, 0.82, 0.42, 1) forwards;
     }
 
     @keyframes floatUp {
-      0% {
-        transform: translateY(0) scale(0.6) rotate(0deg);
-        opacity: 0;
-      }
-      15% {
-        opacity: 1;
-        transform: translateY(-30px) scale(1.2) rotate(-10deg);
-      }
-      80% {
-        opacity: 0.9;
-      }
-      100% {
-        transform: translateY(-450px) scale(1.4) rotate(25deg);
-        opacity: 0;
-      }
+      0% { transform: translateY(0) scale(0.6) rotate(0deg); opacity: 0; }
+      15% { opacity: 1; transform: translateY(-30px) scale(1.2) rotate(-10deg); }
+      80% { opacity: 0.9; }
+      100% { transform: translateY(-460px) scale(1.4) rotate(25deg); opacity: 0; }
     }
 
     .video-badges {
@@ -207,73 +130,36 @@
     .badge {
       background: rgba(0, 0, 0, 0.65);
       color: white;
-      padding: 0.3rem 0.75rem;
+      padding: 0.35rem 0.75rem;
       border-radius: 999px;
       font-size: 0.75rem;
       font-weight: 600;
       backdrop-filter: blur(8px);
       display: flex;
       align-items: center;
-      gap: 0.35rem;
+      gap: 0.4rem;
     }
 
-    .badge-live {
-      background: var(--accent-coral);
-    }
-
+    .badge-live { background: var(--accent-coral); }
     .badge-live::before {
-      content: '';
-      width: 8px;
-      height: 8px;
-      background: white;
-      border-radius: 50%;
+      content: ''; width: 8px; height: 8px; background: white; border-radius: 50%;
       animation: pulse 1.5s infinite;
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-    .stream-controls-bar {
+    .stream-meta-card {
       background: var(--card-bg);
       border: 1px solid var(--border-soft);
       padding: 1rem 1.25rem;
       border-radius: 20px;
       display: flex;
-      flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      gap: 0.75rem;
     }
 
-    .stream-info h2 {
-      font-family: var(--font-heading);
-      font-size: 1.3rem;
-      color: var(--pearl-black);
-    }
-
-    .stream-info p {
-      font-size: 0.85rem;
-      color: #6D5D53;
-      margin-top: 0.15rem;
-    }
-
-    .ingest-selector {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
-    }
-
-    .ingest-selector select, .ingest-selector input {
-      font-family: var(--font-body);
-      font-size: 0.85rem;
-      padding: 0.45rem 0.8rem;
-      border-radius: 12px;
-      border: 1px solid var(--border-soft);
-      outline: none;
-      background: var(--bg-cream);
-    }
+    .stream-meta-card h2 { font-family: var(--font-heading); font-size: 1.3rem; color: var(--pearl-black); }
+    .stream-meta-card p { font-size: 0.85rem; color: #6D5D53; margin-top: 0.2rem; }
 
     .reaction-action-dock {
       background: var(--card-bg);
@@ -307,30 +193,19 @@
       background: var(--bg-cream);
       border: 2px solid transparent;
       border-radius: 18px;
-      padding: 0.6rem 0.2rem;
+      padding: 0.65rem 0.2rem;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.25rem;
+      gap: 0.3rem;
       cursor: pointer;
       font-family: var(--font-heading);
-      transition: all 0.12s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transition: all 0.12s ease;
     }
 
-    .react-btn:hover {
-      background: #F4EADF;
-      transform: translateY(-3px);
-    }
-
-    .react-btn:active {
-      transform: scale(0.85);
-      border-color: var(--tea-dark);
-    }
-
-    .react-btn .emoji {
-      font-size: 1.8rem;
-    }
-
+    .react-btn:hover { background: #F4EADF; transform: translateY(-3px); }
+    .react-btn:active { transform: scale(0.85); border-color: var(--tea-dark); }
+    .react-btn .emoji { font-size: 1.8rem; }
     .react-btn .counter {
       font-size: 0.75rem;
       font-weight: 700;
@@ -386,10 +261,10 @@
       gap: 0.6rem;
       align-items: flex-start;
       font-size: 0.9rem;
-      animation: fadeInMsg 0.2s ease;
+      animation: fadeIn 0.2s ease;
     }
 
-    @keyframes fadeInMsg {
+    @keyframes fadeIn {
       from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
     }
@@ -433,11 +308,9 @@
       color: white;
     }
 
-    .chat-text {
-      color: var(--pearl-black);
-      word-break: break-word;
-      line-height: 1.35;
-    }
+    .badge-host { background: var(--accent-coral); color: white; }
+
+    .chat-text { color: var(--pearl-black); word-break: break-word; line-height: 1.35; }
 
     .chat-footer {
       padding: 0.85rem;
@@ -448,152 +321,59 @@
       background: white;
     }
 
-    .identity-row {
-      display: flex;
-      gap: 0.5rem;
-    }
-
+    .identity-row { display: flex; gap: 0.5rem; }
     .identity-row input {
-      font-size: 0.8rem;
-      padding: 0.35rem 0.6rem;
-      border: 1px solid var(--border-soft);
-      border-radius: 10px;
-      flex: 1;
-      background: var(--bg-cream);
-      outline: none;
+      font-size: 0.8rem; padding: 0.35rem 0.6rem; border: 1px solid var(--border-soft);
+      border-radius: 10px; flex: 1; background: var(--bg-cream); outline: none;
     }
 
-    .chat-input-row {
-      display: flex;
-      gap: 0.5rem;
-    }
-
+    .chat-input-row { display: flex; gap: 0.5rem; }
     .chat-input-row input {
-      flex: 1;
-      font-size: 0.9rem;
-      padding: 0.65rem 0.9rem;
-      border: 1px solid var(--border-soft);
-      border-radius: 999px;
-      outline: none;
-      font-family: var(--font-body);
-      background: var(--bg-cream);
+      flex: 1; font-size: 0.9rem; padding: 0.65rem 0.9rem; border: 1px solid var(--border-soft);
+      border-radius: 999px; outline: none; font-family: var(--font-body); background: var(--bg-cream);
     }
 
-    .chat-input-row input:focus {
-      border-color: var(--tea-dark);
-      background: white;
-    }
-
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(42, 30, 23, 0.4);
-      backdrop-filter: blur(4px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      visibility: hidden;
-      opacity: 0;
-      transition: all 0.2s ease;
-    }
-
-    .modal-overlay.active {
-      visibility: visible;
-      opacity: 1;
-    }
-
-    .modal-card {
-      background: white;
-      border-radius: 28px;
-      padding: 2rem;
-      max-width: 520px;
-      width: 90%;
-      border: 2px solid var(--border-soft);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.12);
-    }
-
-    .modal-card h3 {
-      font-family: var(--font-heading);
-      font-size: 1.4rem;
-      margin-bottom: 0.5rem;
-      color: var(--tea-dark);
-    }
-
-    .code-box {
-      background: var(--pearl-black);
-      color: #97A97C;
-      padding: 0.75rem 1rem;
-      border-radius: 12px;
-      font-family: monospace;
-      font-size: 0.85rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin: 0.5rem 0 1rem;
-    }
-
-    .code-box button {
-      background: rgba(255,255,255,0.2);
-      border: none;
-      color: white;
-      padding: 0.3rem 0.6rem;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.75rem;
+    .btn-send {
+      background: var(--pearl-black); color: white; border: none; font-family: var(--font-heading);
+      padding: 0 1.2rem; border-radius: 999px; cursor: pointer; font-size: 0.95rem;
     }
   </style>
 </head>
 <body>
 
   <header>
-    <a href="#" class="brand">
+    <a href="index.html" class="brand">
       🧋 BobaStream <span>LIVE</span>
     </a>
-    <div class="header-actions">
-      <button class="btn btn-outline" id="obsGuideBtn">🎥 OBS Setup</button>
-      <button class="btn btn-dark" id="copyShareBtn">🔗 Share Stream</button>
+    <div style="font-size: 0.85rem; font-weight: 600; color: var(--tea-dark);">
+      Enjoy the vibes! ✨
     </div>
   </header>
 
   <main class="main-grid">
     <section class="stage-container">
-      <div class="video-viewport" id="viewport">
+      <div class="video-viewport">
+        <video id="streamVideo" autoplay playsinline controls></video>
         <canvas id="streamCanvas"></canvas>
-        <video id="streamVideo" autoplay playsinline muted></video>
-        <iframe id="streamIframe" allowfullscreen frameborder="0"></iframe>
 
         <div class="reaction-particle-layer" id="particleLayer"></div>
 
         <div class="video-badges">
-          <div class="badge badge-live">LIVE</div>
-          <div class="badge" id="viewerBadge">👥 1 Sipper</div>
-          <div class="badge" id="audioBadge">🔊 Stereo</div>
+          <div class="badge badge-live">DIRECT LIVE</div>
+          <div class="badge">👥 Sipper Lounge</div>
         </div>
       </div>
 
-      <div class="stream-controls-bar">
+      <div class="stream-meta-card">
         <div class="stream-info">
-          <h2>Tapioca Chill Room 🧋✨</h2>
-          <p>Playing chill beats, live streaming from OBS Studio</p>
-        </div>
-        <div class="ingest-selector">
-          <label style="font-size: 0.85rem; font-weight:600;">Feed:</label>
-          <select id="feedSourceSelect">
-            <option value="canvas">Interactive Canvas (Demo)</option>
-            <option value="twitch">Twitch Stream Embed</option>
-            <option value="youtube">YouTube Live Embed</option>
-            <option value="hls">Custom HLS (.m3u8)</option>
-            <option value="webcam">OBS Virtual Cam / Webcam</option>
-          </select>
-          <input type="text" id="feedInput" placeholder="Twitch username or Video ID" style="display:none;" />
-          <button class="btn btn-tea" id="applyFeedBtn" style="display:none;">Load</button>
+          <h2>Tapioca Chill Room 🧋</h2>
+          <p>Direct livestream feed from OBS Studio | Low-Latency</p>
         </div>
       </div>
 
       <div class="reaction-action-dock">
         <div class="combo-banner">
-          <span>Spam reactions! 🚀</span>
+          <span>Spam tap reactions! 🚀</span>
           <span id="comboIndicator">x1 Chill Sip</span>
         </div>
         <div class="reaction-buttons-grid">
@@ -628,7 +408,7 @@
     <aside class="chat-panel">
       <div class="chat-header">
         <h3>💬 Boba Lounge Chat</h3>
-        <span style="font-size: 0.75rem; background: var(--matcha-green); color: white; padding: 0.2rem 0.5rem; border-radius: 999px;">Sync Active</span>
+        <span style="font-size: 0.75rem; background: var(--matcha-green); color: white; padding: 0.2rem 0.5rem; border-radius: 999px;">Live</span>
       </div>
       <div class="chat-body" id="chatBody"></div>
       <div class="chat-footer">
@@ -638,38 +418,19 @@
             <option value="🧋">🧋 Milk Tea</option>
             <option value="🍵">🍵 Matcha</option>
             <option value="🍓">🍓 Strawberry</option>
-            <option value="🐻">🐻 Brown Bear</option>
+            <option value="🐻">🐻 Bear</option>
           </select>
         </div>
         <form id="chatForm" class="chat-input-row">
-          <input type="text" id="chatMsgInput" placeholder="Send a bubbly message..." maxlength="200" autocomplete="off" />
-          <button type="submit" class="btn btn-dark">Send</button>
+          <input type="text" id="chatMsgInput" placeholder="Send a message to stream..." maxlength="200" autocomplete="off" />
+          <button type="submit" class="btn-send">Send</button>
         </form>
       </div>
     </aside>
   </main>
 
-  <div class="modal-overlay" id="obsModal">
-    <div class="modal-card">
-      <h3>🎥 Connect OBS Studio to BobaStream</h3>
-      <p style="font-size: 0.9rem; color: #555; margin-bottom: 1rem;">
-        You can pipe your live OBS broadcast into BobaStream using either of these quick methods:
-      </p>
-
-      <strong style="font-size: 0.9rem;">Option 1: Stream to Twitch / YouTube (Zero Lag & Free)</strong>
-      <p style="font-size: 0.85rem; color: #666; margin: 0.4rem 0;">1. Stream from OBS to your Twitch or YouTube account.<br>2. Select Twitch/YouTube on the feed dropdown and type your channel name.</p>
-
-      <strong style="font-size: 0.9rem; margin-top: 0.8rem; display:block;">Option 2: OBS Virtual Camera</strong>
-      <p style="font-size: 0.85rem; color: #666; margin: 0.4rem 0;">1. In OBS, click <strong>Start Virtual Camera</strong>.<br>2. On BobaStream, switch feed to <strong>OBS Virtual Cam / Webcam</strong>.</p>
-
-      <div style="text-align: right; margin-top: 1.5rem;">
-        <button class="btn btn-dark" id="closeObsModal">Got it!</button>
-      </div>
-    </div>
-  </div>
-
   <script>
-    // --- Synthetic Audio Context for Bubble Pops ---
+    // Audio synthesis pop
     let audioCtx = null;
     function playBubblePop() {
       try {
@@ -690,143 +451,7 @@
       } catch (e) {}
     }
 
-    // --- Floating Canvas Pearls Animation ---
-    const canvas = document.getElementById('streamCanvas');
-    const ctx = canvas.getContext('2d');
-    let pearls = [];
-
-    function resizeCanvas() {
-      canvas.width = canvas.parentElement.clientWidth;
-      canvas.height = canvas.parentElement.clientHeight;
-    }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-
-    for (let i = 0; i < 28; i++) {
-      pearls.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        r: 12 + Math.random() * 18,
-        vy: 0.4 + Math.random() * 0.8,
-        sway: Math.random() * Math.PI * 2,
-        swaySpeed: 0.02 + Math.random() * 0.02
-      });
-    }
-
-    function animateStage() {
-      if (canvas.style.display !== 'none') {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Milk tea gradient background
-        const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        grad.addColorStop(0, '#D4B89B');
-        grad.addColorStop(1, '#8A5A36');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // Render floating tapioca pearls
-        pearls.forEach(p => {
-          p.y -= p.vy;
-          p.sway += p.swaySpeed;
-          const currentX = p.x + Math.sin(p.sway) * 15;
-          if (p.y < -p.r) {
-            p.y = canvas.height + p.r;
-            p.x = Math.random() * canvas.width;
-          }
-
-          ctx.beginPath();
-          ctx.arc(currentX, p.y, p.r, 0, Math.PI * 2);
-          ctx.fillStyle = '#1A1412';
-          ctx.fill();
-
-          // Pearl glossy reflection
-          ctx.beginPath();
-          ctx.arc(currentX - p.r * 0.3, p.y - p.r * 0.3, p.r * 0.25, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
-          ctx.fill();
-        });
-
-        // Stage Title
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 32px Fredoka, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('🧋 BobaStream Live Stage', canvas.width / 2, canvas.height / 2 - 10);
-        ctx.font = '16px Plus Jakarta Sans, sans-serif';
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-        ctx.fillText('Broadcasting with smooth milk-tea energy', canvas.width / 2, canvas.height / 2 + 25);
-      }
-      requestAnimationFrame(animateStage);
-    }
-    requestAnimationFrame(animateStage);
-
-    // --- Video Source Switcher ---
-    const feedSelect = document.getElementById('feedSourceSelect');
-    const feedInput = document.getElementById('feedInput');
-    const applyFeedBtn = document.getElementById('applyFeedBtn');
-    const streamVideo = document.getElementById('streamVideo');
-    const streamIframe = document.getElementById('streamIframe');
-
-    feedSelect.addEventListener('change', (e) => {
-      const mode = e.target.value;
-      if (mode === 'twitch' || mode === 'youtube' || mode === 'hls') {
-        feedInput.style.display = 'inline-block';
-        applyFeedBtn.style.display = 'inline-block';
-        feedInput.placeholder = mode === 'twitch' ? 'Twitch username' : mode === 'youtube' ? 'YouTube Video ID' : 'https://.../index.m3u8';
-      } else {
-        feedInput.style.display = 'none';
-        applyFeedBtn.style.display = 'none';
-        activateFeedMode(mode);
-      }
-    });
-
-    applyFeedBtn.addEventListener('click', () => {
-      activateFeedMode(feedSelect.value, feedInput.value.trim());
-    });
-
-    function activateFeedMode(mode, targetVal = '') {
-      canvas.style.display = 'none';
-      streamVideo.style.display = 'none';
-      streamIframe.style.display = 'none';
-
-      if (streamVideo.srcObject) {
-        streamVideo.srcObject.getTracks().forEach(t => t.stop());
-        streamVideo.srcObject = null;
-      }
-
-      if (mode === 'canvas') {
-        canvas.style.display = 'block';
-      } else if (mode === 'twitch') {
-        streamIframe.style.display = 'block';
-        const channel = targetVal || 'twitch';
-        const host = window.location.hostname || 'localhost';
-        streamIframe.src = `https://player.twitch.tv/?channel=${channel}&parent=${host}&muted=false`;
-      } else if (mode === 'youtube') {
-        streamIframe.style.display = 'block';
-        const id = targetVal || 'jfKfPfyJRdk';
-        streamIframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&live=1`;
-      } else if (mode === 'webcam') {
-        streamVideo.style.display = 'block';
-        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-          .then(stream => {
-            streamVideo.srcObject = stream;
-          })
-          .catch(err => {
-            alert('Camera access denied or no virtual camera found.');
-            canvas.style.display = 'block';
-          });
-      } else if (mode === 'hls') {
-        streamVideo.style.display = 'block';
-        if (Hls.isSupported()) {
-          const hls = new Hls();
-          hls.loadSource(targetVal);
-          hls.attachMedia(streamVideo);
-        } else if (streamVideo.canPlayType('application/vnd.apple.mpegurl')) {
-          streamVideo.src = targetVal;
-        }
-      }
-    }
-
-    // --- Emoji Particle Spawner ---
+    // Reaction particles
     const particleLayer = document.getElementById('particleLayer');
     const emojisMap = { heart: '❤️', boba: '🧋', laugh: '😂', fire: '🔥', sparkles: '✨', angry: '😡' };
 
@@ -838,12 +463,11 @@
       el.style.bottom = '20px';
       particleLayer.appendChild(el);
       playBubblePop();
-      setTimeout(() => el.remove(), 2800);
+      setTimeout(() => el.remove(), 2600);
     }
 
-    // Reaction spam click handling
     let combo = 0;
-    let comboResetTimer = null;
+    let comboTimer = null;
     const comboIndicator = document.getElementById('comboIndicator');
 
     document.querySelectorAll('.react-btn').forEach(btn => {
@@ -851,39 +475,33 @@
         const type = btn.getAttribute('data-type');
         spawnFloatingEmoji(type);
 
-        // Optimistic local counter bump
         const badge = btn.querySelector('.counter');
         badge.textContent = parseInt(badge.textContent || '0') + 1;
 
-        // Combo system
         combo++;
-        clearTimeout(comboResetTimer);
+        clearTimeout(comboTimer);
         comboIndicator.textContent = `x${combo} ${combo > 20 ? '🔥 BOBA TSUNAMI' : combo > 10 ? '⚡ TAPIOCA RUSH' : 'Sip'}`;
-        comboResetTimer = setTimeout(() => {
+        comboTimer = setTimeout(() => {
           combo = 0;
           comboIndicator.textContent = 'x1 Chill Sip';
         }, 2200);
 
-        // Global Firestore call if connected
-        if (window.incrementReaction) {
-          window.incrementReaction(type);
-        }
+        if (window.incrementReaction) window.incrementReaction(type);
       });
     });
 
-    // --- Chat Rendering ---
+    // Chat rendering
     const chatBody = document.getElementById('chatBody');
-    const renderedMsgIds = new Set();
-
     window.renderChatMessage = function(name, text, badge, avatar) {
       const msgDiv = document.createElement('div');
       msgDiv.className = 'chat-msg';
+      const isHost = badge === 'HOST';
       msgDiv.innerHTML = `
         <div class="chat-avatar">${avatar || '🧋'}</div>
-        <div class="chat-content">
+        <div class="chat-content" style="${isHost ? 'background: #FFE8D6; border: 1px solid var(--accent-coral);' : ''}">
           <div class="chat-author">
             ${escapeHTML(name || 'Anonymous')}
-            <span class="chat-badge">${escapeHTML(badge || 'Sipper')}</span>
+            <span class="chat-badge ${isHost ? 'badge-host' : ''}">${escapeHTML(badge || 'Sipper')}</span>
           </div>
           <div class="chat-text">${escapeHTML(text)}</div>
         </div>
@@ -893,19 +511,9 @@
     };
 
     function escapeHTML(str) {
-      return String(str).replace(/[&<>'"]/g, tag => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        "'": '&#39;',
-        '"': '&quot;'
-      }[tag] || tag));
+      return String(str).replace(/[&<>'"]/g, t => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[t] || t));
     }
 
-    // Initial greeting
-    window.renderChatMessage('BobaBot', 'Welcome to BobaStream! Say hi or tap a bubble reaction! 🧋', 'BOT', '🤖');
-
-    // Chat form submit
     const chatForm = document.getElementById('chatForm');
     const chatMsgInput = document.getElementById('chatMsgInput');
     const userNameInput = document.getElementById('userNameInput');
@@ -917,33 +525,32 @@
       const name = userNameInput.value.trim() || 'ChillSipper';
       const avatar = userAvatarSelect.value;
       if (!text) return;
-
       chatMsgInput.value = '';
 
       if (window.sendGlobalChat) {
         window.sendGlobalChat(name, text, 'Sipper', avatar);
       } else {
-        // Fallback local render if Firebase is offline
         window.renderChatMessage(name, text, 'Sipper', avatar);
       }
     });
 
-    // Modal controls
-    const obsModal = document.getElementById('obsModal');
-    document.getElementById('obsGuideBtn').addEventListener('click', () => obsModal.classList.add('active'));
-    document.getElementById('closeObsModal').addEventListener('click', () => obsModal.classList.remove('active'));
-    obsModal.addEventListener('click', (e) => {
-      if (e.target === obsModal) obsModal.classList.remove('active');
-    });
-
-    // Share button
-    document.getElementById('copyShareBtn').addEventListener('click', () => {
-      navigator.clipboard.writeText(window.location.href);
-      alert('Stream link copied to clipboard!');
-    });
+    // Video Player Ingest Loader
+    function loadHlsStream(streamUrl) {
+      const video = document.getElementById('streamVideo');
+      if (Hls.isSupported()) {
+        const hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+        hls.loadSource(streamUrl);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(() => {}));
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = streamUrl;
+        video.addEventListener('loadedmetadata', () => video.play().catch(() => {}));
+      }
+    }
+    window.loadHlsStream = loadHlsStream;
   </script>
 
-  <!-- Firebase Global Sync Script -->
+  <!-- Firebase Sync Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { 
@@ -964,11 +571,19 @@
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
 
-      // 1. Realtime Chat Messages
+      // 1. Fetch Stream Config (Broadcaster can update this live from stream.html)
+      const configDoc = doc(db, "stream_stats", "config");
+      onSnapshot(configDoc, (snap) => {
+        if (snap.exists() && snap.data().hlsUrl) {
+          window.loadHlsStream(snap.data().hlsUrl);
+        }
+      });
+
+      // 2. Chat Sync
       const chatCol = collection(db, "chat_messages");
       const chatQuery = query(chatCol, orderBy("timestamp", "asc"), limit(40));
-
       const processedIds = new Set();
+
       onSnapshot(chatQuery, (snapshot) => {
         snapshot.docChanges().forEach((change) => {
           if (change.type === "added") {
@@ -976,9 +591,7 @@
             if (!processedIds.has(id)) {
               processedIds.add(id);
               const data = change.doc.data();
-              if (window.renderChatMessage) {
-                window.renderChatMessage(data.name, data.text, data.badge, data.avatar);
-              }
+              window.renderChatMessage(data.name, data.text, data.badge, data.avatar);
             }
           }
         });
@@ -986,22 +599,17 @@
 
       window.sendGlobalChat = async function(name, text, badge, avatar) {
         if (!text || !text.trim()) return;
-        try {
-          await addDoc(chatCol, {
-            name: name || "Anonymous",
-            text: text.trim(),
-            badge: badge || "Sipper",
-            avatar: avatar || "🧋",
-            timestamp: serverTimestamp()
-          });
-        } catch (e) {
-          console.error("Firebase chat write failed:", e);
-        }
+        await addDoc(chatCol, {
+          name: name || "Anonymous",
+          text: text.trim(),
+          badge: badge || "Sipper",
+          avatar: avatar || "🧋",
+          timestamp: serverTimestamp()
+        });
       };
 
-      // 2. Realtime Spam Reactions
+      // 3. Live Reaction Taps
       const statsDocRef = doc(db, "stream_stats", "reactions");
-
       onSnapshot(statsDocRef, (snap) => {
         if (snap.exists()) {
           const data = snap.data();
@@ -1012,20 +620,15 @@
         }
       });
 
-      window.incrementReaction = async function(reactionType) {
+      window.incrementReaction = async function(type) {
         try {
-          await updateDoc(statsDocRef, {
-            [reactionType]: increment(1),
-            total: increment(1)
-          });
+          await updateDoc(statsDocRef, { [type]: increment(1), total: increment(1) });
         } catch (err) {
-          if (err.code === "not-found") {
-            await setDoc(statsDocRef, { [reactionType]: 1, total: 1 });
-          }
+          if (err.code === "not-found") await setDoc(statsDocRef, { [type]: 1, total: 1 });
         }
       };
     } catch (e) {
-      console.warn("Firebase initialization skipped or offline:", e);
+      console.warn("Firebase offline:", e);
     }
   </script>
 </body>
