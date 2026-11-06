@@ -37,6 +37,8 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
+      position: relative;
     }
 
     header {
@@ -101,12 +103,13 @@
       padding: 1.25rem;
       display: flex;
       flex-direction: column;
+      position: relative;
     }
 
     .view-section { display: none; }
     .view-section.active { display: flex; flex: 1; flex-direction: column; }
 
-    /* Live Layout */
+    /* Live Stream Column Layout */
     .live-layout {
       display: grid;
       grid-template-columns: 1fr 360px;
@@ -122,6 +125,7 @@
       display: flex;
       flex-direction: column;
       gap: 1rem;
+      position: relative;
     }
 
     .video-wrapper {
@@ -174,7 +178,44 @@
       box-shadow: 0 0 6px rgba(46, 125, 50, 0.6);
     }
 
-    /* Chat Layout */
+    /* Chill Sparks Reaction / Spam Bar */
+    .reaction-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      background: var(--card-bg);
+      border: 1.5px solid var(--border-color);
+      border-radius: 16px;
+      padding: 0.75rem 1.25rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .spam-btn {
+      background: linear-gradient(135deg, #FFD180, #FFA726);
+      border: none;
+      border-radius: 999px;
+      padding: 0.65rem 1.4rem;
+      font-size: 1rem;
+      font-weight: 800;
+      color: #3E2723;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(255, 167, 38, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .spam-btn:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 6px 18px rgba(255, 167, 38, 0.5);
+    }
+    .spam-btn:active {
+      transform: translateY(1px) scale(0.96);
+    }
+
+    /* Chat Column Layout */
     .chat-col {
       background: var(--card-bg);
       border: 1.5px solid var(--border-color);
@@ -328,7 +369,7 @@
     }
     .btn-send:hover { background: var(--accent-tea-hover); }
 
-    /* Replay Shelf Layout */
+    /* Replay Archive Layout */
     .replays-container {
       display: flex;
       flex-direction: column;
@@ -409,9 +450,23 @@
       font-size: 0.8rem;
       color: var(--text-muted);
     }
+
+    /* Floating Reactions Canvas */
+    #reactionCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+    }
   </style>
 </head>
 <body>
+
+  <!-- Floating Spark Reactions Canvas -->
+  <canvas id="reactionCanvas"></canvas>
 
   <header>
     <a href="#" class="brand">
@@ -432,18 +487,32 @@
         
         <div class="stream-col">
           <div class="video-wrapper">
-            <!-- Replace channel query with your current stream broadcast if embedding Twitch/Kick/YouTube live -->
+            <!-- Active Stream Video Output (Twitch/Direct Embed) -->
             <iframe 
+              id="liveStreamIframe"
               src="https://player.twitch.tv/?channel=obobatea&parent=bblxxx.rea65048.workers.dev&parent=localhost&muted=false" 
+              allow="autoplay; fullscreen; encrypted-media"
               allowfullscreen>
             </iframe>
+          </div>
+
+          <!-- Chill Sparks Reaction Strip -->
+          <div class="reaction-bar">
+            <div>
+              <h4 style="font-family: var(--font-heading); font-size: 1.05rem; color: var(--accent-boba);">Send Some Boba Sparks! ✨</h4>
+              <p style="font-size: 0.8rem; color: var(--text-muted);">Spam to shower floating boba & love over the stream!</p>
+            </div>
+            <button class="spam-btn" id="btnSpamSparks">
+              <span>🧋</span>
+              <span>Spam Sparks! ✨</span>
+            </button>
           </div>
 
           <div class="stream-meta-card">
             <div>
               <div class="live-badge"><span class="live-dot"></span> BROADCAST ACTIVE</div>
-              <h1 style="font-family: var(--font-heading); font-size: 1.4rem; margin-top: 0.35rem;">Boba Lounge Broadcast 🧋</h1>
-              <p style="font-size: 0.85rem; color: var(--text-muted);">Pull up a seat, order a milk tea, and hang out!</p>
+              <h1 style="font-family: var(--font-heading); font-size: 1.4rem; margin-top: 0.35rem;" id="activeBroadcastTitle">Bobastream Broadcast 🧋</h1>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">Hello welcome everyone. feel free to explore malaki na kayo</p>
             </div>
           </div>
         </div>
@@ -452,7 +521,7 @@
         <div class="chat-col">
           <div class="chat-head">
             <h3>Lounge Chat</h3>
-            <span class="live-badge"><span class="live-dot"></span> Live chat</span>
+            <span class="live-badge"><span class="live-dot"></span> Live</span>
           </div>
 
           <div class="chat-body" id="audienceChatBody"></div>
@@ -477,9 +546,11 @@
       <div class="replays-container">
         
         <div class="replay-player-card">
-          <h2 style="font-family: var(--font-heading); font-size: 1.35rem;" id="activeReplayTitle">🎬 PBB Live Replay</h2>
+          <h2 style="font-family: var(--font-heading); font-size: 1.35rem;" id="activeReplayTitle">🎬 Stream Replay Archive</h2>
           <div class="video-wrapper">
+            <!-- Iframe for YouTube/Twitch VODs -->
             <iframe id="replayIframePlayer" src="" allow="autoplay; fullscreen; encrypted-media" style="display:none;"></iframe>
+            <!-- Native HTML5 Video for Direct Dropbox/MP4 streaming (Eliminates download prompt) -->
             <video id="replayNativeVideo" controls playsinline preload="metadata" style="display:none;"></video>
           </div>
           <p style="font-size: 0.9rem; color: var(--text-muted);" id="activeReplayDesc">Select any recording below to watch.</p>
@@ -523,7 +594,14 @@
       })[m]);
     }
 
-    // --- 2. User Profile Setup ---
+    // --- 2. Live Stream Feed Loader ---
+    const liveStreamIframe = document.getElementById("liveStreamIframe");
+    const savedStreamUrl = localStorage.getItem("bobastream_feed_url");
+    if (savedStreamUrl) {
+      liveStreamIframe.src = savedStreamUrl;
+    }
+
+    // --- 3. User Identity Config ---
     const avatarList = ['🧋', '🍵', '🧃', '✨', '🍡', '🥞', '🧸', '🌸', '☕', '🍰'];
     let avatarIndex = 0;
     let myAvatar = localStorage.getItem("boba_avatar") || '🧋';
@@ -550,8 +628,7 @@
       }
     });
 
-    // --- 3. Ably Realtime Chat Setup ---
-    // Using your Root Key (6M messages/month free, 0 Firebase Reads)
+    // --- 4. Ably Realtime Chat & Sparks Connection ---
     const ABLY_KEY = "zdFIEA.lFwawQ:3hO05NbdXIUZJ-K3BkyCIWT2RaeKz4fPg40qakSsc40";
     const ably = new Ably.Realtime({ key: ABLY_KEY });
     const chatChannel = ably.channels.get("bobastream_lounge");
@@ -560,7 +637,7 @@
     const audienceChatInput = document.getElementById("audienceChatInput");
     const btnAudienceSend = document.getElementById("btnAudienceSend");
 
-    // Receive incoming live messages
+    // Receive chat messages
     chatChannel.subscribe("message", (msg) => {
       const data = msg.data;
       renderAudienceMsg(msg.id, data.name, data.text, data.badge, data.avatar);
@@ -615,22 +692,90 @@
       if (e.key === "Enter") sendChatMessage();
     });
 
-    // --- 4. Replays Shelf (Auto-Direct Dropbox Streaming Fix) ---
+    // --- 5. Floating Sparks Reaction Engine & Spam Button ---
+    const canvas = document.getElementById("reactionCanvas");
+    const ctx = canvas.getContext("2d");
+    let particles = [];
+    const sparkIcons = ['🧋', '✨', '💖', '🍵', '🌸', '⭐', '🧃'];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    function spawnReactionBurst(x, y, count = 5) {
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: x || (window.innerWidth * 0.4 + Math.random() * (window.innerWidth * 0.2)),
+          y: y || (window.innerHeight - 80),
+          vx: (Math.random() - 0.5) * 4,
+          vy: -(Math.random() * 5 + 4),
+          icon: sparkIcons[Math.floor(Math.random() * sparkIcons.length)],
+          size: Math.random() * 14 + 20,
+          opacity: 1,
+          rot: Math.random() * 360,
+          rotSpeed: (Math.random() - 0.5) * 6
+        });
+      }
+    }
+
+    function animateReactions() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy -= 0.05;
+        p.opacity -= 0.012;
+        p.rot += p.rotSpeed;
+
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.opacity);
+        ctx.font = `${p.size}px sans-serif`;
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rot * Math.PI) / 180);
+        ctx.fillText(p.icon, -p.size / 2, p.size / 2);
+        ctx.restore();
+
+        if (p.opacity <= 0 || p.y < -50) {
+          particles.splice(i, 1);
+        }
+      }
+      requestAnimationFrame(animateReactions);
+    }
+    requestAnimationFrame(animateReactions);
+
+    chatChannel.subscribe("spark_burst", () => {
+      spawnReactionBurst(null, null, 6);
+    });
+
+    const btnSpamSparks = document.getElementById("btnSpamSparks");
+    btnSpamSparks.addEventListener("click", () => {
+      const rect = btnSpamSparks.getBoundingClientRect();
+      spawnReactionBurst(rect.left + rect.width / 2, rect.top, 5);
+      chatChannel.publish("spark_burst", { time: Date.now() });
+    });
+
+    // --- 6. Live Replay Shelf & Direct Dropbox Player ---
     const replayGridList = document.getElementById("replayGridList");
     const replayIframe = document.getElementById("replayIframePlayer");
     const replayNativeVideo = document.getElementById("replayNativeVideo");
     const activeReplayTitle = document.getElementById("activeReplayTitle");
     const activeReplayDesc = document.getElementById("activeReplayDesc");
 
-    // Local array of replays (add more items or hook to a static JSON file anytime)
-    const replaysData = [
-      {
-        title: "PBB Live Nov 6 Part 1 🧋",
-        videoUrl: "https://www.dropbox.com/scl/fi/w7z2x69tvz9vehzeilzx3/Pbb-live-Nov-6-Part-1.mp4?rlkey=2w793wvd9lwjfn4076bh1eddd&st=t5yoeuvq&raw=1",
-        meta: "Nov 6 • Part 1",
-        desc: "Pinoy Big Brother Live broadcast recording session."
-      }
-    ];
+    let storedReplays = JSON.parse(localStorage.getItem("bobastream_replays") || "[]");
+    if (storedReplays.length === 0) {
+      storedReplays = [
+        {
+          title: "PBB Live Nov 6 Part 1 🧋",
+          url: "https://www.dropbox.com/scl/fi/w7z2x69tvz9vehzeilzx3/Pbb-live-Nov-6-Part-1.mp4?rlkey=2w793wvd9lwjfn4076bh1eddd&st=t5yoeuvq&raw=1",
+          meta: "Nov 6 • Part 1",
+          desc: "Pinoy Big Brother Live broadcast recording session."
+        }
+      ];
+    }
 
     function playReplaySource(url, title, desc) {
       activeReplayTitle.innerText = title;
@@ -638,13 +783,13 @@
 
       let cleanUrl = (url || "").trim();
 
-      // Convert Dropbox links to pure raw streams
+      // Ensure Dropbox links use raw=1
       if (cleanUrl.includes("dropbox.com")) {
         cleanUrl = cleanUrl.replace(/[?&]dl=0/, "").replace(/[?&]raw=1/, "");
         cleanUrl += cleanUrl.includes("?") ? "&raw=1" : "?raw=1";
       }
 
-      // If direct MP4/Dropbox, use the native <video> tag so it streams instead of prompting download
+      // If direct MP4 or Dropbox, stream via HTML5 <video> tag
       if (cleanUrl.includes(".mp4") || cleanUrl.includes("dropbox.com")) {
         replayIframe.style.display = "none";
         replayIframe.src = "";
@@ -653,7 +798,7 @@
         replayNativeVideo.src = cleanUrl;
         replayNativeVideo.load();
       } else {
-        // Embed links (e.g. YouTube/Twitch VODs)
+        // Embed links (e.g. YouTube/Twitch)
         replayNativeVideo.pause();
         replayNativeVideo.style.display = "none";
         replayNativeVideo.src = "";
@@ -665,9 +810,9 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    // Render replay shelf
+    // Render replay shelf cards
     replayGridList.innerHTML = "";
-    replaysData.forEach((item, index) => {
+    storedReplays.forEach((item, index) => {
       const card = document.createElement("div");
       card.className = "replay-card";
       card.innerHTML = `
@@ -682,11 +827,11 @@
       `;
 
       card.addEventListener("click", () => {
-        playReplaySource(item.videoUrl, item.title, item.desc);
+        playReplaySource(item.url || item.videoUrl, item.title, item.desc || item.meta);
       });
 
       if (index === 0) {
-        playReplaySource(item.videoUrl, item.title, item.desc);
+        playReplaySource(item.url || item.videoUrl, item.title, item.desc || item.meta);
       }
 
       replayGridList.appendChild(card);

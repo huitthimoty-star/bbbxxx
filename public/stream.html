@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Ably Realtime Client (No Quota Limits) -->
+  <!-- Ably Realtime Client (Zero Quota Limits) -->
   <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
 
   <style>
@@ -100,7 +100,7 @@
       border: 1.5px solid var(--border-color);
       border-radius: 14px;
       box-shadow: var(--shadow-md);
-      width: 210px;
+      width: 220px;
       z-index: 100;
       padding: 0.4rem;
       flex-direction: column;
@@ -322,7 +322,7 @@
       <!-- SECTION A: STREAM SETUP -->
       <div class="card" id="cardStreamSetup">
         <h2>🎥 Live Stream Connection</h2>
-        <p style="font-size: 0.85rem; color: var(--text-muted);">Paste the embed URL or video stream link for your audience player.</p>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Paste the embed URL or video stream link for your audience player. Updating pushes instantly to all viewers.</p>
         
         <div class="form-group">
           <label>Stream / Video Embed URL</label>
@@ -330,7 +330,7 @@
         </div>
 
         <div style="display: flex; gap: 0.5rem;">
-          <button class="btn" id="btnUpdateStream">Update Stream Feed</button>
+          <button class="btn" id="btnUpdateStream">Broadcast Stream Feed Live</button>
         </div>
 
         <div style="margin-top: 0.5rem;">
@@ -390,7 +390,10 @@
     <!-- RIGHT PANEL: STUDIO LIVE CHAT (ABLY WEBSOCKET) -->
     <div class="studio-chat-box">
       <div class="chat-head">
-        <h3 style="font-family: var(--font-heading);">Studio Chat Feed</h3>
+        <div>
+          <h3 style="font-family: var(--font-heading);">Studio Chat Feed</h3>
+          <div style="font-size: 0.75rem; color: var(--text-muted);" id="sparkCounterText">✨ 0 Sparks received</div>
+        </div>
         <span style="font-size: 0.75rem; background: #E8F5E9; color: #2E7D32; padding: 0.2rem 0.5rem; border-radius: 999px; font-weight: 800;">Ably Realtime</span>
       </div>
 
@@ -437,20 +440,35 @@
       cardReplaysSetup.scrollIntoView({ behavior: "smooth" });
     });
 
-    // --- 2. Live Stream Update ---
+    // --- 2. Ably Realtime Setup ---
+    const ABLY_KEY = "zdFIEA.lFwawQ:3hO05NbdXIUZJ-K3BkyCIWT2RaeKz4fPg40qakSsc40";
+    const ably = new Ably.Realtime({ key: ABLY_KEY });
+    const chatChannel = ably.channels.get("bobastream_lounge");
+
+    // --- 3. Live Stream Broadcast Controls ---
     const inputStreamUrl = document.getElementById("inputStreamUrl");
     const btnUpdateStream = document.getElementById("btnUpdateStream");
     const studioPreviewIframe = document.getElementById("studioPreviewIframe");
 
+    const savedFeed = localStorage.getItem("bobastream_feed_url");
+    if (savedFeed) {
+      inputStreamUrl.value = savedFeed;
+      studioPreviewIframe.src = savedFeed;
+    }
+
     btnUpdateStream.addEventListener("click", () => {
       const url = inputStreamUrl.value.trim();
       if (!url) return;
+
       studioPreviewIframe.src = url;
       localStorage.setItem("bobastream_feed_url", url);
-      alert("Stream preview updated!");
+
+      // Broadcast update live to all active audience tabs
+      chatChannel.publish("stream_update", { streamUrl: url });
+      alert("Stream feed broadcasted to all viewers!");
     });
 
-    // --- 3. Live Replay Manager ---
+    // --- 4. Live Replay Manager ---
     const replayTitle = document.getElementById("replayTitle");
     const replayUrl = document.getElementById("replayUrl");
     const replayMeta = document.getElementById("replayMeta");
@@ -460,14 +478,13 @@
 
     let savedReplays = JSON.parse(localStorage.getItem("bobastream_replays") || "[]");
 
-    // Initialize with default PBB replay if empty
     if (savedReplays.length === 0) {
       savedReplays.push({
         id: "rep_" + Date.now(),
         title: "PBB Live Nov 6 Part 1 🧋",
         url: "https://www.dropbox.com/scl/fi/w7z2x69tvz9vehzeilzx3/Pbb-live-Nov-6-Part-1.mp4?rlkey=2w793wvd9lwjfn4076bh1eddd&st=t5yoeuvq&raw=1",
         meta: "Nov 6 • Part 1",
-        desc: "Pinoy Big Brother Live session recording."
+        desc: "Pinoy Big Brother Live broadcast recording session."
       });
       localStorage.setItem("bobastream_replays", JSON.stringify(savedReplays));
     }
@@ -507,7 +524,6 @@
         return;
       }
 
-      // Convert standard Dropbox dl=0 links to direct streaming raw=1 links automatically
       if (url.includes("dropbox.com")) {
         url = url.replace(/[?&]dl=0/, "").replace(/[?&]raw=1/, "");
         url += url.includes("?") ? "&raw=1" : "?raw=1";
@@ -528,15 +544,13 @@
 
     renderReplays();
 
-    // --- 4. Ably Realtime Studio Chat ---
-    const ABLY_KEY = "zdFIEA.lFwawQ:3hO05NbdXIUZJ-K3BkyCIWT2RaeKz4fPg40qakSsc40";
-    const ably = new Ably.Realtime({ key: ABLY_KEY });
-    const chatChannel = ably.channels.get("bobastream_lounge");
-
+    // --- 5. Studio Realtime Chat Feed & Sparks Counter ---
     const studioChatBody = document.getElementById("studioChatBody");
     const hostChatInput = document.getElementById("hostChatInput");
     const btnHostSend = document.getElementById("btnHostSend");
     const btnClearAllChat = document.getElementById("btnClearAllChat");
+    const sparkCounterText = document.getElementById("sparkCounterText");
+    let totalSparks = 0;
 
     chatChannel.subscribe("message", (msg) => {
       const data = msg.data;
@@ -544,10 +558,15 @@
       studioChatBody.scrollTop = studioChatBody.scrollHeight;
     });
 
+    chatChannel.subscribe("spark_burst", () => {
+      totalSparks += 5;
+      sparkCounterText.innerText = `✨ ${totalSparks} Sparks received`;
+    });
+
     chatChannel.subscribe("clear_chat", () => {
       studioChatBody.innerHTML = `
         <div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 0.5rem 0;">
-          🧹 Chat room was cleared.
+          🧹 Chat room cleared.
         </div>
       `;
     });
