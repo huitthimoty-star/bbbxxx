@@ -804,7 +804,6 @@
     const ABLY_KEY = "zdFIEA.lFwawQ:3hO05NbdXIUZJ-K3BkyCIWT2RaeKz4fPg40qakSsc40";
     const AblyLib = window.Ably || Ably;
     const ablyClient = new AblyLib.Realtime({ key: ABLY_KEY, echoMessages: true });
-    const chatChannel = ablyClient.channels.get("bobastream_lounge");
 
     const renderedDocIds = new Set();
 
