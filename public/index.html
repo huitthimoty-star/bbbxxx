@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-  <!-- Scaledrone Realtime WebSockets -->
-  <script src="https://cdn.scaledrone.com/scaledrone.min.js"></script>
+  <!-- Scaledrone Official CDN -->
+  <script type="text/javascript" src="https://cdn.scaledrone.com/scaledrone.min.js"></script>
   <style>
     :root {
       --bg-cream: #1A1614;
@@ -37,7 +37,6 @@
       overflow-x: hidden;
     }
 
-    /* Header & 3-Dots Dropdown */
     header {
       display: flex;
       justify-content: space-between;
@@ -120,11 +119,9 @@
     .dropdown-item:hover { background: #2E2722; }
     .dropdown-item.active { background: #382721; color: var(--accent); }
 
-    /* Section Views */
     .view-section { display: none; width: 100%; }
     .view-section.active { display: block; }
 
-    /* Live View Layout */
     .main-grid {
       display: grid;
       grid-template-columns: 2.3fr 1fr;
@@ -219,7 +216,6 @@
       100% { transform: translateY(-110px) scale(1.4) rotate(20deg); opacity: 0; }
     }
 
-    /* Live Chat */
     .chat-col {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -323,7 +319,6 @@
       cursor: pointer;
     }
 
-    /* Replays View Layout */
     .replays-container {
       display: flex;
       flex-direction: column;
@@ -387,7 +382,6 @@
     .replay-title { font-family: var(--font-heading); font-size: 1.05rem; color: var(--boba-tea); }
     .replay-meta { font-size: 0.78rem; color: var(--text-muted); }
 
-    /* Modal for Name & Avatar */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -428,7 +422,6 @@
 </head>
 <body>
 
-  <!-- Header with Brand & 3-Dots Navigation -->
   <header>
     <div class="brand">
       <span style="font-size: 1.6rem;">🧋</span>
@@ -441,10 +434,8 @@
         Enjoy the tea! ✨
       </div>
 
-      <!-- 3-Dots Menu Trigger -->
       <button class="btn-menu-dots" id="btnMenuDots" title="Menu">⋮</button>
 
-      <!-- 3-Dots Dropdown Options -->
       <div class="dropdown-menu" id="navDropdown">
         <button class="dropdown-item active" id="tabLive">
           <span>🔴</span> Live Section
@@ -487,7 +478,7 @@
       <div class="chat-col">
         <div class="chat-head">
           <h3>Boba Lounge Chat</h3>
-          <span style="font-size: 0.75rem; background: #1B3822; color: #72E28B; padding: 0.2rem 0.5rem; border-radius: 999px; font-weight: 700;">Active</span>
+          <span id="chatStatusPill" style="font-size: 0.75rem; background: #382721; color: var(--boba-gold); padding: 0.2rem 0.5rem; border-radius: 999px; font-weight: 700;">Connecting...</span>
         </div>
 
         <div class="user-profile-bar">
@@ -508,8 +499,6 @@
   <!-- ================= SUB-WEB 2: LIVE REPLAYS ================= -->
   <section class="view-section" id="sectionReplays">
     <div class="replays-container">
-      
-      <!-- Replay Video Player -->
       <div class="replay-player-card">
         <h2 style="font-family: var(--font-heading); font-size: 1.35rem;" id="activeReplayTitle">🎬 Stream Replay Archive</h2>
         <div class="video-wrapper">
@@ -518,12 +507,10 @@
         <p style="font-size: 0.9rem; color: var(--text-muted);" id="activeReplayDesc">Select any past broadcast below to rewatch the session.</p>
       </div>
 
-      <!-- Dynamic Replays Archive Shelf -->
       <h3 style="font-family: var(--font-heading); font-size: 1.2rem;">Past Broadcasts</h3>
       <div class="replay-grid" id="replayGridList">
-        <p style="font-size: 0.85rem; color: var(--text-muted);" id="noReplaysMsg">Loading replays...</p>
+        <p style="font-size: 0.85rem; color: var(--text-muted);" id="noReplaysMsg">Past broadcasts shelf ready.</p>
       </div>
-
     </div>
   </section>
 
@@ -559,25 +546,7 @@
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { 
-      getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, serverTimestamp, increment 
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    // --- Firebase Configuration ---
-    const firebaseConfig = {
-      apiKey: "AIzaSyB-SAMPLE-REPLACE_WITH_YOUR_KEY",
-      authDomain: "bobastream-65561.firebaseapp.com",
-      projectId: "bobastream-65561",
-      storageBucket: "bobastream-65561.firebasestorage.app",
-      messagingSenderId: "84729104829",
-      appId: "1:84729104829:web:93a4cd2b948cf20"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
+  <script>
     // --- Navigation & 3-Dots Dropdown Setup ---
     const btnMenuDots = document.getElementById("btnMenuDots");
     const navDropdown = document.getElementById("navDropdown");
@@ -596,13 +565,8 @@
       navDropdown.classList.remove("show");
     });
 
-    tabLive.addEventListener("click", () => {
-      switchSubView("live");
-    });
-
-    tabReplays.addEventListener("click", () => {
-      switchSubView("replays");
-    });
+    tabLive.addEventListener("click", () => switchSubView("live"));
+    tabReplays.addEventListener("click", () => switchSubView("replays"));
 
     function switchSubView(view) {
       if (view === "live") {
@@ -623,59 +587,6 @@
       navDropdown.classList.remove("show");
     }
 
-    // --- Dynamic Replays Shelf Listener ---
-    const replayGridList = document.getElementById("replayGridList");
-    const replayIframe = document.getElementById("replayIframePlayer");
-    const activeReplayTitle = document.getElementById("activeReplayTitle");
-    const activeReplayDesc = document.getElementById("activeReplayDesc");
-
-    try {
-      onSnapshot(collection(db, "live_replays"), (snapshot) => {
-        if (snapshot.empty) {
-          replayGridList.innerHTML = `<p style="font-size: 0.9rem; color: var(--text-muted); grid-column: 1/-1; padding: 1.5rem 0;">No replay recordings published yet. Stay tuned for past broadcasts!</p>`;
-          return;
-        }
-
-        replayGridList.innerHTML = "";
-        let first = true;
-
-        snapshot.forEach((docItem) => {
-          const item = docItem.data();
-          const card = document.createElement("div");
-          card.className = "replay-card";
-          
-          card.innerHTML = `
-            <div class="replay-thumb">
-              <span>🧋</span>
-              <span class="replay-duration">${escapeHtml(item.meta || 'VOD')}</span>
-            </div>
-            <div class="replay-details">
-              <h4 class="replay-title">${escapeHtml(item.title)}</h4>
-              <span class="replay-meta">${escapeHtml(item.desc || '')}</span>
-            </div>
-          `;
-
-          card.addEventListener("click", () => {
-            replayIframe.src = item.videoUrl;
-            activeReplayTitle.innerText = item.title;
-            activeReplayDesc.innerText = item.desc || item.meta || "Recorded broadcast on BobaStream.";
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          });
-
-          if (first && !replayIframe.src) {
-            replayIframe.src = item.videoUrl;
-            activeReplayTitle.innerText = item.title;
-            activeReplayDesc.innerText = item.desc || item.meta || "Recorded broadcast on BobaStream.";
-            first = false;
-          }
-
-          replayGridList.appendChild(card);
-        });
-      }, (err) => console.warn("Firestore replays offline/exhausted:", err));
-    } catch (e) {
-      console.warn("Firestore offline:", e);
-    }
-
     // --- Live Stream Elements ---
     const liveIframePlayer = document.getElementById("liveIframePlayer");
     const liveHlsVideo = document.getElementById("liveHlsVideo");
@@ -689,8 +600,9 @@
     const audienceChatBody = document.getElementById("audienceChatBody");
     const audienceChatInput = document.getElementById("audienceChatInput");
     const btnAudienceSend = document.getElementById("btnAudienceSend");
+    const chatStatusPill = document.getElementById("chatStatusPill");
 
-    // Profile Modal Elements
+    // Profile Elements
     const profileModal = document.getElementById("profileModal");
     const btnOpenModal = document.getElementById("btnOpenModal");
     const btnSaveProfile = document.getElementById("btnSaveProfile");
@@ -698,7 +610,7 @@
     const avatarPickerGrid = document.getElementById("avatarPickerGrid");
     const lblProfilePreview = document.getElementById("lblProfilePreview");
 
-    // --- User Profile (Name + Avatar) Management ---
+    // Profile State
     let myName = localStorage.getItem("boba_nick");
     let myAvatar = localStorage.getItem("boba_avatar") || "🧋";
 
@@ -743,45 +655,21 @@
       if (e.target === profileModal) profileModal.style.display = "none";
     });
 
-    // --- 1. Load Cached Stream Info on Refresh ---
+    // --- Stream Persistence on Refresh ---
     let currentStreamUrl = localStorage.getItem("boba_active_url") || "";
     const cachedTitle = localStorage.getItem("boba_room_title");
     const cachedDesc = localStorage.getItem("boba_room_desc");
 
-    if (currentStreamUrl) {
-      loadVideoUrl(currentStreamUrl);
-    }
+    if (currentStreamUrl) loadVideoUrl(currentStreamUrl);
     if (cachedTitle) roomTitleDisplay.innerText = cachedTitle;
     if (cachedDesc) roomDescDisplay.innerText = cachedDesc;
-
-    // Optional Firestore fallback
-    try {
-      onSnapshot(doc(db, "stream_stats", "main"), (snap) => {
-        if (snap.exists()) {
-          const data = snap.data();
-          if (data.title) {
-            roomTitleDisplay.innerText = data.title;
-            localStorage.setItem("boba_room_title", data.title);
-          }
-          if (data.description) {
-            roomDescDisplay.innerText = data.description;
-            localStorage.setItem("boba_room_desc", data.description);
-          }
-          if (data.activeUrl && data.activeUrl !== currentStreamUrl) {
-            currentStreamUrl = data.activeUrl;
-            localStorage.setItem("boba_active_url", data.activeUrl);
-            loadVideoUrl(currentStreamUrl);
-          }
-        }
-      }, (err) => console.warn("Firestore stats listener bypassed:", err));
-    } catch(e) {}
 
     function loadVideoUrl(url) {
       if (!url) return;
       if (url.includes(".m3u8")) {
         liveIframePlayer.style.display = "none";
         liveHlsVideo.style.display = "block";
-        if (Hls.isSupported()) {
+        if (window.Hls && Hls.isSupported()) {
           const hls = new Hls();
           hls.loadSource(url);
           hls.attachMedia(liveHlsVideo);
@@ -791,21 +679,20 @@
       } else {
         liveHlsVideo.style.display = "none";
         liveIframePlayer.style.display = "block";
-        liveIframePlayer.src = url;
+        if (liveIframePlayer.src !== url) {
+          liveIframePlayer.src = url;
+        }
       }
     }
 
-    // --- 2. Scaledrone Realtime Live Room & Feed Broadcast ---
+    // --- Scaledrone WebSocket Engine ---
     const SCALEDRONE_CHANNEL_ID = "YOUR_SCALEDRONE_CHANNEL_ID";
-    const drone = new Scaledrone(SCALEDRONE_CHANNEL_ID, {
-      data: { name: myName, avatar: myAvatar }
-    });
-
     const roomName = "observable-bobastream_lounge";
-    let droneRoom;
+    let drone = null;
+    let droneRoom = null;
     const audienceMsgIds = new Set();
 
-    // Restore cached chat messages so history survives refresh
+    // Restore cached chat history
     const savedChat = JSON.parse(localStorage.getItem("boba_chat_history") || "[]");
     savedChat.forEach(msg => {
       audienceMsgIds.add(msg.id);
@@ -813,77 +700,111 @@
     });
     audienceChatBody.scrollTop = audienceChatBody.scrollHeight;
 
-    drone.on('open', error => {
-      if (error) return console.error("Drone error:", error);
+    function initScaledrone() {
+      const DroneConstructor = window.Scaledrone || window.ScaleDrone;
+      if (!DroneConstructor) {
+        console.error("Scaledrone script not loaded yet.");
+        chatStatusPill.innerText = "Script Error";
+        return;
+      }
 
-      droneRoom = drone.subscribe(roomName);
-
-      // Scaledrone Presence - Active Viewers Tracking
-      droneRoom.on('members', members => {
-        viewerCountDisplay.innerText = `${members.length} ${members.length === 1 ? 'Viewer' : 'Viewers'}`;
+      drone = new DroneConstructor(SCALEDRONE_CHANNEL_ID, {
+        data: { name: myName, avatar: myAvatar }
       });
 
-      droneRoom.on('member_join', () => {
-        const count = droneRoom.members.length;
-        viewerCountDisplay.innerText = `${count} ${count === 1 ? 'Viewer' : 'Viewers'}`;
-      });
+      drone.on('open', error => {
+        if (error) {
+          console.error("Drone open error:", error);
+          chatStatusPill.innerText = "Offline";
+          chatStatusPill.style.background = "#4A2626";
+          chatStatusPill.style.color = "#FF9B9B";
+          return;
+        }
 
-      droneRoom.on('member_leave', () => {
-        const count = droneRoom.members.length;
-        viewerCountDisplay.innerText = `${count} ${count === 1 ? 'Viewer' : 'Viewers'}`;
-      });
+        chatStatusPill.innerText = "Active";
+        chatStatusPill.style.background = "#1B3822";
+        chatStatusPill.style.color = "#72E28B";
 
-      // Handle Live Incoming Data
-      droneRoom.on('data', (data) => {
-        if (!data) return;
+        droneRoom = drone.subscribe(roomName);
 
-        // Instant Stream URL Ingest broadcast from Studio
-        if (data.type === "stream_update") {
-          currentStreamUrl = data.url;
-          localStorage.setItem("boba_active_url", data.url);
-          if (data.title) {
-            roomTitleDisplay.innerText = data.title;
-            localStorage.setItem("boba_room_title", data.title);
+        droneRoom.on('open', err => {
+          if (err) console.error("Room subscribe error:", err);
+        });
+
+        droneRoom.on('members', members => {
+          viewerCountDisplay.innerText = `${members.length} ${members.length === 1 ? 'Viewer' : 'Viewers'}`;
+        });
+
+        droneRoom.on('member_join', () => {
+          const count = droneRoom.members.length;
+          viewerCountDisplay.innerText = `${count} ${count === 1 ? 'Viewer' : 'Viewers'}`;
+        });
+
+        droneRoom.on('member_leave', () => {
+          const count = droneRoom.members.length;
+          viewerCountDisplay.innerText = `${count} ${count === 1 ? 'Viewer' : 'Viewers'}`;
+        });
+
+        droneRoom.on('data', (data) => {
+          if (!data) return;
+
+          // Immediate Live Stream Feed sync from Studio
+          if (data.type === "stream_update") {
+            currentStreamUrl = data.url;
+            localStorage.setItem("boba_active_url", data.url);
+            if (data.title) {
+              roomTitleDisplay.innerText = data.title;
+              localStorage.setItem("boba_room_title", data.title);
+            }
+            if (data.desc) {
+              roomDescDisplay.innerText = data.desc;
+              localStorage.setItem("boba_room_desc", data.desc);
+            }
+            loadVideoUrl(currentStreamUrl);
+            return;
           }
-          if (data.desc) {
-            roomDescDisplay.innerText = data.desc;
-            localStorage.setItem("boba_room_desc", data.desc);
+
+          if (data.type === "tap_reaction") {
+            spawnFloatingEmoji();
+            return;
           }
-          loadVideoUrl(currentStreamUrl);
-          return;
-        }
 
-        // Tap reaction pulse
-        if (data.type === "tap_reaction") {
-          spawnFloatingEmoji();
-          return;
-        }
+          if (data.type === "clear") {
+            audienceChatBody.innerHTML = "";
+            audienceMsgIds.clear();
+            localStorage.removeItem("boba_chat_history");
+            return;
+          }
 
-        if (data.type === "clear") {
-          audienceChatBody.innerHTML = "";
-          audienceMsgIds.clear();
-          localStorage.removeItem("boba_chat_history");
-          return;
-        }
+          if (data.type === "delete") {
+            audienceMsgIds.delete(data.id);
+            const elem = document.getElementById(`aud-msg-${data.id}`);
+            if (elem) elem.remove();
+            return;
+          }
 
-        if (data.type === "delete") {
-          audienceMsgIds.delete(data.id);
-          const elem = document.getElementById(`aud-msg-${data.id}`);
-          if (elem) elem.remove();
-          return;
-        }
+          if (!audienceMsgIds.has(data.id)) {
+            audienceMsgIds.add(data.id);
+            renderAudienceMsg(data.id, data.name, data.text, data.badge, data.avatar);
+            audienceChatBody.scrollTop = audienceChatBody.scrollHeight;
 
-        if (!audienceMsgIds.has(data.id)) {
-          audienceMsgIds.add(data.id);
-          renderAudienceMsg(data.id, data.name, data.text, data.badge, data.avatar);
-          audienceChatBody.scrollTop = audienceChatBody.scrollHeight;
-
-          savedChat.push(data);
-          if (savedChat.length > 30) savedChat.shift();
-          localStorage.setItem("boba_chat_history", JSON.stringify(savedChat));
-        }
+            savedChat.push(data);
+            if (savedChat.length > 40) savedChat.shift();
+            localStorage.setItem("boba_chat_history", JSON.stringify(savedChat));
+          }
+        });
       });
-    });
+
+      drone.on('error', err => {
+        console.error("Drone error event:", err);
+      });
+    }
+
+    if (window.Scaledrone || window.ScaleDrone) {
+      initScaledrone();
+    } else {
+      window.addEventListener("load", initScaledrone);
+    }
 
     function renderAudienceMsg(id, name, text, badge, avatar) {
       const isHost = (badge === "Host" || badge === "HOST");
@@ -933,7 +854,7 @@
       }
     };
 
-    // --- 3. Interactive Floating Tap Emojis ---
+    // --- Floating Tap Emojis ---
     const tapEmojis = ["🧋", "✨", "💖", "🍡", "🌸", "⭐", "🎉"];
     let localTaps = parseInt(localStorage.getItem("boba_local_taps") || "0", 10);
     tapCountDisplay.innerText = localTaps;
