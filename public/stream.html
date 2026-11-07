@@ -7,8 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <!-- Ably Realtime Client (Zero Quota Limits) -->
-  <script src="https://cdn.ably.com/lib/ably.min.js"></script>
+  <!-- Pusher Client -->
+  <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
   <style>
     :root {
       --bg-dark: #12100E;
@@ -613,7 +613,7 @@
         <div class="chat-header">
           <div>
             <h3>Host Mod Chat</h3>
-            <span style="font-size: 0.72rem; color: var(--text-muted);">Ably Realtime WebSocket</span>
+            <span style="font-size: 0.72rem; color: var(--text-muted);">Pusher Realtime</span>
           </div>
           <button id="btnClearAllChat" class="btn-clear-chat">🗑️ Clear Chat</button>
         </div>
@@ -800,36 +800,35 @@
       }
     });
 
-    // --- 4. Ably Realtime Host Chat & Moderation (Zero Firestore Quota Used) ---
-    const ABLY_KEY = "zdFIEA.lFwawQ:3hO05NbdXIUZJ-K3BkyCIWT2RaeKz4fPg40qakSsc40";
-    const AblyLib = window.Ably || Ably;
-    const ablyClient = new AblyLib.Realtime({ key: ABLY_KEY, echoMessages: true });
+    // --- 4. Pusher Realtime Host Chat & Moderation (Zero Firestore Quota Used) ---
+    const pusher = new Pusher("604e71363e0e47626fc6", {
+      cluster: "ap1",
+      forceTLS: true
+    });
 
+    const chatChannel = pusher.subscribe("bobastream_chat");
     const renderedDocIds = new Set();
 
-    // Listen for live messages
-    chatChannel.subscribe("chat_message", (msg) => {
-      const id = msg.id || ("msg_" + Math.random().toString(36).substring(2, 9));
-      if (!renderedDocIds.has(id)) {
-        renderedDocIds.add(id);
-        const data = msg.data;
-        renderStudioMsg(id, data.name, data.text, data.badge, data.avatar);
+    // Listen for live messages from viewers
+    chatChannel.bind("client-chat_message", (data) => {
+      if (!renderedDocIds.has(data.id)) {
+        renderedDocIds.add(data.id);
+        renderStudioMsg(data.id, data.name, data.text, data.badge, data.avatar);
         studioChatBody.scrollTop = studioChatBody.scrollHeight;
       }
     });
 
     // Listen for clear all chat
-    chatChannel.subscribe("clear_all_chat", () => {
+    chatChannel.bind("client-clear_all_chat", () => {
       studioChatBody.innerHTML = "";
       renderedDocIds.clear();
     });
 
     // Listen for single message deletes
-    chatChannel.subscribe("delete_single_msg", (msg) => {
-      const targetId = msg.data && msg.data.id;
-      if (targetId) {
-        renderedDocIds.delete(targetId);
-        const elem = document.getElementById(`msg-${targetId}`);
+    chatChannel.bind("client-delete_single_msg", (data) => {
+      if (data && data.id) {
+        renderedDocIds.delete(data.id);
+        const elem = document.getElementById(`msg-${data.id}`);
         if (elem) elem.remove();
       }
     });
@@ -856,7 +855,9 @@
 
       div.querySelector(".btn-del-msg").onclick = () => {
         if (confirm("Delete this specific message?")) {
-          chatChannel.publish("delete_single_msg", { id: id });
+          renderedDocIds.delete(id);
+          div.remove();
+          chatChannel.trigger("client-delete_single_msg", { id: id });
         }
       };
 
@@ -864,22 +865,27 @@
     }
 
     // --- 5. Host Send Message ---
-    async function sendHostMessage() {
+    function sendHostMessage() {
       const text = hostChatInput.value.trim();
       if (!text) return;
 
       hostChatInput.value = "";
-      try {
-        await chatChannel.publish("chat_message", {
-          name: "Host (Tim)",
-          text: text,
-          badge: "HOST",
-          avatar: "🧋",
-          timestamp: Date.now()
-        });
-      } catch (err) {
-        console.error("Host message send failed:", err);
-      }
+      const msgId = "host_msg_" + Math.random().toString(36).substring(2, 9);
+      renderedDocIds.add(msgId);
+
+      const payload = {
+        id: msgId,
+        name: "Host (Tim)",
+        text: text,
+        badge: "HOST",
+        avatar: "🧋",
+        timestamp: Date.now()
+      };
+
+      renderStudioMsg(msgId, payload.name, payload.text, payload.badge, payload.avatar);
+      studioChatBody.scrollTop = studioChatBody.scrollHeight;
+
+      chatChannel.trigger("client-chat_message", payload);
     }
 
     btnHostSend.onclick = sendHostMessage;
@@ -893,7 +899,9 @@
     // --- 6. Host Wipe / Clear All Chat Button ---
     btnClearAllChat.onclick = () => {
       if (!confirm("Are you sure you want to clear and delete ALL chat messages for EVERYONE?")) return;
-      chatChannel.publish("clear_all_chat", { timestamp: Date.now() });
+      studioChatBody.innerHTML = "";
+      renderedDocIds.clear();
+      chatChannel.trigger("client-clear_all_chat", { timestamp: Date.now() });
     };
 
     // --- 7. Replays Manager Controller ---
