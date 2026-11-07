@@ -466,7 +466,7 @@
             <span id="viewerCountDisplay">1 Viewer</span>
           </div>
 
-          <iframe id="liveIframePlayer" src="" style="display:none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+          <iframe id="liveIframePlayer" src="" style="display:none;" allow="autoplay; fullscreen; encrypted-media; picture-in-picture"></iframe>
           <video id="liveHlsVideo" controls autoplay playsinline style="display:none;"></video>
         </div>
 
@@ -513,13 +513,12 @@
       <div class="replay-player-card">
         <h2 style="font-family: var(--font-heading); font-size: 1.35rem;" id="activeReplayTitle">🎬 Stream Replay Archive</h2>
         <div class="video-wrapper">
-          <iframe id="replayIframePlayer" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="background:#000;"></iframe>
-          <video id="replayVideoPlayer" controls playsinline style="display:none; width: 100%; height: 100%;"></video>
+          <iframe id="replayIframePlayer" src="" allow="autoplay; fullscreen; encrypted-media" style="background:#000;"></iframe>
         </div>
         <p style="font-size: 0.9rem; color: var(--text-muted);" id="activeReplayDesc">Select any past broadcast below to rewatch the session.</p>
       </div>
 
-      <!-- Dynamic Replays Shelf -->
+      <!-- Dynamic Replays Archive Shelf -->
       <h3 style="font-family: var(--font-heading); font-size: 1.2rem;">Past Broadcasts</h3>
       <div class="replay-grid" id="replayGridList">
         <p style="font-size: 0.85rem; color: var(--text-muted);" id="noReplaysMsg">Loading replays...</p>
@@ -560,7 +559,25 @@
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { 
+      getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, serverTimestamp, increment 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // --- Firebase Configuration ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyB-SAMPLE-REPLACE_WITH_YOUR_KEY",
+      authDomain: "bobastream-65561.firebaseapp.com",
+      projectId: "bobastream-65561",
+      storageBucket: "bobastream-65561.firebasestorage.app",
+      messagingSenderId: "84729104829",
+      appId: "1:84729104829:web:93a4cd2b948cf20"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
     // --- Navigation & 3-Dots Dropdown Setup ---
     const btnMenuDots = document.getElementById("btnMenuDots");
     const navDropdown = document.getElementById("navDropdown");
@@ -579,8 +596,13 @@
       navDropdown.classList.remove("show");
     });
 
-    tabLive.addEventListener("click", () => switchSubView("live"));
-    tabReplays.addEventListener("click", () => switchSubView("replays"));
+    tabLive.addEventListener("click", () => {
+      switchSubView("live");
+    });
+
+    tabReplays.addEventListener("click", () => {
+      switchSubView("replays");
+    });
 
     function switchSubView(view) {
       if (view === "live") {
@@ -601,7 +623,82 @@
       navDropdown.classList.remove("show");
     }
 
-    // --- Profile Setup ---
+    // --- Dynamic Replays Shelf Listener ---
+    const replayGridList = document.getElementById("replayGridList");
+    const replayIframe = document.getElementById("replayIframePlayer");
+    const activeReplayTitle = document.getElementById("activeReplayTitle");
+    const activeReplayDesc = document.getElementById("activeReplayDesc");
+
+    try {
+      onSnapshot(collection(db, "live_replays"), (snapshot) => {
+        if (snapshot.empty) {
+          replayGridList.innerHTML = `<p style="font-size: 0.9rem; color: var(--text-muted); grid-column: 1/-1; padding: 1.5rem 0;">No replay recordings published yet. Stay tuned for past broadcasts!</p>`;
+          return;
+        }
+
+        replayGridList.innerHTML = "";
+        let first = true;
+
+        snapshot.forEach((docItem) => {
+          const item = docItem.data();
+          const card = document.createElement("div");
+          card.className = "replay-card";
+          
+          card.innerHTML = `
+            <div class="replay-thumb">
+              <span>🧋</span>
+              <span class="replay-duration">${escapeHtml(item.meta || 'VOD')}</span>
+            </div>
+            <div class="replay-details">
+              <h4 class="replay-title">${escapeHtml(item.title)}</h4>
+              <span class="replay-meta">${escapeHtml(item.desc || '')}</span>
+            </div>
+          `;
+
+          card.addEventListener("click", () => {
+            replayIframe.src = item.videoUrl;
+            activeReplayTitle.innerText = item.title;
+            activeReplayDesc.innerText = item.desc || item.meta || "Recorded broadcast on BobaStream.";
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          });
+
+          if (first && !replayIframe.src) {
+            replayIframe.src = item.videoUrl;
+            activeReplayTitle.innerText = item.title;
+            activeReplayDesc.innerText = item.desc || item.meta || "Recorded broadcast on BobaStream.";
+            first = false;
+          }
+
+          replayGridList.appendChild(card);
+        });
+      }, (err) => console.warn("Firestore replays offline/exhausted:", err));
+    } catch (e) {
+      console.warn("Firestore offline:", e);
+    }
+
+    // --- Live Stream Elements ---
+    const liveIframePlayer = document.getElementById("liveIframePlayer");
+    const liveHlsVideo = document.getElementById("liveHlsVideo");
+    const roomTitleDisplay = document.getElementById("roomTitleDisplay");
+    const roomDescDisplay = document.getElementById("roomDescDisplay");
+    const viewerCountDisplay = document.getElementById("viewerCountDisplay");
+    const tapCountDisplay = document.getElementById("tapCountDisplay");
+    const btnTapSip = document.getElementById("btnTapSip");
+    const reactionsContainer = document.getElementById("reactionsContainer");
+
+    const audienceChatBody = document.getElementById("audienceChatBody");
+    const audienceChatInput = document.getElementById("audienceChatInput");
+    const btnAudienceSend = document.getElementById("btnAudienceSend");
+
+    // Profile Modal Elements
+    const profileModal = document.getElementById("profileModal");
+    const btnOpenModal = document.getElementById("btnOpenModal");
+    const btnSaveProfile = document.getElementById("btnSaveProfile");
+    const modalNameInput = document.getElementById("modalNameInput");
+    const avatarPickerGrid = document.getElementById("avatarPickerGrid");
+    const lblProfilePreview = document.getElementById("lblProfilePreview");
+
+    // --- User Profile (Name + Avatar) Management ---
     let myName = localStorage.getItem("boba_nick");
     let myAvatar = localStorage.getItem("boba_avatar") || "🧋";
 
@@ -611,18 +708,11 @@
       localStorage.setItem("boba_nick", myName);
       localStorage.setItem("boba_avatar", myAvatar);
     }
-
-    const lblProfilePreview = document.getElementById("lblProfilePreview");
-    const profileModal = document.getElementById("profileModal");
-    const btnOpenModal = document.getElementById("btnOpenModal");
-    const btnSaveProfile = document.getElementById("btnSaveProfile");
-    const modalNameInput = document.getElementById("modalNameInput");
-    const avatarPickerGrid = document.getElementById("avatarPickerGrid");
+    updateProfileUI();
 
     function updateProfileUI() {
       lblProfilePreview.innerText = `${myAvatar} ${myName}`;
     }
-    updateProfileUI();
 
     btnOpenModal.addEventListener("click", () => {
       modalNameInput.value = myName;
@@ -653,155 +743,122 @@
       if (e.target === profileModal) profileModal.style.display = "none";
     });
 
-    // --- Live Stream & Replay Players ---
-    const liveIframePlayer = document.getElementById("liveIframePlayer");
-    const liveHlsVideo = document.getElementById("liveHlsVideo");
-    const roomTitleDisplay = document.getElementById("roomTitleDisplay");
-    const roomDescDisplay = document.getElementById("roomDescDisplay");
-    const viewerCountDisplay = document.getElementById("viewerCountDisplay");
-    const tapCountDisplay = document.getElementById("tapCountDisplay");
-    const btnTapSip = document.getElementById("btnTapSip");
-    const reactionsContainer = document.getElementById("reactionsContainer");
+    // --- 1. Load Cached Stream Info on Refresh ---
+    let currentStreamUrl = localStorage.getItem("boba_active_url") || "";
+    const cachedTitle = localStorage.getItem("boba_room_title");
+    const cachedDesc = localStorage.getItem("boba_room_desc");
 
-    const replayGridList = document.getElementById("replayGridList");
-    const replayIframe = document.getElementById("replayIframePlayer");
-    const replayVideo = document.getElementById("replayVideoPlayer");
-    const activeReplayTitle = document.getElementById("activeReplayTitle");
-    const activeReplayDesc = document.getElementById("activeReplayDesc");
-
-    let liveHlsInstance = null;
-    let replayHlsInstance = null;
-    let globalTaps = parseInt(localStorage.getItem("boba_local_taps") || "0", 10);
-    tapCountDisplay.innerText = globalTaps;
-
-    function sanitizeMediaUrl(rawUrl) {
-      if (!rawUrl) return "";
-      let url = rawUrl.trim();
-      if (url.includes("player.twitch.tv") && !url.includes("parent=")) {
-        const host = window.location.hostname || "localhost";
-        url += (url.includes("?") ? "&" : "?") + `parent=${host}`;
-      }
-      return url;
+    if (currentStreamUrl) {
+      loadVideoUrl(currentStreamUrl);
     }
+    if (cachedTitle) roomTitleDisplay.innerText = cachedTitle;
+    if (cachedDesc) roomDescDisplay.innerText = cachedDesc;
 
-    function loadLiveVideo(url) {
+    // Optional Firestore fallback
+    try {
+      onSnapshot(doc(db, "stream_stats", "main"), (snap) => {
+        if (snap.exists()) {
+          const data = snap.data();
+          if (data.title) {
+            roomTitleDisplay.innerText = data.title;
+            localStorage.setItem("boba_room_title", data.title);
+          }
+          if (data.description) {
+            roomDescDisplay.innerText = data.description;
+            localStorage.setItem("boba_room_desc", data.description);
+          }
+          if (data.activeUrl && data.activeUrl !== currentStreamUrl) {
+            currentStreamUrl = data.activeUrl;
+            localStorage.setItem("boba_active_url", data.activeUrl);
+            loadVideoUrl(currentStreamUrl);
+          }
+        }
+      }, (err) => console.warn("Firestore stats listener bypassed:", err));
+    } catch(e) {}
+
+    function loadVideoUrl(url) {
       if (!url) return;
-      const cleanUrl = sanitizeMediaUrl(url);
-
-      if (cleanUrl.includes(".m3u8")) {
+      if (url.includes(".m3u8")) {
         liveIframePlayer.style.display = "none";
         liveHlsVideo.style.display = "block";
         if (Hls.isSupported()) {
-          if (liveHlsInstance) liveHlsInstance.destroy();
-          liveHlsInstance = new Hls();
-          liveHlsInstance.loadSource(cleanUrl);
-          liveHlsInstance.attachMedia(liveHlsVideo);
+          const hls = new Hls();
+          hls.loadSource(url);
+          hls.attachMedia(liveHlsVideo);
         } else if (liveHlsVideo.canPlayType('application/vnd.apple.mpegurl')) {
-          liveHlsVideo.src = cleanUrl;
+          liveHlsVideo.src = url;
         }
-      } else if (cleanUrl.match(/\.(mp4|webm|ogg)$/i)) {
-        liveIframePlayer.style.display = "none";
-        liveHlsVideo.style.display = "block";
-        liveHlsVideo.src = cleanUrl;
       } else {
         liveHlsVideo.style.display = "none";
-        liveHlsVideo.pause();
         liveIframePlayer.style.display = "block";
-        if (liveIframePlayer.src !== cleanUrl) liveIframePlayer.src = cleanUrl;
+        liveIframePlayer.src = url;
       }
     }
 
-    function loadReplayMedia(url) {
-      if (!url) return;
-      const cleanUrl = sanitizeMediaUrl(url);
-
-      if (cleanUrl.includes(".m3u8")) {
-        replayIframe.style.display = "none";
-        replayVideo.style.display = "block";
-        if (Hls.isSupported()) {
-          if (replayHlsInstance) replayHlsInstance.destroy();
-          replayHlsInstance = new Hls();
-          replayHlsInstance.loadSource(cleanUrl);
-          replayHlsInstance.attachMedia(replayVideo);
-        } else if (replayVideo.canPlayType('application/vnd.apple.mpegurl')) {
-          replayVideo.src = cleanUrl;
-        }
-      } else if (cleanUrl.match(/\.(mp4|webm|ogg)$/i)) {
-        replayIframe.style.display = "none";
-        replayVideo.style.display = "block";
-        replayVideo.src = cleanUrl;
-      } else {
-        replayVideo.style.display = "none";
-        replayVideo.pause();
-        replayIframe.style.display = "block";
-        replayIframe.src = cleanUrl;
-      }
-    }
-
-    // --- Scaledrone Integration ---
-    const SCALEDRONE_CHANNEL_ID = "YcmXVUcwZvg4FVv1";
+    // --- 2. Scaledrone Realtime Live Room & Feed Broadcast ---
+    const SCALEDRONE_CHANNEL_ID = "YOUR_SCALEDRONE_CHANNEL_ID";
     const drone = new Scaledrone(SCALEDRONE_CHANNEL_ID, {
       data: { name: myName, avatar: myAvatar }
     });
 
     const roomName = "observable-bobastream_lounge";
     let droneRoom;
-    const audienceChatBody = document.getElementById("audienceChatBody");
-    const audienceChatInput = document.getElementById("audienceChatInput");
-    const btnAudienceSend = document.getElementById("btnAudienceSend");
     const audienceMsgIds = new Set();
 
-    // Cache replays in LocalStorage
-    let replaysList = JSON.parse(localStorage.getItem("boba_replays_cache") || "[]");
-    renderReplaysUI();
+    // Restore cached chat messages so history survives refresh
+    const savedChat = JSON.parse(localStorage.getItem("boba_chat_history") || "[]");
+    savedChat.forEach(msg => {
+      audienceMsgIds.add(msg.id);
+      renderAudienceMsg(msg.id, msg.name, msg.text, msg.badge, msg.avatar);
+    });
+    audienceChatBody.scrollTop = audienceChatBody.scrollHeight;
 
     drone.on('open', error => {
-      if (error) return console.error("Drone open error:", error);
+      if (error) return console.error("Drone error:", error);
 
       droneRoom = drone.subscribe(roomName);
 
-      // Presence: active viewer counter
-      droneRoom.on('members', (members) => {
+      // Scaledrone Presence - Active Viewers Tracking
+      droneRoom.on('members', members => {
         viewerCountDisplay.innerText = `${members.length} ${members.length === 1 ? 'Viewer' : 'Viewers'}`;
       });
+
       droneRoom.on('member_join', () => {
         const count = droneRoom.members.length;
         viewerCountDisplay.innerText = `${count} ${count === 1 ? 'Viewer' : 'Viewers'}`;
       });
+
       droneRoom.on('member_leave', () => {
         const count = droneRoom.members.length;
         viewerCountDisplay.innerText = `${count} ${count === 1 ? 'Viewer' : 'Viewers'}`;
       });
 
-      // Data dispatcher
+      // Handle Live Incoming Data
       droneRoom.on('data', (data) => {
         if (!data) return;
 
-        // 1. Live stream ingest updates
+        // Instant Stream URL Ingest broadcast from Studio
         if (data.type === "stream_update") {
-          if (data.title) roomTitleDisplay.innerText = data.title;
-          if (data.description) roomDescDisplay.innerText = data.description;
-          if (data.activeUrl) loadLiveVideo(data.activeUrl);
+          currentStreamUrl = data.url;
+          localStorage.setItem("boba_active_url", data.url);
+          if (data.title) {
+            roomTitleDisplay.innerText = data.title;
+            localStorage.setItem("boba_room_title", data.title);
+          }
+          if (data.desc) {
+            roomDescDisplay.innerText = data.desc;
+            localStorage.setItem("boba_room_desc", data.desc);
+          }
+          loadVideoUrl(currentStreamUrl);
           return;
         }
 
-        // 2. Global Taps
-        if (data.type === "tap") {
-          globalTaps = (data.taps !== undefined) ? data.taps : (globalTaps + 1);
-          tapCountDisplay.innerText = globalTaps;
-          localStorage.setItem("boba_local_taps", globalTaps);
+        // Tap reaction pulse
+        if (data.type === "tap_reaction") {
+          spawnFloatingEmoji();
           return;
         }
 
-        // 3. Replays shelf updates
-        if (data.type === "replays_sync") {
-          replaysList = data.replays || [];
-          localStorage.setItem("boba_replays_cache", JSON.stringify(replaysList));
-          renderReplaysUI();
-          return;
-        }
-
-        // 4. Chat controls
         if (data.type === "clear") {
           audienceChatBody.innerHTML = "";
           audienceMsgIds.clear();
@@ -816,11 +873,14 @@
           return;
         }
 
-        // 5. Standard Chat Message
         if (!audienceMsgIds.has(data.id)) {
           audienceMsgIds.add(data.id);
           renderAudienceMsg(data.id, data.name, data.text, data.badge, data.avatar);
           audienceChatBody.scrollTop = audienceChatBody.scrollHeight;
+
+          savedChat.push(data);
+          if (savedChat.length > 30) savedChat.shift();
+          localStorage.setItem("boba_chat_history", JSON.stringify(savedChat));
         }
       });
     });
@@ -873,9 +933,12 @@
       }
     };
 
-    // Tap reactions
+    // --- 3. Interactive Floating Tap Emojis ---
     const tapEmojis = ["🧋", "✨", "💖", "🍡", "🌸", "⭐", "🎉"];
-    btnTapSip.addEventListener("click", () => {
+    let localTaps = parseInt(localStorage.getItem("boba_local_taps") || "0", 10);
+    tapCountDisplay.innerText = localTaps;
+
+    function spawnFloatingEmoji() {
       const span = document.createElement("span");
       span.className = "floating-reaction";
       span.innerText = tapEmojis[Math.floor(Math.random() * tapEmojis.length)];
@@ -887,57 +950,21 @@
 
       reactionsContainer.appendChild(span);
       setTimeout(() => span.remove(), 1200);
+    }
 
-      globalTaps += 1;
-      tapCountDisplay.innerText = globalTaps;
-      localStorage.setItem("boba_local_taps", globalTaps);
+    btnTapSip.addEventListener("click", () => {
+      spawnFloatingEmoji();
+      localTaps++;
+      tapCountDisplay.innerText = localTaps;
+      localStorage.setItem("boba_local_taps", localTaps);
 
-      if (droneRoom) {
+      if (drone && droneRoom) {
         drone.publish({
           room: roomName,
-          message: { type: "tap", taps: globalTaps }
+          message: { type: "tap_reaction" }
         });
       }
     });
-
-    // Replay Rendering
-    function renderReplaysUI() {
-      if (!replaysList || replaysList.length === 0) {
-        replayGridList.innerHTML = `<p style="font-size: 0.9rem; color: var(--text-muted); grid-column: 1/-1; padding: 1.5rem 0;">No replay recordings published yet. Stay tuned for past broadcasts!</p>`;
-        return;
-      }
-
-      replayGridList.innerHTML = "";
-      replaysList.forEach((item, index) => {
-        const card = document.createElement("div");
-        card.className = "replay-card";
-        card.innerHTML = `
-          <div class="replay-thumb">
-            <span>🧋</span>
-            <span class="replay-duration">${escapeHtml(item.meta || 'VOD')}</span>
-          </div>
-          <div class="replay-details">
-            <h4 class="replay-title">${escapeHtml(item.title)}</h4>
-            <span class="replay-meta">${escapeHtml(item.desc || '')}</span>
-          </div>
-        `;
-
-        card.addEventListener("click", () => {
-          loadReplayMedia(item.videoUrl);
-          activeReplayTitle.innerText = item.title;
-          activeReplayDesc.innerText = item.desc || item.meta || "Recorded broadcast on BobaStream.";
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        });
-
-        if (index === 0 && !replayIframe.src && !replayVideo.src) {
-          loadReplayMedia(item.videoUrl);
-          activeReplayTitle.innerText = item.title;
-          activeReplayDesc.innerText = item.desc || item.meta || "Recorded broadcast on BobaStream.";
-        }
-
-        replayGridList.appendChild(card);
-      });
-    }
 
     function escapeHtml(str) {
       return String(str || "").replace(/[&<>"']/g, (m) => ({
