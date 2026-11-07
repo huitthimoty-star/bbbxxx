@@ -8,18 +8,18 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-  <!-- Pusher Client -->
-  <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+  <!-- Scaledrone Realtime WebSockets -->
+  <script src="https://cdn.scaledrone.com/scaledrone.min.js"></script>
   <style>
     :root {
-      --bg-cream: #FAF6EE;
-      --card-bg: #FFFFFF;
-      --card-border: #EFE4D6;
+      --bg-cream: #1A1614;
+      --card-bg: #241E1A;
+      --card-border: #382F2A;
       --accent: #E07A5F;
       --accent-hover: #D0694E;
-      --boba-gold: #E29578;
-      --boba-tea: #5C4B40;
-      --text-muted: #8F8278;
+      --boba-gold: #F4A261;
+      --boba-tea: #F4EAD4;
+      --text-muted: #A39388;
       --font-heading: 'Fredoka', cursive, sans-serif;
       --font-body: 'Nunito', sans-serif;
     }
@@ -82,7 +82,7 @@
       justify-content: center;
       transition: background 0.15s, transform 0.1s;
     }
-    .btn-menu-dots:hover { background: #F5ECE0; }
+    .btn-menu-dots:hover { background: #2E2722; }
     .btn-menu-dots:active { transform: scale(0.92); }
 
     .dropdown-menu {
@@ -92,7 +92,7 @@
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 14px;
-      box-shadow: 0 10px 25px rgba(92, 75, 64, 0.12);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
       width: 180px;
       padding: 0.5rem;
       display: none;
@@ -117,8 +117,8 @@
       text-align: left;
       transition: background 0.15s;
     }
-    .dropdown-item:hover { background: var(--bg-cream); }
-    .dropdown-item.active { background: #FDE8E1; color: var(--accent); }
+    .dropdown-item:hover { background: #2E2722; }
+    .dropdown-item.active { background: #382721; color: var(--accent); }
 
     /* Section Views */
     .view-section { display: none; width: 100%; }
@@ -140,7 +140,7 @@
       background: #000;
       border-radius: 20px;
       overflow: hidden;
-      box-shadow: 0 10px 30px rgba(92, 75, 64, 0.08);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     }
     .video-wrapper iframe, .video-wrapper video {
       width: 100%;
@@ -153,7 +153,7 @@
       position: absolute;
       top: 1rem;
       left: 1rem;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0, 0, 0, 0.65);
       backdrop-filter: blur(8px);
       color: #fff;
       font-size: 0.8rem;
@@ -191,8 +191,9 @@
     }
 
     .btn-tap {
-      background: var(--bg-cream);
+      background: #2E2722;
       border: 1px solid var(--card-border);
+      color: var(--boba-tea);
       padding: 0.5rem 1rem;
       border-radius: 12px;
       font-family: var(--font-heading);
@@ -204,7 +205,7 @@
       font-size: 0.95rem;
       transition: transform 0.08s, background 0.1s;
     }
-    .btn-tap:active { transform: scale(0.92); background: #EFE4D6; }
+    .btn-tap:active { transform: scale(0.92); background: #382F2A; }
 
     .floating-reaction {
       position: absolute;
@@ -227,7 +228,7 @@
       flex-direction: column;
       height: 720px;
       overflow: hidden;
-      box-shadow: 0 10px 30px rgba(92, 75, 64, 0.05);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
     }
     .chat-head {
       padding: 0.9rem 1.25rem;
@@ -236,11 +237,11 @@
       justify-content: space-between;
       align-items: center;
     }
-    .chat-head h3 { font-family: var(--font-heading); font-size: 1.15rem; }
+    .chat-head h3 { font-family: var(--font-heading); font-size: 1.15rem; color: var(--boba-tea); }
 
     .user-profile-bar {
       padding: 0.5rem 1.25rem;
-      background: #FDFBF7;
+      background: #1E1916;
       border-bottom: 1px solid var(--card-border);
       display: flex;
       justify-content: space-between;
@@ -269,30 +270,30 @@
       display: flex;
       align-items: flex-start;
       gap: 0.6rem;
-      background: #FDFBF7;
+      background: #1C1714;
       padding: 0.65rem 0.85rem;
       border-radius: 14px;
       border: 1px solid var(--card-border);
     }
-    .chat-item.is-host { background: #FFF5F2; border-color: #F8D1C7; }
+    .chat-item.is-host { background: #2A1F1B; border-color: #4A332B; }
     .user-avatar { font-size: 1.35rem; line-height: 1; }
     .user-tag {
       font-size: 0.82rem;
       font-weight: 800;
-      color: var(--boba-tea);
+      color: var(--boba-gold);
       display: flex;
       align-items: center;
       gap: 0.4rem;
     }
     .badge-label {
-      background: var(--boba-tea);
-      color: #fff;
+      background: var(--card-border);
+      color: var(--text-muted);
       font-size: 0.65rem;
       padding: 0.1rem 0.45rem;
       border-radius: 999px;
     }
-    .badge-label.host { background: var(--accent); }
-    .msg-body { font-size: 0.9rem; color: #4A3E37; margin-top: 0.15rem; word-break: break-word; }
+    .badge-label.host { background: var(--accent); color: #fff; }
+    .msg-body { font-size: 0.9rem; color: var(--boba-tea); margin-top: 0.15rem; word-break: break-word; }
 
     .chat-input-box {
       padding: 0.85rem;
@@ -303,7 +304,7 @@
     }
     .chat-input-box input {
       flex: 1;
-      background: var(--bg-cream);
+      background: #161210;
       border: 1px solid var(--card-border);
       padding: 0.65rem 0.9rem;
       border-radius: 10px;
@@ -337,7 +338,7 @@
       display: flex;
       flex-direction: column;
       gap: 1rem;
-      box-shadow: 0 10px 30px rgba(92, 75, 64, 0.05);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
     }
 
     .replay-grid {
@@ -356,13 +357,13 @@
     }
     .replay-card:hover {
       transform: translateY(-4px);
-      box-shadow: 0 8px 20px rgba(92, 75, 64, 0.08);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
     }
 
     .replay-thumb {
       width: 100%;
       aspect-ratio: 16 / 9;
-      background: #2E2620;
+      background: #14110F;
       position: relative;
       display: flex;
       align-items: center;
@@ -390,7 +391,7 @@
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0,0,0,0.65);
       display: none;
       align-items: center;
       justify-content: center;
@@ -398,7 +399,9 @@
       backdrop-filter: blur(4px);
     }
     .modal-content {
-      background: #fff;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--boba-tea);
       border-radius: 20px;
       padding: 1.5rem;
       width: 90%;
@@ -420,7 +423,7 @@
       border-radius: 10px;
       border: 2px solid transparent;
     }
-    .avatar-opt.selected { border-color: var(--accent); background: #FFF5F2; }
+    .avatar-opt.selected { border-color: var(--accent); background: #382721; }
   </style>
 </head>
 <body>
@@ -463,7 +466,7 @@
             <span id="viewerCountDisplay">1 Viewer</span>
           </div>
 
-          <iframe id="liveIframePlayer" src="" style="display:none;" allow="autoplay; fullscreen; encrypted-media; picture-in-picture"></iframe>
+          <iframe id="liveIframePlayer" src="" style="display:none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
           <video id="liveHlsVideo" controls autoplay playsinline style="display:none;"></video>
         </div>
 
@@ -484,11 +487,11 @@
       <div class="chat-col">
         <div class="chat-head">
           <h3>Boba Lounge Chat</h3>
-          <span style="font-size: 0.75rem; background: #E8F5E9; color: #2E7D32; padding: 0.2rem 0.5rem; border-radius: 999px; font-weight: 700;">Active</span>
+          <span style="font-size: 0.75rem; background: #1B3822; color: #72E28B; padding: 0.2rem 0.5rem; border-radius: 999px; font-weight: 700;">Active</span>
         </div>
 
         <div class="user-profile-bar">
-          <div>Chatting as: <strong id="lblProfilePreview">🧋 ChillSipper</strong></div>
+          <div>Chatting as: <strong id="lblProfilePreview" style="color: var(--boba-gold);">🧋 ChillSipper</strong></div>
           <button class="btn-edit-profile" id="btnOpenModal">Change Name/Icon</button>
         </div>
 
@@ -510,12 +513,13 @@
       <div class="replay-player-card">
         <h2 style="font-family: var(--font-heading); font-size: 1.35rem;" id="activeReplayTitle">🎬 Stream Replay Archive</h2>
         <div class="video-wrapper">
-          <iframe id="replayIframePlayer" src="" allow="autoplay; fullscreen; encrypted-media" style="background:#000;"></iframe>
+          <iframe id="replayIframePlayer" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="background:#000;"></iframe>
+          <video id="replayVideoPlayer" controls playsinline style="display:none; width: 100%; height: 100%;"></video>
         </div>
         <p style="font-size: 0.9rem; color: var(--text-muted);" id="activeReplayDesc">Select any past broadcast below to rewatch the session.</p>
       </div>
 
-      <!-- Dynamic Replays Archive Shelf (Direct from Firestore) -->
+      <!-- Dynamic Replays Shelf -->
       <h3 style="font-family: var(--font-heading); font-size: 1.2rem;">Past Broadcasts</h3>
       <div class="replay-grid" id="replayGridList">
         <p style="font-size: 0.85rem; color: var(--text-muted);" id="noReplaysMsg">Loading replays...</p>
@@ -531,7 +535,7 @@
       
       <div>
         <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">Your Nickname:</label>
-        <input type="text" id="modalNameInput" style="width: 100%; padding: 0.6rem; border-radius: 8px; border: 1px solid var(--card-border); margin-top: 0.25rem; font-family: var(--font-body);" maxlength="20">
+        <input type="text" id="modalNameInput" style="width: 100%; padding: 0.6rem; border-radius: 8px; border: 1px solid var(--card-border); background: #161210; color: var(--boba-tea); margin-top: 0.25rem; font-family: var(--font-body);" maxlength="20">
       </div>
 
       <div>
@@ -556,25 +560,7 @@
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { 
-      getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, serverTimestamp, increment 
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    // --- Firebase Configuration (Preserved for Streams & Replays) ---
-    const firebaseConfig = {
-      apiKey: "AIzaSyB-SAMPLE-REPLACE_WITH_YOUR_KEY",
-      authDomain: "bobastream-65561.firebaseapp.com",
-      projectId: "bobastream-65561",
-      storageBucket: "bobastream-65561.firebasestorage.app",
-      messagingSenderId: "84729104829",
-      appId: "1:84729104829:web:93a4cd2b948cf20"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
+  <script>
     // --- Navigation & 3-Dots Dropdown Setup ---
     const btnMenuDots = document.getElementById("btnMenuDots");
     const navDropdown = document.getElementById("navDropdown");
@@ -593,13 +579,8 @@
       navDropdown.classList.remove("show");
     });
 
-    tabLive.addEventListener("click", () => {
-      switchSubView("live");
-    });
-
-    tabReplays.addEventListener("click", () => {
-      switchSubView("replays");
-    });
+    tabLive.addEventListener("click", () => switchSubView("live"));
+    tabReplays.addEventListener("click", () => switchSubView("replays"));
 
     function switchSubView(view) {
       if (view === "live") {
@@ -620,78 +601,7 @@
       navDropdown.classList.remove("show");
     }
 
-    // --- Dynamic Replays Shelf Listener ---
-    const replayGridList = document.getElementById("replayGridList");
-    const replayIframe = document.getElementById("replayIframePlayer");
-    const activeReplayTitle = document.getElementById("activeReplayTitle");
-    const activeReplayDesc = document.getElementById("activeReplayDesc");
-
-    onSnapshot(collection(db, "live_replays"), (snapshot) => {
-      if (snapshot.empty) {
-        replayGridList.innerHTML = `<p style="font-size: 0.9rem; color: var(--text-muted); grid-column: 1/-1; padding: 1.5rem 0;">No replay recordings published yet. Stay tuned for past broadcasts!</p>`;
-        return;
-      }
-
-      replayGridList.innerHTML = "";
-      let first = true;
-
-      snapshot.forEach((docItem) => {
-        const item = docItem.data();
-        const card = document.createElement("div");
-        card.className = "replay-card";
-        
-        card.innerHTML = `
-          <div class="replay-thumb">
-            <span>🧋</span>
-            <span class="replay-duration">${escapeHtml(item.meta || 'VOD')}</span>
-          </div>
-          <div class="replay-details">
-            <h4 class="replay-title">${escapeHtml(item.title)}</h4>
-            <span class="replay-meta">${escapeHtml(item.desc || '')}</span>
-          </div>
-        `;
-
-        card.addEventListener("click", () => {
-          replayIframe.src = item.videoUrl;
-          activeReplayTitle.innerText = item.title;
-          activeReplayDesc.innerText = item.desc || item.meta || "Recorded broadcast on BobaStream.";
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        });
-
-        if (first && !replayIframe.src) {
-          replayIframe.src = item.videoUrl;
-          activeReplayTitle.innerText = item.title;
-          activeReplayDesc.innerText = item.desc || item.meta || "Recorded broadcast on BobaStream.";
-          first = false;
-        }
-
-        replayGridList.appendChild(card);
-      });
-    });
-
-    // --- Live Stream Elements ---
-    const liveIframePlayer = document.getElementById("liveIframePlayer");
-    const liveHlsVideo = document.getElementById("liveHlsVideo");
-    const roomTitleDisplay = document.getElementById("roomTitleDisplay");
-    const roomDescDisplay = document.getElementById("roomDescDisplay");
-    const viewerCountDisplay = document.getElementById("viewerCountDisplay");
-    const tapCountDisplay = document.getElementById("tapCountDisplay");
-    const btnTapSip = document.getElementById("btnTapSip");
-    const reactionsContainer = document.getElementById("reactionsContainer");
-
-    const audienceChatBody = document.getElementById("audienceChatBody");
-    const audienceChatInput = document.getElementById("audienceChatInput");
-    const btnAudienceSend = document.getElementById("btnAudienceSend");
-
-    // Profile Modal Elements
-    const profileModal = document.getElementById("profileModal");
-    const btnOpenModal = document.getElementById("btnOpenModal");
-    const btnSaveProfile = document.getElementById("btnSaveProfile");
-    const modalNameInput = document.getElementById("modalNameInput");
-    const avatarPickerGrid = document.getElementById("avatarPickerGrid");
-    const lblProfilePreview = document.getElementById("lblProfilePreview");
-
-    // --- User Profile (Name + Avatar) Management ---
+    // --- Profile Setup ---
     let myName = localStorage.getItem("boba_nick");
     let myAvatar = localStorage.getItem("boba_avatar") || "🧋";
 
@@ -701,11 +611,18 @@
       localStorage.setItem("boba_nick", myName);
       localStorage.setItem("boba_avatar", myAvatar);
     }
-    updateProfileUI();
+
+    const lblProfilePreview = document.getElementById("lblProfilePreview");
+    const profileModal = document.getElementById("profileModal");
+    const btnOpenModal = document.getElementById("btnOpenModal");
+    const btnSaveProfile = document.getElementById("btnSaveProfile");
+    const modalNameInput = document.getElementById("modalNameInput");
+    const avatarPickerGrid = document.getElementById("avatarPickerGrid");
 
     function updateProfileUI() {
       lblProfilePreview.innerText = `${myAvatar} ${myName}`;
     }
+    updateProfileUI();
 
     btnOpenModal.addEventListener("click", () => {
       modalNameInput.value = myName;
@@ -736,81 +653,176 @@
       if (e.target === profileModal) profileModal.style.display = "none";
     });
 
-    // --- 1. Active Viewers Tracking ---
-    const viewerDocId = "viewer_" + Math.random().toString(36).substring(2, 9);
-    const viewerRef = doc(db, "active_viewers", viewerDocId);
-    setDoc(viewerRef, { joinedAt: serverTimestamp() });
-    window.addEventListener("beforeunload", () => deleteDoc(viewerRef));
+    // --- Live Stream & Replay Players ---
+    const liveIframePlayer = document.getElementById("liveIframePlayer");
+    const liveHlsVideo = document.getElementById("liveHlsVideo");
+    const roomTitleDisplay = document.getElementById("roomTitleDisplay");
+    const roomDescDisplay = document.getElementById("roomDescDisplay");
+    const viewerCountDisplay = document.getElementById("viewerCountDisplay");
+    const tapCountDisplay = document.getElementById("tapCountDisplay");
+    const btnTapSip = document.getElementById("btnTapSip");
+    const reactionsContainer = document.getElementById("reactionsContainer");
 
-    onSnapshot(collection(db, "active_viewers"), (snap) => {
-      viewerCountDisplay.innerText = `${snap.size} ${snap.size === 1 ? 'Viewer' : 'Viewers'}`;
-    });
+    const replayGridList = document.getElementById("replayGridList");
+    const replayIframe = document.getElementById("replayIframePlayer");
+    const replayVideo = document.getElementById("replayVideoPlayer");
+    const activeReplayTitle = document.getElementById("activeReplayTitle");
+    const activeReplayDesc = document.getElementById("activeReplayDesc");
 
-    // --- 2. Live Stream Embed & Details ---
-    let currentStreamUrl = "";
-    onSnapshot(doc(db, "stream_stats", "main"), (snap) => {
-      if (snap.exists()) {
-        const data = snap.data();
-        if (data.title) roomTitleDisplay.innerText = data.title;
-        if (data.description) roomDescDisplay.innerText = data.description;
-        if (data.taps !== undefined) tapCountDisplay.innerText = data.taps;
+    let liveHlsInstance = null;
+    let replayHlsInstance = null;
+    let globalTaps = parseInt(localStorage.getItem("boba_local_taps") || "0", 10);
+    tapCountDisplay.innerText = globalTaps;
 
-        if (data.activeUrl && data.activeUrl !== currentStreamUrl) {
-          currentStreamUrl = data.activeUrl;
-          loadVideoUrl(currentStreamUrl);
-        }
+    function sanitizeMediaUrl(rawUrl) {
+      if (!rawUrl) return "";
+      let url = rawUrl.trim();
+      if (url.includes("player.twitch.tv") && !url.includes("parent=")) {
+        const host = window.location.hostname || "localhost";
+        url += (url.includes("?") ? "&" : "?") + `parent=${host}`;
       }
-    });
+      return url;
+    }
 
-    function loadVideoUrl(url) {
-      if (url.includes(".m3u8")) {
+    function loadLiveVideo(url) {
+      if (!url) return;
+      const cleanUrl = sanitizeMediaUrl(url);
+
+      if (cleanUrl.includes(".m3u8")) {
         liveIframePlayer.style.display = "none";
         liveHlsVideo.style.display = "block";
         if (Hls.isSupported()) {
-          const hls = new Hls();
-          hls.loadSource(url);
-          hls.attachMedia(liveHlsVideo);
+          if (liveHlsInstance) liveHlsInstance.destroy();
+          liveHlsInstance = new Hls();
+          liveHlsInstance.loadSource(cleanUrl);
+          liveHlsInstance.attachMedia(liveHlsVideo);
         } else if (liveHlsVideo.canPlayType('application/vnd.apple.mpegurl')) {
-          liveHlsVideo.src = url;
+          liveHlsVideo.src = cleanUrl;
         }
+      } else if (cleanUrl.match(/\.(mp4|webm|ogg)$/i)) {
+        liveIframePlayer.style.display = "none";
+        liveHlsVideo.style.display = "block";
+        liveHlsVideo.src = cleanUrl;
       } else {
         liveHlsVideo.style.display = "none";
+        liveHlsVideo.pause();
         liveIframePlayer.style.display = "block";
-        liveIframePlayer.src = url;
+        if (liveIframePlayer.src !== cleanUrl) liveIframePlayer.src = cleanUrl;
       }
     }
 
-    // --- 3. Pusher Realtime Chat (Zero Firestore Reads) ---
-    const pusher = new Pusher("604e71363e0e47626fc6", {
-      cluster: "ap1",
-      forceTLS: true
+    function loadReplayMedia(url) {
+      if (!url) return;
+      const cleanUrl = sanitizeMediaUrl(url);
+
+      if (cleanUrl.includes(".m3u8")) {
+        replayIframe.style.display = "none";
+        replayVideo.style.display = "block";
+        if (Hls.isSupported()) {
+          if (replayHlsInstance) replayHlsInstance.destroy();
+          replayHlsInstance = new Hls();
+          replayHlsInstance.loadSource(cleanUrl);
+          replayHlsInstance.attachMedia(replayVideo);
+        } else if (replayVideo.canPlayType('application/vnd.apple.mpegurl')) {
+          replayVideo.src = cleanUrl;
+        }
+      } else if (cleanUrl.match(/\.(mp4|webm|ogg)$/i)) {
+        replayIframe.style.display = "none";
+        replayVideo.style.display = "block";
+        replayVideo.src = cleanUrl;
+      } else {
+        replayVideo.style.display = "none";
+        replayVideo.pause();
+        replayIframe.style.display = "block";
+        replayIframe.src = cleanUrl;
+      }
+    }
+
+    // --- Scaledrone Integration ---
+    const SCALEDRONE_CHANNEL_ID = "YcmXVUcwZvg4FVv1";
+    const drone = new Scaledrone(SCALEDRONE_CHANNEL_ID, {
+      data: { name: myName, avatar: myAvatar }
     });
 
-    const chatChannel = pusher.subscribe("bobastream_chat");
+    const roomName = "observable-bobastream_lounge";
+    let droneRoom;
+    const audienceChatBody = document.getElementById("audienceChatBody");
+    const audienceChatInput = document.getElementById("audienceChatInput");
+    const btnAudienceSend = document.getElementById("btnAudienceSend");
     const audienceMsgIds = new Set();
 
-    // Listen for live messages from other viewers and host
-    chatChannel.bind("client-chat_message", (data) => {
-      if (!audienceMsgIds.has(data.id)) {
-        audienceMsgIds.add(data.id);
-        renderAudienceMsg(data.id, data.name, data.text, data.badge, data.avatar);
-        audienceChatBody.scrollTop = audienceChatBody.scrollHeight;
-      }
-    });
+    // Cache replays in LocalStorage
+    let replaysList = JSON.parse(localStorage.getItem("boba_replays_cache") || "[]");
+    renderReplaysUI();
 
-    // Listen for Host Clear Chat
-    chatChannel.bind("client-clear_all_chat", () => {
-      audienceChatBody.innerHTML = "";
-      audienceMsgIds.clear();
-    });
+    drone.on('open', error => {
+      if (error) return console.error("Drone open error:", error);
 
-    // Listen for single message deletions
-    chatChannel.bind("client-delete_single_msg", (data) => {
-      if (data && data.id) {
-        audienceMsgIds.delete(data.id);
-        const elem = document.getElementById(`aud-msg-${data.id}`);
-        if (elem) elem.remove();
-      }
+      droneRoom = drone.subscribe(roomName);
+
+      // Presence: active viewer counter
+      droneRoom.on('members', (members) => {
+        viewerCountDisplay.innerText = `${members.length} ${members.length === 1 ? 'Viewer' : 'Viewers'}`;
+      });
+      droneRoom.on('member_join', () => {
+        const count = droneRoom.members.length;
+        viewerCountDisplay.innerText = `${count} ${count === 1 ? 'Viewer' : 'Viewers'}`;
+      });
+      droneRoom.on('member_leave', () => {
+        const count = droneRoom.members.length;
+        viewerCountDisplay.innerText = `${count} ${count === 1 ? 'Viewer' : 'Viewers'}`;
+      });
+
+      // Data dispatcher
+      droneRoom.on('data', (data) => {
+        if (!data) return;
+
+        // 1. Live stream ingest updates
+        if (data.type === "stream_update") {
+          if (data.title) roomTitleDisplay.innerText = data.title;
+          if (data.description) roomDescDisplay.innerText = data.description;
+          if (data.activeUrl) loadLiveVideo(data.activeUrl);
+          return;
+        }
+
+        // 2. Global Taps
+        if (data.type === "tap") {
+          globalTaps = (data.taps !== undefined) ? data.taps : (globalTaps + 1);
+          tapCountDisplay.innerText = globalTaps;
+          localStorage.setItem("boba_local_taps", globalTaps);
+          return;
+        }
+
+        // 3. Replays shelf updates
+        if (data.type === "replays_sync") {
+          replaysList = data.replays || [];
+          localStorage.setItem("boba_replays_cache", JSON.stringify(replaysList));
+          renderReplaysUI();
+          return;
+        }
+
+        // 4. Chat controls
+        if (data.type === "clear") {
+          audienceChatBody.innerHTML = "";
+          audienceMsgIds.clear();
+          localStorage.removeItem("boba_chat_history");
+          return;
+        }
+
+        if (data.type === "delete") {
+          audienceMsgIds.delete(data.id);
+          const elem = document.getElementById(`aud-msg-${data.id}`);
+          if (elem) elem.remove();
+          return;
+        }
+
+        // 5. Standard Chat Message
+        if (!audienceMsgIds.has(data.id)) {
+          audienceMsgIds.add(data.id);
+          renderAudienceMsg(data.id, data.name, data.text, data.badge, data.avatar);
+          audienceChatBody.scrollTop = audienceChatBody.scrollHeight;
+        }
+      });
     });
 
     function renderAudienceMsg(id, name, text, badge, avatar) {
@@ -835,27 +847,22 @@
 
     function sendChatMessage() {
       const msg = audienceChatInput.value.trim();
-      if (!msg) return;
+      if (!msg || !droneRoom) return;
 
       audienceChatInput.value = "";
       const msgId = "msg_" + Math.random().toString(36).substring(2, 9);
-      audienceMsgIds.add(msgId);
 
-      const payload = {
-        id: msgId,
-        name: myName,
-        text: msg,
-        badge: "Sipper",
-        avatar: myAvatar,
-        timestamp: Date.now()
-      };
-
-      // Show locally immediately
-      renderAudienceMsg(msgId, payload.name, payload.text, payload.badge, payload.avatar);
-      audienceChatBody.scrollTop = audienceChatBody.scrollHeight;
-
-      // Broadcast to others via Pusher client event
-      chatChannel.trigger("client-chat_message", payload);
+      drone.publish({
+        room: roomName,
+        message: {
+          id: msgId,
+          name: myName,
+          text: msg,
+          badge: "Sipper",
+          avatar: myAvatar,
+          timestamp: Date.now()
+        }
+      });
     }
 
     btnAudienceSend.onclick = sendChatMessage;
@@ -866,9 +873,9 @@
       }
     };
 
-    // --- 4. Interactive Floating Tap Emojis ---
+    // Tap reactions
     const tapEmojis = ["🧋", "✨", "💖", "🍡", "🌸", "⭐", "🎉"];
-    btnTapSip.addEventListener("click", async () => {
+    btnTapSip.addEventListener("click", () => {
       const span = document.createElement("span");
       span.className = "floating-reaction";
       span.innerText = tapEmojis[Math.floor(Math.random() * tapEmojis.length)];
@@ -881,14 +888,56 @@
       reactionsContainer.appendChild(span);
       setTimeout(() => span.remove(), 1200);
 
-      try {
-        await setDoc(doc(db, "stream_stats", "main"), {
-          taps: increment(1)
-        }, { merge: true });
-      } catch (err) {
-        console.error("Tap increment error", err);
+      globalTaps += 1;
+      tapCountDisplay.innerText = globalTaps;
+      localStorage.setItem("boba_local_taps", globalTaps);
+
+      if (droneRoom) {
+        drone.publish({
+          room: roomName,
+          message: { type: "tap", taps: globalTaps }
+        });
       }
     });
+
+    // Replay Rendering
+    function renderReplaysUI() {
+      if (!replaysList || replaysList.length === 0) {
+        replayGridList.innerHTML = `<p style="font-size: 0.9rem; color: var(--text-muted); grid-column: 1/-1; padding: 1.5rem 0;">No replay recordings published yet. Stay tuned for past broadcasts!</p>`;
+        return;
+      }
+
+      replayGridList.innerHTML = "";
+      replaysList.forEach((item, index) => {
+        const card = document.createElement("div");
+        card.className = "replay-card";
+        card.innerHTML = `
+          <div class="replay-thumb">
+            <span>🧋</span>
+            <span class="replay-duration">${escapeHtml(item.meta || 'VOD')}</span>
+          </div>
+          <div class="replay-details">
+            <h4 class="replay-title">${escapeHtml(item.title)}</h4>
+            <span class="replay-meta">${escapeHtml(item.desc || '')}</span>
+          </div>
+        `;
+
+        card.addEventListener("click", () => {
+          loadReplayMedia(item.videoUrl);
+          activeReplayTitle.innerText = item.title;
+          activeReplayDesc.innerText = item.desc || item.meta || "Recorded broadcast on BobaStream.";
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+
+        if (index === 0 && !replayIframe.src && !replayVideo.src) {
+          loadReplayMedia(item.videoUrl);
+          activeReplayTitle.innerText = item.title;
+          activeReplayDesc.innerText = item.desc || item.meta || "Recorded broadcast on BobaStream.";
+        }
+
+        replayGridList.appendChild(card);
+      });
+    }
 
     function escapeHtml(str) {
       return String(str || "").replace(/[&<>"']/g, (m) => ({
