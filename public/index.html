@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-  <!-- Ably Realtime Client (Zero Quota Limits) -->
-  <script src="https://cdn.ably.com/lib/ably.min.js"></script>
+  <!-- Pusher Client -->
+  <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
   <style>
     :root {
       --bg-cream: #FAF6EE;
@@ -562,7 +562,7 @@
       getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, serverTimestamp, increment 
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // --- Firebase Configuration (Preserved for Streams, Taps, & Replays) ---
+    // --- Firebase Configuration (Preserved for Streams & Replays) ---
     const firebaseConfig = {
       apiKey: "AIzaSyB-SAMPLE-REPLACE_WITH_YOUR_KEY",
       authDomain: "bobastream-65561.firebaseapp.com",
@@ -780,37 +780,35 @@
       }
     }
 
-    // --- 3. Ably Realtime Chat Setup (Zero Firestore Quota Used) ---
-    const ABLY_KEY = "zdFIEA.lFwawQ:3hO05NbdXIUZJ-K3BkyCIWT2RaeKz4fPg40qakSsc40";
-    const AblyLib = window.Ably || Ably;
-    const ablyClient = new AblyLib.Realtime({ key: ABLY_KEY, echoMessages: true });
-    const chatChannel = ablyClient.channels.get("bobastream_lounge", { params: { rewind: "50" } });
+    // --- 3. Pusher Realtime Chat (Zero Firestore Reads) ---
+    const pusher = new Pusher("604e71363e0e47626fc6", {
+      cluster: "ap1",
+      forceTLS: true
+    });
 
+    const chatChannel = pusher.subscribe("bobastream_chat");
     const audienceMsgIds = new Set();
 
-    // Listen for live messages
-    chatChannel.subscribe("chat_message", (msg) => {
-      const id = msg.id || ("msg_" + Math.random().toString(36).substring(2, 9));
-      if (!audienceMsgIds.has(id)) {
-        audienceMsgIds.add(id);
-        const data = msg.data;
-        renderAudienceMsg(id, data.name, data.text, data.badge, data.avatar);
+    // Listen for live messages from other viewers and host
+    chatChannel.bind("client-chat_message", (data) => {
+      if (!audienceMsgIds.has(data.id)) {
+        audienceMsgIds.add(data.id);
+        renderAudienceMsg(data.id, data.name, data.text, data.badge, data.avatar);
         audienceChatBody.scrollTop = audienceChatBody.scrollHeight;
       }
     });
 
     // Listen for Host Clear Chat
-    chatChannel.subscribe("clear_all_chat", () => {
+    chatChannel.bind("client-clear_all_chat", () => {
       audienceChatBody.innerHTML = "";
       audienceMsgIds.clear();
     });
 
     // Listen for single message deletions
-    chatChannel.subscribe("delete_single_msg", (msg) => {
-      const targetId = msg.data && msg.data.id;
-      if (targetId) {
-        audienceMsgIds.delete(targetId);
-        const elem = document.getElementById(`aud-msg-${targetId}`);
+    chatChannel.bind("client-delete_single_msg", (data) => {
+      if (data && data.id) {
+        audienceMsgIds.delete(data.id);
+        const elem = document.getElementById(`aud-msg-${data.id}`);
         if (elem) elem.remove();
       }
     });
@@ -835,22 +833,29 @@
       audienceChatBody.appendChild(div);
     }
 
-    async function sendChatMessage() {
+    function sendChatMessage() {
       const msg = audienceChatInput.value.trim();
       if (!msg) return;
 
       audienceChatInput.value = "";
-      try {
-        await chatChannel.publish("chat_message", {
-          name: myName,
-          text: msg,
-          badge: "Sipper",
-          avatar: myAvatar,
-          timestamp: Date.now()
-        });
-      } catch (err) {
-        console.error("Message send failed:", err);
-      }
+      const msgId = "msg_" + Math.random().toString(36).substring(2, 9);
+      audienceMsgIds.add(msgId);
+
+      const payload = {
+        id: msgId,
+        name: myName,
+        text: msg,
+        badge: "Sipper",
+        avatar: myAvatar,
+        timestamp: Date.now()
+      };
+
+      // Show locally immediately
+      renderAudienceMsg(msgId, payload.name, payload.text, payload.badge, payload.avatar);
+      audienceChatBody.scrollTop = audienceChatBody.scrollHeight;
+
+      // Broadcast to others via Pusher client event
+      chatChannel.trigger("client-chat_message", payload);
     }
 
     btnAudienceSend.onclick = sendChatMessage;
