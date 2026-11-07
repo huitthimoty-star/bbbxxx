@@ -7,8 +7,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <!-- Pusher Client -->
-  <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <!-- Scaledrone Realtime WebSockets -->
+  <script src="https://cdn.scaledrone.com/scaledrone.min.js"></script>
   <style>
     :root {
       --bg-dark: #12100E;
@@ -24,12 +25,7 @@
       --font-body: 'Nunito', sans-serif;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       background: var(--bg-dark);
       color: var(--tea-milk);
@@ -51,17 +47,8 @@
       position: relative;
     }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .brand h1 {
-      font-family: var(--font-heading);
-      font-size: 1.5rem;
-      color: var(--tea-milk);
-    }
+    .brand { display: flex; align-items: center; gap: 0.75rem; }
+    .brand h1 { font-family: var(--font-heading); font-size: 1.5rem; color: var(--tea-milk); }
 
     .badge-studio {
       background: var(--accent);
@@ -91,9 +78,7 @@
       font-size: 0.85rem;
       transition: background 0.2s;
     }
-    .btn-audience:hover {
-      background: var(--card-border);
-    }
+    .btn-audience:hover { background: var(--card-border); }
 
     .btn-menu-dots {
       background: var(--card-bg);
@@ -110,9 +95,7 @@
       justify-content: center;
       transition: background 0.15s;
     }
-    .btn-menu-dots:hover {
-      background: var(--card-border);
-    }
+    .btn-menu-dots:hover { background: var(--card-border); }
 
     .dropdown-menu {
       position: absolute;
@@ -146,21 +129,11 @@
       text-align: left;
       transition: background 0.15s;
     }
-    .dropdown-item:hover {
-      background: #25201B;
-    }
-    .dropdown-item.active {
-      background: #2E221D;
-      color: var(--boba-gold);
-    }
+    .dropdown-item:hover { background: #25201B; }
+    .dropdown-item.active { background: #2E221D; color: var(--boba-gold); }
 
-    .view-section {
-      display: none;
-      width: 100%;
-    }
-    .view-section.active {
-      display: block;
-    }
+    .view-section { display: none; width: 100%; }
+    .view-section.active { display: block; }
 
     /* Live Studio Section Layout */
     .dashboard-layout {
@@ -169,17 +142,9 @@
       gap: 1.5rem;
     }
 
-    @media (max-width: 1024px) {
-      .dashboard-layout {
-        grid-template-columns: 1fr;
-      }
-    }
+    @media (max-width: 1024px) { .dashboard-layout { grid-template-columns: 1fr; } }
 
-    .monitor-panel {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
+    .monitor-panel { display: flex; flex-direction: column; gap: 1.5rem; }
 
     .video-monitor-card {
       background: var(--card-bg);
@@ -210,10 +175,11 @@
       position: relative;
     }
 
-    .monitor-viewport iframe {
+    .monitor-viewport iframe, .monitor-viewport video {
       width: 100%;
       height: 100%;
       border: none;
+      object-fit: cover;
     }
 
     .stats-row {
@@ -254,17 +220,8 @@
       gap: 1rem;
     }
 
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .form-group label {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--tea-milk);
-    }
+    .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+    .form-group label { font-size: 0.85rem; font-weight: 700; color: var(--tea-milk); }
 
     .form-input {
       background: #100E0D;
@@ -275,11 +232,7 @@
       font-family: var(--font-body);
       font-size: 0.95rem;
     }
-
-    .form-input:focus {
-      outline: none;
-      border-color: var(--boba-gold);
-    }
+    .form-input:focus { outline: none; border-color: var(--boba-gold); }
 
     .btn-broadcast {
       background: var(--accent);
@@ -293,14 +246,8 @@
       cursor: pointer;
       transition: background 0.2s, transform 0.1s;
     }
-
-    .btn-broadcast:hover {
-      background: var(--accent-hover);
-    }
-
-    .btn-broadcast:active {
-      transform: scale(0.98);
-    }
+    .btn-broadcast:hover { background: var(--accent-hover); }
+    .btn-broadcast:active { transform: scale(0.98); }
 
     /* Host Mod Chat */
     .chat-panel {
@@ -320,11 +267,7 @@
       justify-content: space-between;
       align-items: center;
     }
-
-    .chat-header h3 {
-      font-family: var(--font-heading);
-      font-size: 1.1rem;
-    }
+    .chat-header h3 { font-family: var(--font-heading); font-size: 1.1rem; }
 
     .btn-clear-chat {
       background: rgba(230, 57, 70, 0.15);
@@ -337,11 +280,7 @@
       cursor: pointer;
       transition: all 0.2s;
     }
-
-    .btn-clear-chat:hover {
-      background: var(--danger);
-      color: #fff;
-    }
+    .btn-clear-chat:hover { background: var(--danger); color: #fff; }
 
     .chat-messages {
       flex: 1;
@@ -362,21 +301,9 @@
       border: 1px solid #251F1A;
       position: relative;
     }
-
-    .chat-msg.is-host {
-      background: #201714;
-      border-color: #3D261D;
-    }
-
-    .chat-msg .avatar-box {
-      font-size: 1.35rem;
-      line-height: 1;
-      user-select: none;
-    }
-
-    .chat-msg .content {
-      flex: 1;
-    }
+    .chat-msg.is-host { background: #201714; border-color: #3D261D; }
+    .chat-msg .avatar-box { font-size: 1.35rem; line-height: 1; user-select: none; }
+    .chat-msg .content { flex: 1; }
 
     .msg-user {
       font-size: 0.8rem;
@@ -386,7 +313,6 @@
       align-items: center;
       gap: 0.4rem;
     }
-
     .msg-badge {
       background: var(--card-border);
       color: var(--text-muted);
@@ -394,11 +320,7 @@
       padding: 0.1rem 0.4rem;
       border-radius: 4px;
     }
-
-    .msg-badge.host {
-      background: var(--accent);
-      color: white;
-    }
+    .msg-badge.host { background: var(--accent); color: white; }
 
     .msg-text {
       font-size: 0.88rem;
@@ -418,14 +340,8 @@
       opacity: 0.4;
       transition: opacity 0.2s, color 0.2s;
     }
-
-    .chat-msg:hover .btn-del-msg {
-      opacity: 1;
-    }
-
-    .btn-del-msg:hover {
-      color: var(--danger);
-    }
+    .chat-msg:hover .btn-del-msg { opacity: 1; }
+    .btn-del-msg:hover { color: var(--danger); }
 
     .chat-input-area {
       padding: 0.75rem;
@@ -433,7 +349,6 @@
       display: flex;
       gap: 0.5rem;
     }
-
     .chat-input-area input {
       flex: 1;
       background: #100E0D;
@@ -443,12 +358,7 @@
       border-radius: 8px;
       font-size: 0.85rem;
     }
-
-    .chat-input-area input:focus {
-      outline: none;
-      border-color: var(--boba-gold);
-    }
-
+    .chat-input-area input:focus { outline: none; border-color: var(--boba-gold); }
     .chat-input-area button {
       background: var(--accent);
       border: none;
@@ -465,12 +375,7 @@
       grid-template-columns: 1fr 1.5fr;
       gap: 1.5rem;
     }
-
-    @media (max-width: 900px) {
-      .replays-admin-layout {
-        grid-template-columns: 1fr;
-      }
-    }
+    @media (max-width: 900px) { .replays-admin-layout { grid-template-columns: 1fr; } }
 
     .replay-list-card {
       background: var(--card-bg);
@@ -498,11 +403,7 @@
       color: var(--boba-gold);
       margin-bottom: 0.2rem;
     }
-
-    .admin-replay-info p {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-    }
+    .admin-replay-info p { font-size: 0.78rem; color: var(--text-muted); }
 
     .btn-delete-replay {
       background: rgba(230, 57, 70, 0.15);
@@ -515,10 +416,7 @@
       cursor: pointer;
       transition: all 0.2s;
     }
-    .btn-delete-replay:hover {
-      background: var(--danger);
-      color: #fff;
-    }
+    .btn-delete-replay:hover { background: var(--danger); color: #fff; }
   </style>
 </head>
 <body>
@@ -533,10 +431,8 @@
     <div class="header-actions">
       <a href="/" target="_blank" class="btn-audience">Open Audience View ↗</a>
 
-      <!-- 3-Dots Menu Trigger -->
       <button class="btn-menu-dots" id="btnMenuDots" title="Menu">⋮</button>
 
-      <!-- 3-Dots Dropdown Options -->
       <div class="dropdown-menu" id="navDropdown">
         <button class="dropdown-item active" id="menuLive">
           <span>🔴</span> Live Section
@@ -560,7 +456,8 @@
             <span id="feedStatusText" style="color: #4EBA6F;">Ready</span>
           </div>
           <div class="monitor-viewport">
-            <iframe id="studioMonitorIframe" src="" allow="autoplay; fullscreen; encrypted-media; picture-in-picture"></iframe>
+            <iframe id="studioMonitorIframe" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            <video id="studioMonitorVideo" controls playsinline style="display:none;"></video>
           </div>
         </div>
 
@@ -568,7 +465,7 @@
         <div class="stats-row">
           <div class="stat-box">
             <div class="stat-label">Active Viewers</div>
-            <div class="stat-val" id="valViewers">0</div>
+            <div class="stat-val" id="valViewers">1</div>
           </div>
           <div class="stat-box">
             <div class="stat-label">Feed Status</div>
@@ -579,8 +476,8 @@
             <div class="stat-val" id="valTaps">0</div>
           </div>
           <div class="stat-box">
-            <div class="stat-label">Mode</div>
-            <div class="stat-val" style="font-size: 1.2rem; color: var(--tea-milk);">Direct Link</div>
+            <div class="stat-label">Ingest Mode</div>
+            <div class="stat-val" style="font-size: 1.2rem; color: var(--tea-milk);" id="valMode">Direct</div>
           </div>
         </div>
 
@@ -589,7 +486,7 @@
           <h3 style="font-family: var(--font-heading); font-size: 1.15rem; color: var(--boba-gold);">🔗 Live Stream Ingest & Details</h3>
           
           <div class="form-group">
-            <label>Live Player / Embed Link (Twitch embed, VDO.Ninja view, or HLS .m3u8):</label>
+            <label>Live Player / Embed Link (Twitch embed, VDO.Ninja, HLS .m3u8, or MP4):</label>
             <input type="text" id="streamUrlInput" class="form-input" placeholder="e.g. https://player.twitch.tv/?channel=... or https://vdo.ninja/?view=...">
           </div>
 
@@ -613,7 +510,7 @@
         <div class="chat-header">
           <div>
             <h3>Host Mod Chat</h3>
-            <span style="font-size: 0.72rem; color: var(--text-muted);">Pusher Realtime</span>
+            <span style="font-size: 0.72rem; color: var(--text-muted);">Scaledrone WebSocket</span>
           </div>
           <button id="btnClearAllChat" class="btn-clear-chat">🗑️ Clear Chat</button>
         </div>
@@ -664,32 +561,14 @@
       <div class="replay-list-card">
         <h3 style="font-family: var(--font-heading); font-size: 1.2rem;">🎬 Published Replays</h3>
         <div id="adminReplaysList" style="display: flex; flex-direction: column; gap: 0.75rem;">
-          <p style="font-size: 0.85rem; color: var(--text-muted);">Loading replay archive...</p>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">No replays published yet.</p>
         </div>
       </div>
 
     </div>
   </section>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { 
-      getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, setDoc, deleteDoc 
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    // --- Firebase Configuration (Preserved for Streams & Replays) ---
-    const firebaseConfig = {
-      apiKey: "AIzaSyB-SAMPLE-REPLACE_WITH_YOUR_KEY",
-      authDomain: "bobastream-65561.firebaseapp.com",
-      projectId: "bobastream-65561",
-      storageBucket: "bobastream-65561.firebasestorage.app",
-      messagingSenderId: "84729104829",
-      appId: "1:84729104829:web:93a4cd2b948cf20"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
+  <script>
     // --- Navigation & 3-Dots Dropdown Setup ---
     const btnMenuDots = document.getElementById("btnMenuDots");
     const navDropdown = document.getElementById("navDropdown");
@@ -708,13 +587,8 @@
       navDropdown.classList.remove("show");
     });
 
-    menuLive.addEventListener("click", () => {
-      switchStudioView("live");
-    });
-
-    menuReplays.addEventListener("click", () => {
-      switchStudioView("replays");
-    });
+    menuLive.addEventListener("click", () => switchStudioView("live"));
+    menuReplays.addEventListener("click", () => switchStudioView("replays"));
 
     function switchStudioView(view) {
       if (view === "live") {
@@ -735,8 +609,9 @@
       navDropdown.classList.remove("show");
     }
 
-    // --- Live Studio Elements ---
+    // --- Studio Monitoring Elements ---
     const monitorIframe = document.getElementById("studioMonitorIframe");
+    const monitorVideo = document.getElementById("studioMonitorVideo");
     const streamUrlInput = document.getElementById("streamUrlInput");
     const roomTitleInput = document.getElementById("roomTitleInput");
     const roomDescInput = document.getElementById("roomDescInput");
@@ -749,90 +624,144 @@
     const hostChatInput = document.getElementById("hostChatInput");
     const btnHostSend = document.getElementById("btnHostSend");
 
-    // --- 1. Real-time Stream Metadata ---
-    onSnapshot(doc(db, "stream_stats", "main"), (snap) => {
-      if (snap.exists()) {
-        const data = snap.data();
-        if (data.activeUrl && monitorIframe.src !== data.activeUrl) {
-          monitorIframe.src = data.activeUrl;
-          streamUrlInput.value = data.activeUrl;
-        }
-        if (data.title) roomTitleInput.value = data.title;
-        if (data.description) roomDescInput.value = data.description;
-        if (data.taps !== undefined) valTaps.innerText = data.taps;
+    let studioHlsInstance = null;
+    let localTaps = parseInt(localStorage.getItem("boba_local_taps") || "0", 10);
+    valTaps.innerText = localTaps;
+
+    function sanitizeMediaUrl(rawUrl) {
+      if (!rawUrl) return "";
+      let url = rawUrl.trim();
+      if (url.includes("player.twitch.tv") && !url.includes("parent=")) {
+        const host = window.location.hostname || "localhost";
+        url += (url.includes("?") ? "&" : "?") + `parent=${host}`;
       }
+      return url;
+    }
+
+    function renderMonitor(url) {
+      if (!url) return;
+      const cleanUrl = sanitizeMediaUrl(url);
+
+      if (cleanUrl.includes(".m3u8")) {
+        monitorIframe.style.display = "none";
+        monitorVideo.style.display = "block";
+        if (Hls.isSupported()) {
+          if (studioHlsInstance) studioHlsInstance.destroy();
+          studioHlsInstance = new Hls();
+          studioHlsInstance.loadSource(cleanUrl);
+          studioHlsInstance.attachMedia(monitorVideo);
+        } else if (monitorVideo.canPlayType('application/vnd.apple.mpegurl')) {
+          monitorVideo.src = cleanUrl;
+        }
+      } else if (cleanUrl.match(/\.(mp4|webm|ogg)$/i)) {
+        monitorIframe.style.display = "none";
+        monitorVideo.style.display = "block";
+        monitorVideo.src = cleanUrl;
+      } else {
+        monitorVideo.style.display = "none";
+        monitorVideo.pause();
+        monitorIframe.style.display = "block";
+        if (monitorIframe.src !== cleanUrl) monitorIframe.src = cleanUrl;
+      }
+    }
+
+    // --- Scaledrone Host Connection ---
+    const SCALEDRONE_CHANNEL_ID = "YcmXVUcwZvg4FVv1";
+    const drone = new Scaledrone(SCALEDRONE_CHANNEL_ID, {
+      data: { name: "Host (Tim)", avatar: "🧋", isHost: true }
     });
 
-    // --- 2. Active Viewers Count ---
-    onSnapshot(collection(db, "active_viewers"), (snap) => {
-      valViewers.innerText = snap.size;
+    const roomName = "observable-bobastream_lounge";
+    let droneRoom;
+    const renderedMsgIds = new Set();
+
+    drone.on('open', error => {
+      if (error) return console.error("Host Drone open error:", error);
+
+      droneRoom = drone.subscribe(roomName);
+
+      // Presence: active viewer counts
+      droneRoom.on('members', (members) => {
+        valViewers.innerText = members.length;
+      });
+      droneRoom.on('member_join', () => {
+        valViewers.innerText = droneRoom.members.length;
+      });
+      droneRoom.on('member_leave', () => {
+        valViewers.innerText = droneRoom.members.length;
+      });
+
+      // Data dispatcher
+      droneRoom.on('data', (data) => {
+        if (!data) return;
+
+        if (data.type === "tap") {
+          localTaps = (data.taps !== undefined) ? data.taps : (localTaps + 1);
+          valTaps.innerText = localTaps;
+          localStorage.setItem("boba_local_taps", localTaps);
+          return;
+        }
+
+        if (data.type === "clear") {
+          studioChatBody.innerHTML = "";
+          renderedMsgIds.clear();
+          return;
+        }
+
+        if (data.type === "delete") {
+          renderedMsgIds.delete(data.id);
+          const elem = document.getElementById(`msg-${data.id}`);
+          if (elem) elem.remove();
+          return;
+        }
+
+        // Replays sync from other admin session
+        if (data.type === "replays_sync") {
+          replaysArchive = data.replays || [];
+          localStorage.setItem("boba_replays_cache", JSON.stringify(replaysArchive));
+          renderAdminReplays();
+          return;
+        }
+
+        if (!renderedMsgIds.has(data.id) && data.text) {
+          renderedMsgIds.add(data.id);
+          renderStudioMsg(data.id, data.name, data.text, data.badge, data.avatar);
+          studioChatBody.scrollTop = studioChatBody.scrollHeight;
+        }
+      });
     });
 
-    // --- 3. Save / Broadcast Feed ---
-    btnBroadcast.addEventListener("click", async () => {
-      const url = streamUrlInput.value.trim();
+    // Broadcast feed to all active audience members
+    btnBroadcast.addEventListener("click", () => {
+      let rawUrl = streamUrlInput.value.trim();
       const title = roomTitleInput.value.trim();
       const desc = roomDescInput.value.trim();
 
-      if (!url) {
+      if (!rawUrl) {
         alert("Please enter a valid Stream or Embed link!");
         return;
       }
 
-      btnBroadcast.innerText = "Broadcasting...";
-      btnBroadcast.disabled = true;
+      const cleanUrl = sanitizeMediaUrl(rawUrl);
+      renderMonitor(cleanUrl);
 
-      try {
-        await setDoc(doc(db, "stream_stats", "main"), {
-          activeUrl: url,
-          title: title,
-          description: desc,
-          updatedAt: serverTimestamp()
-        }, { merge: true });
-
-        monitorIframe.src = url;
-        alert("🎉 Broadcast URL published successfully to all viewers!");
-      } catch (err) {
-        alert("Error publishing stream: " + err.message);
-      } finally {
-        btnBroadcast.innerText = "🚀 Broadcast Live to All Viewers";
-        btnBroadcast.disabled = false;
+      if (droneRoom) {
+        drone.publish({
+          room: roomName,
+          message: {
+            type: "stream_update",
+            activeUrl: cleanUrl,
+            title: title || "Tapioca Pearl Room 🧋",
+            description: desc || "Welcome to BobaStream!"
+          }
+        });
+        alert("🚀 Stream details broadcasted to all viewers!");
+      } else {
+        alert("Connecting to broadcast room, please retry in a second...");
       }
     });
 
-    // --- 4. Pusher Realtime Host Chat & Moderation (Zero Firestore Quota Used) ---
-    const pusher = new Pusher("604e71363e0e47626fc6", {
-      cluster: "ap1",
-      forceTLS: true
-    });
-
-    const chatChannel = pusher.subscribe("bobastream_chat");
-    const renderedDocIds = new Set();
-
-    // Listen for live messages from viewers
-    chatChannel.bind("client-chat_message", (data) => {
-      if (!renderedDocIds.has(data.id)) {
-        renderedDocIds.add(data.id);
-        renderStudioMsg(data.id, data.name, data.text, data.badge, data.avatar);
-        studioChatBody.scrollTop = studioChatBody.scrollHeight;
-      }
-    });
-
-    // Listen for clear all chat
-    chatChannel.bind("client-clear_all_chat", () => {
-      studioChatBody.innerHTML = "";
-      renderedDocIds.clear();
-    });
-
-    // Listen for single message deletes
-    chatChannel.bind("client-delete_single_msg", (data) => {
-      if (data && data.id) {
-        renderedDocIds.delete(data.id);
-        const elem = document.getElementById(`msg-${data.id}`);
-        if (elem) elem.remove();
-      }
-    });
-
+    // Chat rendering and host messaging
     function renderStudioMsg(id, name, text, badge, avatar) {
       const div = document.createElement("div");
       const isHost = (badge === "Host" || badge === "HOST");
@@ -854,38 +783,35 @@
       `;
 
       div.querySelector(".btn-del-msg").onclick = () => {
-        if (confirm("Delete this specific message?")) {
-          renderedDocIds.delete(id);
-          div.remove();
-          chatChannel.trigger("client-delete_single_msg", { id: id });
+        if (confirm("Delete this message?")) {
+          drone.publish({
+            room: roomName,
+            message: { type: "delete", id: id }
+          });
         }
       };
 
       studioChatBody.appendChild(div);
     }
 
-    // --- 5. Host Send Message ---
     function sendHostMessage() {
       const text = hostChatInput.value.trim();
-      if (!text) return;
+      if (!text || !droneRoom) return;
 
       hostChatInput.value = "";
       const msgId = "host_msg_" + Math.random().toString(36).substring(2, 9);
-      renderedDocIds.add(msgId);
 
-      const payload = {
-        id: msgId,
-        name: "Host (Tim)",
-        text: text,
-        badge: "HOST",
-        avatar: "🧋",
-        timestamp: Date.now()
-      };
-
-      renderStudioMsg(msgId, payload.name, payload.text, payload.badge, payload.avatar);
-      studioChatBody.scrollTop = studioChatBody.scrollHeight;
-
-      chatChannel.trigger("client-chat_message", payload);
+      drone.publish({
+        room: roomName,
+        message: {
+          id: msgId,
+          name: "Host (Tim)",
+          text: text,
+          badge: "HOST",
+          avatar: "🧋",
+          timestamp: Date.now()
+        }
+      });
     }
 
     btnHostSend.onclick = sendHostMessage;
@@ -896,15 +822,15 @@
       }
     };
 
-    // --- 6. Host Wipe / Clear All Chat Button ---
     btnClearAllChat.onclick = () => {
-      if (!confirm("Are you sure you want to clear and delete ALL chat messages for EVERYONE?")) return;
-      studioChatBody.innerHTML = "";
-      renderedDocIds.clear();
-      chatChannel.trigger("client-clear_all_chat", { timestamp: Date.now() });
+      if (!confirm("Are you sure you want to clear chat for everyone?")) return;
+      drone.publish({
+        room: roomName,
+        message: { type: "clear" }
+      });
     };
 
-    // --- 7. Replays Manager Controller ---
+    // --- Replays Admin Shelf Controller ---
     const newReplayTitle = document.getElementById("newReplayTitle");
     const newReplayUrl = document.getElementById("newReplayUrl");
     const newReplayMeta = document.getElementById("newReplayMeta");
@@ -912,14 +838,17 @@
     const btnAddReplay = document.getElementById("btnAddReplay");
     const adminReplaysList = document.getElementById("adminReplaysList");
 
-    btnAddReplay.addEventListener("click", async () => {
-      let title = newReplayTitle.value.trim();
+    let replaysArchive = JSON.parse(localStorage.getItem("boba_replays_cache") || "[]");
+    renderAdminReplays();
+
+    btnAddReplay.addEventListener("click", () => {
+      const title = newReplayTitle.value.trim();
       let url = newReplayUrl.value.trim();
       const meta = newReplayMeta.value.trim();
       const desc = newReplayDesc.value.trim();
 
       if (!title || !url) {
-        alert("Please enter both a Replay Title and Video URL!");
+        alert("Please provide both a title and video URL!");
         return;
       }
 
@@ -928,78 +857,68 @@
         url += url.includes("?") ? "&raw=1" : "?raw=1";
       }
 
-      btnAddReplay.innerText = "Adding...";
-      btnAddReplay.disabled = true;
+      const replayItem = {
+        id: "rep_" + Date.now(),
+        title: title,
+        videoUrl: sanitizeMediaUrl(url),
+        meta: meta || "Recorded broadcast",
+        desc: desc || "Past stream replay on BobaStream."
+      };
 
-      try {
-        await addDoc(collection(db, "live_replays"), {
-          title: title,
-          videoUrl: url,
-          meta: meta || "Streamed recently",
-          desc: desc || "Recorded live replay on BobaStream.",
-          createdAt: serverTimestamp()
+      replaysArchive.unshift(replayItem);
+      localStorage.setItem("boba_replays_cache", JSON.stringify(replaysArchive));
+      renderAdminReplays();
+
+      // Sync across all audience connections
+      if (droneRoom) {
+        drone.publish({
+          room: roomName,
+          message: { type: "replays_sync", replays: replaysArchive }
         });
-
-        newReplayTitle.value = "";
-        newReplayUrl.value = "";
-        newReplayMeta.value = "";
-        newReplayDesc.value = "";
-        alert("🎉 Replay added to public shelf!");
-      } catch (err) {
-        alert("Failed to add replay: " + err.message);
-      } finally {
-        btnAddReplay.innerText = "✨ Publish to Replays Shelf";
-        btnAddReplay.disabled = false;
       }
+
+      newReplayTitle.value = "";
+      newReplayUrl.value = "";
+      newReplayMeta.value = "";
+      newReplayDesc.value = "";
+      alert("✨ Replay published to public shelf!");
     });
 
-    // --- 8. Replays Live Sync & Robust Deletion ---
-    onSnapshot(collection(db, "live_replays"), (snapshot) => {
-      if (snapshot.empty) {
+    function renderAdminReplays() {
+      if (!replaysArchive || replaysArchive.length === 0) {
         adminReplaysList.innerHTML = `<p style="font-size: 0.85rem; color: var(--text-muted);">No replays published yet.</p>`;
         return;
       }
 
       adminReplaysList.innerHTML = "";
-      snapshot.forEach((docItem) => {
-        const item = docItem.data();
-        const replayDocId = docItem.id;
-
+      replaysArchive.forEach((item) => {
         const row = document.createElement("div");
         row.className = "admin-replay-item";
-        row.id = `admin-replay-${replayDocId}`;
         row.innerHTML = `
           <div class="admin-replay-info">
             <h4>${escapeHtml(item.title)}</h4>
             <p>${escapeHtml(item.meta || '')} • ${escapeHtml(item.desc || '')}</p>
           </div>
-          <button class="btn-delete-replay" data-id="${replayDocId}">Delete</button>
+          <button class="btn-delete-replay" data-id="${item.id}">Delete</button>
         `;
 
-        const deleteBtn = row.querySelector(".btn-delete-replay");
-        deleteBtn.addEventListener("click", async (e) => {
-          e.stopPropagation();
-          const targetId = deleteBtn.getAttribute("data-id");
+        row.querySelector(".btn-delete-replay").addEventListener("click", () => {
+          if (!confirm(`Delete "${item.title}"?`)) return;
+          replaysArchive = replaysArchive.filter(r => r.id !== item.id);
+          localStorage.setItem("boba_replays_cache", JSON.stringify(replaysArchive));
+          renderAdminReplays();
 
-          if (!confirm(`Are you sure you want to permanently delete "${item.title}"?`)) return;
-
-          deleteBtn.innerText = "Deleting...";
-          deleteBtn.disabled = true;
-
-          try {
-            await deleteDoc(doc(db, "live_replays", targetId));
-            row.remove();
-          } catch (err) {
-            console.error("Failed to delete replay:", err);
-            alert("Delete failed: " + err.message);
-            deleteBtn.innerText = "Delete";
-            deleteBtn.disabled = false;
+          if (droneRoom) {
+            drone.publish({
+              room: roomName,
+              message: { type: "replays_sync", replays: replaysArchive }
+            });
           }
         });
 
         adminReplaysList.appendChild(row);
       });
-    });
+    }
 
     function escapeHtml(str) {
       return String(str || "").replace(/[&<>"']/g, (m) => ({
