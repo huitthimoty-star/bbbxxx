@@ -449,7 +449,7 @@
           
           <div class="form-group">
             <label>Live Player / Embed Link (YouTube embed, Twitch, or HLS .m3u8):</label>
-            <input type="text" id="streamUrlInput" class="form-input" placeholder="e.g. https://www.youtube-nocookie.com/embed/VIDEO_ID?autoplay=1">
+            <input type="text" id="streamUrlInput" class="form-input" value="https://www.twitch.tv/b0bbaazz" placeholder="https://www.twitch.tv/b0bbaazz">
           </div>
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -678,9 +678,9 @@
       window.addEventListener("load", initStudioScaledrone);
     }
 
-    // --- Broadcast Button ---
+// --- Broadcast Button ---
     btnBroadcast.addEventListener("click", () => {
-      const url = streamUrlInput.value.trim();
+      let url = streamUrlInput.value.trim();
       const title = roomTitleInput.value.trim();
       const desc = roomDescInput.value.trim();
 
@@ -693,7 +693,16 @@
       localStorage.setItem("boba_active_url", url);
       localStorage.setItem("boba_room_title", title);
       localStorage.setItem("boba_room_desc", desc);
-      monitorIframe.src = url;
+
+      // Format Twitch URLs properly for the Studio iframe preview
+      const twitchMatch = url.match(/twitch\.tv\/([a-zA-Z0-9_]+)/);
+      if (twitchMatch && twitchMatch[1]) {
+        const parentHost = window.location.hostname || "localhost";
+        monitorIframe.src = `https://player.twitch.tv/?channel=${twitchMatch[1]}&parent=${parentHost}&muted=true`;
+      } else {
+        monitorIframe.src = url;
+      }
+
       valStatus.innerText = "Active";
 
       // Broadcast immediately across open viewers

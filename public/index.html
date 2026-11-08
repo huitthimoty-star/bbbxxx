@@ -669,7 +669,7 @@
     if (cachedTitle) roomTitleDisplay.innerText = cachedTitle;
     if (cachedDesc) roomDescDisplay.innerText = cachedDesc;
 
-    function loadVideoUrl(url) {
+function loadVideoUrl(url) {
   if (!url) return;
   
   const twitchEmbed = document.getElementById("twitch-embed");
@@ -913,17 +913,22 @@
       })[m]);
     }
 
-        // --- Twitch Interactive Player Setup ---
+// --- Twitch Interactive Player Setup ---
     const twitchOptions = {
       width: "100%",
       height: "100%",
-      channel: "bobatea01",
-      // The exact Cloudflare workers domain is now added here
-      parent: ["localhost", "127.0.0.1", "thim.site", "bbbxxx.rea65048.workers.dev"] 
+      channel: "b0bbaazz",
+      parent: [
+        "localhost",
+        "127.0.0.1",
+        "thim.site",
+        "bbbxxx.rea65048.workers.dev",
+        window.location.hostname
+      ]
     };
 
     const twitchPlayer = new Twitch.Player("twitch-embed", twitchOptions);
-    twitchPlayer.setVolume(0.5);
+    twitchPlayer.setVolume(1);
   </script>
 </body>
 </html>
