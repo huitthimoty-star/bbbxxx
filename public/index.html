@@ -10,8 +10,6 @@
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <!-- Scaledrone Official CDN -->
   <script type="text/javascript" src="https://cdn.scaledrone.com/scaledrone.min.js"></script>
-  <!-- Twitch Interactive API -->
-  <script src="https://player.twitch.tv/js/embed/v1.js"></script>
   <style>
     :root {
       --bg-cream: #1A1614;
@@ -94,7 +92,7 @@
       border: 1px solid var(--card-border);
       border-radius: 14px;
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-      width: 180px;
+      width: 190px;
       padding: 0.5rem;
       display: none;
       flex-direction: column;
@@ -384,6 +382,123 @@
     .replay-title { font-family: var(--font-heading); font-size: 1.05rem; color: var(--boba-tea); }
     .replay-meta { font-size: 0.78rem; color: var(--text-muted); }
 
+    /* --- Support / Donation Section Styles --- */
+    .support-container {
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .support-hero {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 2rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    }
+    .support-hero h2 {
+      font-family: var(--font-heading);
+      font-size: 1.8rem;
+      color: var(--boba-gold);
+    }
+    .support-tiers {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+    }
+    .tier-card {
+      background: #1C1714;
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .tier-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent);
+    }
+    .tier-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .tier-title {
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      color: var(--boba-tea);
+    }
+    .tier-price {
+      background: #382721;
+      color: var(--boba-gold);
+      font-weight: 800;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+    }
+    .tier-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .donation-methods-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .method-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #14110F;
+      border: 1px solid var(--card-border);
+      padding: 0.85rem 1rem;
+      border-radius: 12px;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .method-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .btn-copy {
+      background: #2E2722;
+      border: 1px solid var(--card-border);
+      color: var(--boba-tea);
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-copy:hover { background: #3E342E; }
+    .btn-link-donate {
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      padding: 0.45rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: inline-block;
+      transition: background 0.15s;
+    }
+    .btn-link-donate:hover { background: var(--accent-hover); }
+
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -445,6 +560,9 @@
         <button class="dropdown-item" id="tabReplays">
           <span>🎬</span> Live Replays
         </button>
+        <button class="dropdown-item" id="tabSupport">
+          <span>🧋</span> Tip Jar & Support
+        </button>
       </div>
     </div>
   </header>
@@ -459,7 +577,7 @@
             <span id="viewerCountDisplay">1 Viewer</span>
           </div>
 
-          <!-- Interactive Twitch Container -->
+          <!-- Universal Twitch Container (Muted autoplay bypasses iOS/Android WebKit restrictions) -->
           <div id="twitch-embed" style="width: 100%; height: 100%; display: block;"></div>
 
           <iframe id="liveIframePlayer" src="" style="display:none;" allow="autoplay; fullscreen; encrypted-media; picture-in-picture"></iframe>
@@ -519,6 +637,87 @@
     </div>
   </section>
 
+  <!-- ================= SUB-WEB 3: SUPPORT / TIP JAR ================= -->
+  <section class="view-section" id="sectionSupport">
+    <div class="support-container">
+      
+      <div class="support-hero">
+        <span style="font-size: 2.8rem;">🧋✨</span>
+        <h2>Support BobaStream</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 500px;">
+          Enjoying the live feed? Tips directly fund the 24/7 VPS stream server, fresh tea, and upcoming lounge upgrades. Every sip is appreciated!
+        </p>
+      </div>
+
+      <!-- Quick Tiers -->
+      <div class="support-tiers">
+        <div class="tier-card">
+          <div class="tier-header">
+            <span class="tier-title">Extra Boba Pearls</span>
+            <span class="tier-price">₱50 / $1</span>
+          </div>
+          <p class="tier-desc">Adds sweet tapioca pearls to the stream fuel. Sends a shoutout during stream!</p>
+        </div>
+        <div class="tier-card">
+          <div class="tier-header">
+            <span class="tier-title">Classic Milk Tea</span>
+            <span class="tier-price">₱150 / $3</span>
+          </div>
+          <p class="tier-desc">Buys a whole milk tea to power multi-camera broadcasts and late night sessions.</p>
+        </div>
+        <div class="tier-card">
+          <div class="tier-header">
+            <span class="tier-title">Brown Sugar VIP</span>
+            <span class="tier-price">₱250+ / $5+</span>
+          </div>
+          <p class="tier-desc">Major lounge supporter! Helps cover monthly cloud server bandwidth costs.</p>
+        </div>
+      </div>
+
+      <!-- Payment Methods -->
+      <div class="donation-methods-card">
+        <h3 style="font-family: var(--font-heading); font-size: 1.25rem;">Payment Channels</h3>
+
+        <!-- GCash / Maya -->
+        <div class="method-row">
+          <div class="method-info">
+            <span style="font-size: 1.5rem;">📱</span>
+            <div>
+              <div style="font-weight: 800; font-size: 0.95rem;">GCash / Maya</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">0912 345 6789 (Tim H.)</div>
+            </div>
+          </div>
+          <button class="btn-copy" onclick="copyPaymentDetail('09123456789', this)">📋 Copy Number</button>
+        </div>
+
+        <!-- Ko-fi or Tipping Platform -->
+        <div class="method-row">
+          <div class="method-info">
+            <span style="font-size: 1.5rem;">☕</span>
+            <div>
+              <div style="font-weight: 800; font-size: 0.95rem;">Ko-fi / Tipping Page</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Supports international cards and Apple Pay</div>
+            </div>
+          </div>
+          <a href="https://ko-fi.com" target="_blank" rel="noopener" class="btn-link-donate">Open Link ↗</a>
+        </div>
+
+        <!-- PayPal -->
+        <div class="method-row">
+          <div class="method-info">
+            <span style="font-size: 1.5rem;">💳</span>
+            <div>
+              <div style="font-weight: 800; font-size: 0.95rem;">PayPal</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">paypal.me/yourusername</div>
+            </div>
+          </div>
+          <a href="https://paypal.me" target="_blank" rel="noopener" class="btn-link-donate">Send via PayPal ↗</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
   <!-- Profile Edit Modal -->
   <div class="modal-overlay" id="profileModal">
     <div class="modal-content">
@@ -557,8 +756,10 @@
     const navDropdown = document.getElementById("navDropdown");
     const tabLive = document.getElementById("tabLive");
     const tabReplays = document.getElementById("tabReplays");
+    const tabSupport = document.getElementById("tabSupport");
     const sectionLive = document.getElementById("sectionLive");
     const sectionReplays = document.getElementById("sectionReplays");
+    const sectionSupport = document.getElementById("sectionSupport");
     const liveBadge = document.getElementById("liveBadge");
 
     btnMenuDots.addEventListener("click", (e) => {
@@ -572,24 +773,46 @@
 
     tabLive.addEventListener("click", () => switchSubView("live"));
     tabReplays.addEventListener("click", () => switchSubView("replays"));
+    tabSupport.addEventListener("click", () => switchSubView("support"));
 
     function switchSubView(view) {
+      sectionLive.classList.remove("active");
+      sectionReplays.classList.remove("active");
+      sectionSupport.classList.remove("active");
+      tabLive.classList.remove("active");
+      tabReplays.classList.remove("active");
+      tabSupport.classList.remove("active");
+
       if (view === "live") {
         sectionLive.classList.add("active");
-        sectionReplays.classList.remove("active");
         tabLive.classList.add("active");
-        tabReplays.classList.remove("active");
         liveBadge.innerText = "LIVE";
         liveBadge.style.background = "var(--accent)";
-      } else {
-        sectionLive.classList.remove("active");
+        liveBadge.style.color = "#fff";
+      } else if (view === "replays") {
         sectionReplays.classList.add("active");
-        tabLive.classList.remove("active");
         tabReplays.classList.add("active");
         liveBadge.innerText = "REPLAYS";
         liveBadge.style.background = "var(--boba-tea)";
+        liveBadge.style.color = "#1A1614";
+      } else if (view === "support") {
+        sectionSupport.classList.add("active");
+        tabSupport.classList.add("active");
+        liveBadge.innerText = "SUPPORT";
+        liveBadge.style.background = "var(--boba-gold)";
+        liveBadge.style.color = "#1A1614";
       }
       navDropdown.classList.remove("show");
+    }
+
+    function copyPaymentDetail(text, btnElement) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btnElement.innerText;
+        btnElement.innerText = "✅ Copied!";
+        setTimeout(() => { btnElement.innerText = originalText; }, 2000);
+      }).catch(() => {
+        prompt("Copy payment account:", text);
+      });
     }
 
     // --- Live Stream Elements ---
@@ -660,50 +883,90 @@
       if (e.target === profileModal) profileModal.style.display = "none";
     });
 
+    // --- Universal Cross-Platform Twitch Embed (PC, iPhone, iPad, Android) ---
+    function initTwitchPlayer(channelName = "b0bbaazz") {
+      const twitchContainer = document.getElementById("twitch-embed");
+      if (!twitchContainer) return;
+
+      const currentHost = window.location.hostname || "localhost";
+      const domains = [
+        currentHost,
+        "thim.site",
+        "bbbxxx.rea65048.workers.dev",
+        "localhost",
+        "127.0.0.1"
+      ];
+      const uniqueParents = [...new Set(domains)].filter(Boolean);
+      const parentParams = uniqueParents.map(d => `parent=${encodeURIComponent(d)}`).join("&");
+
+      twitchContainer.innerHTML = `
+        <iframe
+          src="https://player.twitch.tv/?channel=${encodeURIComponent(channelName)}&${parentParams}&muted=true&autoplay=true"
+          height="100%"
+          width="100%"
+          allowfullscreen="true"
+          webkitallowfullscreen="true"
+          mozallowfullscreen="true"
+          allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+          playsinline
+          style="width: 100%; height: 100%; border: none; display: block;"
+        ></iframe>
+      `;
+    }
+
     // --- Stream Persistence on Refresh ---
     let currentStreamUrl = localStorage.getItem("boba_active_url") || "";
     const cachedTitle = localStorage.getItem("boba_room_title");
     const cachedDesc = localStorage.getItem("boba_room_desc");
 
-    if (currentStreamUrl) loadVideoUrl(currentStreamUrl);
+    if (currentStreamUrl) {
+      loadVideoUrl(currentStreamUrl);
+    } else {
+      initTwitchPlayer("b0bbaazz");
+    }
+
     if (cachedTitle) roomTitleDisplay.innerText = cachedTitle;
     if (cachedDesc) roomDescDisplay.innerText = cachedDesc;
 
-function loadVideoUrl(url) {
-  if (!url) return;
-  
-  const twitchEmbed = document.getElementById("twitch-embed");
-  
-  // 1. Force the new Twitch player to show if the URL is Twitch-related (bypasses old cache bugs)
-  if (url.includes("twitch.tv")) {
-    twitchEmbed.style.display = "block";
-    liveIframePlayer.style.display = "none";
-    liveHlsVideo.style.display = "none";
-    return;
-  }
+    function loadVideoUrl(url) {
+      if (!url) return;
+      
+      const twitchEmbed = document.getElementById("twitch-embed");
 
-  // 2. Handle normal .m3u8 video feeds
-  if (url.includes(".m3u8")) {
-    twitchEmbed.style.display = "none";
-    liveIframePlayer.style.display = "none";
-    liveHlsVideo.style.display = "block";
-    if (window.Hls && Hls.isSupported()) {
-      const hls = new Hls();
-      hls.loadSource(url);
-      hls.attachMedia(liveHlsVideo);
-    } else if (liveHlsVideo.canPlayType('application/vnd.apple.mpegurl')) {
-      liveHlsVideo.src = url;
+      // 1. Twitch stream handling for PC & Mobile
+      if (url.includes("twitch.tv")) {
+        twitchEmbed.style.display = "block";
+        liveIframePlayer.style.display = "none";
+        liveHlsVideo.style.display = "none";
+
+        const channelMatch = url.match(/twitch\.tv\/([a-zA-Z0-9_]+)/);
+        const channel = channelMatch ? channelMatch[1] : "b0bbaazz";
+        initTwitchPlayer(channel);
+        return;
+      }
+
+      // 2. Normal .m3u8 video feeds
+      if (url.includes(".m3u8")) {
+        twitchEmbed.style.display = "none";
+        liveIframePlayer.style.display = "none";
+        liveHlsVideo.style.display = "block";
+        if (window.Hls && Hls.isSupported()) {
+          const hls = new Hls();
+          hls.loadSource(url);
+          hls.attachMedia(liveHlsVideo);
+        } else if (liveHlsVideo.canPlayType('application/vnd.apple.mpegurl')) {
+          liveHlsVideo.src = url;
+        }
+      } else {
+        // 3. YouTube / standard embed iframes
+        twitchEmbed.style.display = "none";
+        liveHlsVideo.style.display = "none";
+        liveIframePlayer.style.display = "block";
+        if (liveIframePlayer.src !== url) {
+          liveIframePlayer.src = url;
+        }
+      }
     }
-  } else {
-    // 3. Handle standard YouTube/Other iframes
-    twitchEmbed.style.display = "none";
-    liveHlsVideo.style.display = "none";
-    liveIframePlayer.style.display = "block";
-    if (liveIframePlayer.src !== url) {
-      liveIframePlayer.src = url;
-    }
-  }
-}
 
     // --- Scaledrone WebSocket Engine ---
     const SCALEDRONE_CHANNEL_ID = "YcmXVUcwZvg4FVv1";
@@ -912,23 +1175,6 @@ function loadVideoUrl(url) {
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
       })[m]);
     }
-
-// --- Twitch Interactive Player Setup ---
-    const twitchOptions = {
-      width: "100%",
-      height: "100%",
-      channel: "b0bbaazz",
-      parent: [
-        "localhost",
-        "127.0.0.1",
-        "thim.site",
-        "bbbxxx.rea65048.workers.dev",
-        window.location.hostname
-      ]
-    };
-
-    const twitchPlayer = new Twitch.Player("twitch-embed", twitchOptions);
-    twitchPlayer.setVolume(1);
   </script>
 </body>
 </html>
