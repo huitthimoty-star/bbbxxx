@@ -670,30 +670,40 @@
     if (cachedDesc) roomDescDisplay.innerText = cachedDesc;
 
     function loadVideoUrl(url) {
-      if (!url) return;
-      
-      const twitchEmbed = document.getElementById("twitch-embed");
-      
-      if (url.includes(".m3u8")) {
-        twitchEmbed.style.display = "none";
-        liveIframePlayer.style.display = "none";
-        liveHlsVideo.style.display = "block";
-        if (window.Hls && Hls.isSupported()) {
-          const hls = new Hls();
-          hls.loadSource(url);
-          hls.attachMedia(liveHlsVideo);
-        } else if (liveHlsVideo.canPlayType('application/vnd.apple.mpegurl')) {
-          liveHlsVideo.src = url;
-        }
-      } else {
-        twitchEmbed.style.display = "none";
-        liveHlsVideo.style.display = "none";
-        liveIframePlayer.style.display = "block";
-        if (liveIframePlayer.src !== url) {
-          liveIframePlayer.src = url;
-        }
-      }
+  if (!url) return;
+  
+  const twitchEmbed = document.getElementById("twitch-embed");
+  
+  // 1. Force the new Twitch player to show if the URL is Twitch-related (bypasses old cache bugs)
+  if (url.includes("twitch.tv")) {
+    twitchEmbed.style.display = "block";
+    liveIframePlayer.style.display = "none";
+    liveHlsVideo.style.display = "none";
+    return;
+  }
+
+  // 2. Handle normal .m3u8 video feeds
+  if (url.includes(".m3u8")) {
+    twitchEmbed.style.display = "none";
+    liveIframePlayer.style.display = "none";
+    liveHlsVideo.style.display = "block";
+    if (window.Hls && Hls.isSupported()) {
+      const hls = new Hls();
+      hls.loadSource(url);
+      hls.attachMedia(liveHlsVideo);
+    } else if (liveHlsVideo.canPlayType('application/vnd.apple.mpegurl')) {
+      liveHlsVideo.src = url;
     }
+  } else {
+    // 3. Handle standard YouTube/Other iframes
+    twitchEmbed.style.display = "none";
+    liveHlsVideo.style.display = "none";
+    liveIframePlayer.style.display = "block";
+    if (liveIframePlayer.src !== url) {
+      liveIframePlayer.src = url;
+    }
+  }
+}
 
     // --- Scaledrone WebSocket Engine ---
     const SCALEDRONE_CHANNEL_ID = "YcmXVUcwZvg4FVv1";
@@ -902,7 +912,7 @@
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
       })[m]);
     }
-    
+
         // --- Twitch Interactive Player Setup ---
     const twitchOptions = {
       width: "100%",
