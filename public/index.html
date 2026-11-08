@@ -10,6 +10,8 @@
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <!-- Scaledrone Official CDN -->
   <script type="text/javascript" src="https://cdn.scaledrone.com/scaledrone.min.js"></script>
+  <!-- Twitch Interactive API -->
+  <script src="https://player.twitch.tv/js/embed/v1.js"></script>
   <style>
     :root {
       --bg-cream: #1A1614;
@@ -457,12 +459,15 @@
             <span id="viewerCountDisplay">1 Viewer</span>
           </div>
 
-          <iframe id="liveIframePlayer" src="https://player.twitch.tv/?channel=bobatea01&parent=YOUR_DOMAIN" style="display:block;" allow="autoplay; fullscreen; encrypted-media; picture-in-picture"></iframe>
+          <!-- Interactive Twitch Container -->
+          <div id="twitch-embed" style="width: 100%; height: 100%; display: block;"></div>
+
+          <iframe id="liveIframePlayer" src="" style="display:none;" allow="autoplay; fullscreen; encrypted-media; picture-in-picture"></iframe>
           <video id="liveHlsVideo" controls autoplay playsinline style="display:none;"></video>
         </div>
 
         <div class="info-card">
-          <h2 class="info-title" id="roomTitleDisplay">Tapioca Pearl Room 🧋</h2>
+          <h2 class="info-title" id="roomTitleDisplay">Obobatea Live 🧋</h2>
           <p class="info-desc" id="roomDescDisplay">Connecting to live feed...</p>
         </div>
 
@@ -666,7 +671,11 @@
 
     function loadVideoUrl(url) {
       if (!url) return;
+      
+      const twitchEmbed = document.getElementById("twitch-embed");
+      
       if (url.includes(".m3u8")) {
+        twitchEmbed.style.display = "none";
         liveIframePlayer.style.display = "none";
         liveHlsVideo.style.display = "block";
         if (window.Hls && Hls.isSupported()) {
@@ -677,6 +686,7 @@
           liveHlsVideo.src = url;
         }
       } else {
+        twitchEmbed.style.display = "none";
         liveHlsVideo.style.display = "none";
         liveIframePlayer.style.display = "block";
         if (liveIframePlayer.src !== url) {
@@ -892,6 +902,18 @@
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
       })[m]);
     }
+
+    // --- Twitch Interactive Player Setup ---
+    const twitchOptions = {
+      width: "100%",
+      height: "100%",
+      channel: "bobatea01",
+      // Include every place you might test or host the site
+      parent: ["localhost", "127.0.0.1", "thim.site"] 
+    };
+
+    const twitchPlayer = new Twitch.Player("twitch-embed", twitchOptions);
+    twitchPlayer.setVolume(0.5);
   </script>
 </body>
 </html>
