@@ -382,122 +382,201 @@
     .replay-title { font-family: var(--font-heading); font-size: 1.05rem; color: var(--boba-tea); }
     .replay-meta { font-size: 0.78rem; color: var(--text-muted); }
 
-    /* --- Support / Donation Section Styles --- */
-    .support-container {
-      max-width: 860px;
+    /* ================= DONATION / TIP JAR STYLES ================= */
+    .support-wrapper {
+      max-width: 1040px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
     }
-    .support-hero {
+
+    .support-header-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 20px;
-      padding: 2rem;
+      padding: 2rem 1.5rem;
       text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.5rem;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
     }
-    .support-hero h2 {
+    .support-header-card h2 {
       font-family: var(--font-heading);
-      font-size: 1.8rem;
-      color: var(--boba-gold);
+      font-size: 1.85rem;
+      color: var(--boba-tea);
     }
-    .support-tiers {
+
+    .donation-cards-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+    @media (max-width: 900px) {
+      .donation-cards-grid { grid-template-columns: 1fr; }
+    }
+
+    .don-card {
+      color: #ffffff;
+      border-radius: 22px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.15s;
+    }
+    .don-card:hover { transform: translateY(-2px); }
+
+    .don-card.gcash {
+      background: linear-gradient(145deg, #0747a6 0%, #007dfe 100%);
+    }
+    /* .don-card.gotyme {
+      background: linear-gradient(145deg, #095954 0%, #00a887 100%);
+    }
+    .don-card.maribank {
+      background: linear-gradient(145deg, #bd3e0f 0%, #e85926 100%);
+    } */
+
+    .don-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.2rem;
+    }
+    .don-brand-title {
+      font-family: var(--font-heading);
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+    .don-badge {
+      background: rgba(255, 255, 255, 0.22);
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      letter-spacing: 0.05em;
+    }
+
+    .don-info-block {
+      background: rgba(0, 0, 0, 0.22);
+      backdrop-filter: blur(8px);
+      border-radius: 14px;
+      padding: 0.8rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      margin-bottom: 0.65rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .don-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      opacity: 0.85;
+      font-weight: 700;
+    }
+    .don-value {
+      font-size: 1.15rem;
+      font-family: var(--font-heading);
+      letter-spacing: 0.03em;
+    }
+
+    .btn-don-qr {
+      width: 100%;
+      margin-top: 0.5rem;
+      padding: 0.8rem;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      background: rgba(255, 255, 255, 0.22);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      transition: background 0.15s, transform 0.08s;
+    }
+    .btn-don-qr:hover { background: rgba(255, 255, 255, 0.32); }
+    .btn-don-qr:active { transform: scale(0.97); }
+
+    /* Collapsible QR Drawer inside the card */
+    .qr-drawer {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease, opacity 0.3s ease, margin-top 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0.6rem;
+    }
+    .qr-drawer.open {
+      max-height: 480px;
+      opacity: 1;
+      margin-top: 1.2rem;
+    }
+    .qr-white-frame {
+      background: #ffffff;
+      padding: 0.75rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+      display: inline-flex;
+      max-width: 100%;
+    }
+    .qr-white-frame img {
+      width: 100%;
+      max-width: 220px;
+      height: auto;
+      display: block;
+      border-radius: 8px;
+    }
+    .qr-tip-text {
+      font-size: 0.76rem;
+      opacity: 0.9;
+      line-height: 1.35;
+    }
+
+    /* Tea Sips Perks */
+    .perks-shelf {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
       gap: 1rem;
     }
-    .tier-card {
-      background: #1C1714;
+    @media (max-width: 650px) {
+      .perks-shelf { grid-template-columns: 1fr; }
+    }
+    .perk-box {
+      background: #1A1513;
       border: 1px solid var(--card-border);
       border-radius: 16px;
       padding: 1.25rem;
       display: flex;
       flex-direction: column;
-      gap: 0.6rem;
-      transition: transform 0.15s, border-color 0.15s;
+      gap: 0.4rem;
     }
-    .tier-card:hover {
-      transform: translateY(-3px);
-      border-color: var(--accent);
-    }
-    .tier-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .tier-title {
+    .perk-title {
       font-family: var(--font-heading);
-      font-size: 1.15rem;
-      color: var(--boba-tea);
-    }
-    .tier-price {
-      background: #382721;
+      font-size: 1.05rem;
       color: var(--boba-gold);
-      font-weight: 800;
-      font-size: 0.85rem;
-      padding: 0.2rem 0.55rem;
-      border-radius: 999px;
     }
-    .tier-desc {
-      font-size: 0.85rem;
+    .perk-desc {
+      font-size: 0.82rem;
       color: var(--text-muted);
       line-height: 1.4;
     }
-    .donation-methods-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 20px;
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    .method-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #14110F;
-      border: 1px solid var(--card-border);
-      padding: 0.85rem 1rem;
-      border-radius: 12px;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-    .method-info {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-    .btn-copy {
-      background: #2E2722;
-      border: 1px solid var(--card-border);
-      color: var(--boba-tea);
-      padding: 0.4rem 0.8rem;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    .btn-copy:hover { background: #3E342E; }
-    .btn-link-donate {
-      background: var(--accent);
-      color: #fff;
-      text-decoration: none;
-      padding: 0.45rem 1rem;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      font-weight: 700;
-      display: inline-block;
-      transition: background 0.15s;
-    }
-    .btn-link-donate:hover { background: var(--accent-hover); }
 
     .modal-overlay {
       position: fixed;
@@ -561,7 +640,7 @@
           <span>🎬</span> Live Replays
         </button>
         <button class="dropdown-item" id="tabSupport">
-          <span>🧋</span> Tip Jar & Support
+          <span>💖</span> Tip Jar & Donations
         </button>
       </div>
     </div>
@@ -577,7 +656,7 @@
             <span id="viewerCountDisplay">1 Viewer</span>
           </div>
 
-          <!-- Universal Twitch Container (Muted autoplay bypasses iOS/Android WebKit restrictions) -->
+          <!-- Cross-Platform Twitch Container -->
           <div id="twitch-embed" style="width: 100%; height: 100%; display: block;"></div>
 
           <iframe id="liveIframePlayer" src="" style="display:none;" allow="autoplay; fullscreen; encrypted-media; picture-in-picture"></iframe>
@@ -637,81 +716,143 @@
     </div>
   </section>
 
-  <!-- ================= SUB-WEB 3: SUPPORT / TIP JAR ================= -->
+  <!-- ================= SUB-WEB 3: DONATION / TIP JAR ================= -->
   <section class="view-section" id="sectionSupport">
-    <div class="support-container">
+    <div class="support-wrapper">
       
-      <div class="support-hero">
-        <span style="font-size: 2.8rem;">🧋✨</span>
-        <h2>Support BobaStream</h2>
-        <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 500px;">
-          Enjoying the live feed? Tips directly fund the 24/7 VPS stream server, fresh tea, and upcoming lounge upgrades. Every sip is appreciated!
+      <div class="support-header-card">
+        <span style="font-size: 2.4rem;">🧋✨</span>
+        <h2>Support the Stream Lounge</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 540px;">
+          Hello Chat! Just for Donation. Any Tips help support the continuous 24/7 stream server, equipment, and cold drinks. Tap <strong>Open QR</strong> on any payment channel below to scan and tip! Thank you so much chat! Any amount will do.
         </p>
       </div>
 
-      <!-- Quick Tiers -->
-      <div class="support-tiers">
-        <div class="tier-card">
-          <div class="tier-header">
-            <span class="tier-title">Extra Boba Pearls</span>
-            <span class="tier-price">₱50 / $1</span>
+      <div class="donation-cards-grid">
+        
+        <!-- GCash Card -->
+        <div class="don-card gcash">
+          <div>
+            <div class="don-card-header">
+              <div class="don-brand-title">
+                <span>💙</span> GCash
+              </div>
+              <span class="don-badge">INSTAPAY QR</span>
+            </div>
+
+            <div class="don-info-block">
+              <span class="don-label">Account Name</span>
+              <span class="don-value">TH*****Y JO***A H.</span>
+            </div>
+
+            <div class="don-info-block">
+              <span class="don-label">Mobile Number</span>
+              <span class="don-value">095* *** ****</span>
+            </div>
           </div>
-          <p class="tier-desc">Adds sweet tapioca pearls to the stream fuel. Sends a shoutout during stream!</p>
-        </div>
-        <div class="tier-card">
-          <div class="tier-header">
-            <span class="tier-title">Classic Milk Tea</span>
-            <span class="tier-price">₱150 / $3</span>
+
+          <div>
+            <button class="btn-don-qr" onclick="toggleQr('gcashQrDrawer', this)">
+              <span>📷</span> <span>Open QR</span>
+            </button>
+
+            <!-- Collapsible QR Drawer with your uploaded image -->
+            <div class="qr-drawer" id="gcashQrDrawer">
+              <div class="qr-white-frame">
+                <img src="gcash_qr.jpg" alt="GCash QR Code">
+              </div>
+              <span class="qr-tip-text">Scan with GCash or any InstaPay app</span>
+            </div>
           </div>
-          <p class="tier-desc">Buys a whole milk tea to power multi-camera broadcasts and late night sessions.</p>
         </div>
-        <div class="tier-card">
-          <div class="tier-header">
-            <span class="tier-title">Brown Sugar VIP</span>
-            <span class="tier-price">₱250+ / $5+</span>
+
+        <!-- GoTyme Card
+        <div class="don-card gotyme">
+          <div>
+            <div class="don-card-header">
+              <div class="don-brand-title">
+                <span>💎</span> GoTyme Bank
+              </div>
+              <span class="don-badge">INSTAPAY QR</span>
+            </div>
+
+            <div class="don-info-block">
+              <span class="don-label">Account Name</span>
+              <span class="don-value">TH*****Y JO***A H.</span>
+            </div>
+
+            <div class="don-info-block">
+              <span class="don-label">Account Number</span>
+              <span class="don-value">•••••••• 5630</span>
+            </div>
           </div>
-          <p class="tier-desc">Major lounge supporter! Helps cover monthly cloud server bandwidth costs.</p>
-        </div>
+
+          <div>
+            <button class="btn-don-qr" onclick="toggleQr('gotymeQrDrawer', this)">
+              <span>📷</span> <span>Open QR</span>
+            </button> -->
+
+            <!-- Collapsible QR Drawer with your uploaded image -->
+            <!-- <div class="qr-drawer" id="gotymeQrDrawer">
+              <div class="qr-white-frame">
+                <img src="gotyme_qr.jpg" alt="GoTyme Bank QR Code">
+              </div>
+              <span class="qr-tip-text">Scan with GoTyme Bank or any InstaPay banking app</span>
+            </div>
+          </div>
+        </div> -->
+
+        <!-- MariBank Card -->
+        <!-- <div class="don-card maribank">
+          <div>
+            <div class="don-card-header">
+              <div class="don-brand-title">
+                <span>🧡</span> MariBank
+              </div>
+              <span class="don-badge">INSTAPAY QR</span>
+            </div>
+
+            <div class="don-info-block">
+              <span class="don-label">Account Name</span>
+              <span class="don-value">TH*****Y JO***A H.</span>
+            </div>
+
+            <div class="don-info-block">
+              <span class="don-label">Account Number</span>
+              <span class="don-value">•••• 0951</span>
+            </div>
+          </div>
+
+          <div>
+            <button class="btn-don-qr" onclick="toggleQr('maribankQrDrawer', this)">
+              <span>📷</span> <span>Open QR</span>
+            </button> -->
+
+            <!-- Collapsible QR Drawer with your uploaded image -->
+            <!-- <div class="qr-drawer" id="maribankQrDrawer">
+              <div class="qr-white-frame">
+                <img src="maribank_qr.jpg" alt="MariBank QR Code">
+              </div>
+              <span class="qr-tip-text">Scan with MariBank, ShopeePay, or any InstaPay app</span>
+            </div>
+          </div>
+        </div> -->
+
       </div>
 
-      <!-- Payment Methods -->
-      <div class="donation-methods-card">
-        <h3 style="font-family: var(--font-heading); font-size: 1.25rem;">Payment Channels</h3>
-
-        <!-- GCash / Maya -->
-        <div class="method-row">
-          <div class="method-info">
-            <span style="font-size: 1.5rem;">📱</span>
-            <div>
-              <div style="font-weight: 800; font-size: 0.95rem;">GCash / Maya</div>
-              <div style="font-size: 0.8rem; color: var(--text-muted);">0912 345 6789 (Tim H.)</div>
-            </div>
-          </div>
-          <button class="btn-copy" onclick="copyPaymentDetail('09123456789', this)">📋 Copy Number</button>
+      <!-- Perks Shelf -->
+      <div class="perks-shelf">
+        <div class="perk-box">
+          <span class="perk-title">🧋 ₱50 Boba Pearl</span>
+          <p class="perk-desc">Adds tapioca fuel to the broadcast and gets a live shoutout in lounge chat!</p>
         </div>
-
-        <!-- Ko-fi or Tipping Platform -->
-        <div class="method-row">
-          <div class="method-info">
-            <span style="font-size: 1.5rem;">☕</span>
-            <div>
-              <div style="font-weight: 800; font-size: 0.95rem;">Ko-fi / Tipping Page</div>
-              <div style="font-size: 0.8rem; color: var(--text-muted);">Supports international cards and Apple Pay</div>
-            </div>
-          </div>
-          <a href="https://ko-fi.com" target="_blank" rel="noopener" class="btn-link-donate">Open Link ↗</a>
+        <div class="perk-box">
+          <span class="perk-title">🍵 ₱150 Fresh Milk Tea</span>
+          <p class="perk-desc">Covers cold drinks and refreshments during long late-night sessions.</p>
         </div>
-
-        <!-- PayPal -->
-        <div class="method-row">
-          <div class="method-info">
-            <span style="font-size: 1.5rem;">💳</span>
-            <div>
-              <div style="font-weight: 800; font-size: 0.95rem;">PayPal</div>
-              <div style="font-size: 0.8rem; color: var(--text-muted);">paypal.me/yourusername</div>
-            </div>
-          </div>
-          <a href="https://paypal.me" target="_blank" rel="noopener" class="btn-link-donate">Send via PayPal ↗</a>
+        <div class="perk-box">
+          <span class="perk-title">🚀 ₱300+ Server Supporter</span>
+          <p class="perk-desc">Directly covers monthly cloud streaming encoding bandwidth.</p>
         </div>
       </div>
 
@@ -751,7 +892,7 @@
   </div>
 
   <script>
-    // --- Navigation & 3-Dots Dropdown Setup ---
+    // --- Navigation & Dropdown Setup ---
     const btnMenuDots = document.getElementById("btnMenuDots");
     const navDropdown = document.getElementById("navDropdown");
     const tabLive = document.getElementById("tabLive");
@@ -798,21 +939,18 @@
       } else if (view === "support") {
         sectionSupport.classList.add("active");
         tabSupport.classList.add("active");
-        liveBadge.innerText = "SUPPORT";
+        liveBadge.innerText = "DONATE";
         liveBadge.style.background = "var(--boba-gold)";
         liveBadge.style.color = "#1A1614";
       }
       navDropdown.classList.remove("show");
     }
 
-    function copyPaymentDetail(text, btnElement) {
-      navigator.clipboard.writeText(text).then(() => {
-        const originalText = btnElement.innerText;
-        btnElement.innerText = "✅ Copied!";
-        setTimeout(() => { btnElement.innerText = originalText; }, 2000);
-      }).catch(() => {
-        prompt("Copy payment account:", text);
-      });
+    // --- QR Drawer Toggle Handler ---
+    function toggleQr(drawerId, btnElement) {
+      const drawer = document.getElementById(drawerId);
+      const isOpen = drawer.classList.toggle("open");
+      btnElement.innerHTML = isOpen ? "<span>✖</span> <span>Hide QR</span>" : "<span>📷</span> <span>Open QR</span>";
     }
 
     // --- Live Stream Elements ---
@@ -1031,7 +1169,6 @@
         droneRoom.on('data', (data) => {
           if (!data) return;
 
-          // Immediate Live Stream Feed sync from Studio
           if (data.type === "stream_update") {
             currentStreamUrl = data.url;
             localStorage.setItem("boba_active_url", data.url);
